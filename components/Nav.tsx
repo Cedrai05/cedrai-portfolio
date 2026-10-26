@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth-context'
 const links = [
   { label: 'HOME',      href: '/'          },
   { label: 'PROJECTS',  href: '/projects'  },
-  { label: 'BLOG',      href: '/blog'      },
+  { label: 'BLOG',      href: 'https://rinhye05.github.io/' },
   { label: 'SCHEDULE',  href: '/schedule'  },
   { label: 'NOW',       href: '/now'       },
   { label: 'CONTACT',   href: '/contact'   },
