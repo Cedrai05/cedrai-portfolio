@@ -7,11 +7,9 @@ const ALLOW_ORIGIN = 'https://rinhye05.github.io'
 const HEADERS = { 'Access-Control-Allow-Origin': ALLOW_ORIGIN, 'Vary': 'Origin', 'Cache-Control': 'no-store' }
 
 function extractArticle(html: string) {
-  const opening = /<div\b[^>]*id="article-description"[^>]*>/i.exec(html)
+  const opening = /<div\b[^>]*class="[^"]*contents_style[^"]*"[^>]*>/i.exec(html)
   if (!opening || opening.index === undefined) return ''
   const start = opening.index + opening[0].length
-  const tags = /<\/?div\b[^>]*>/gi
-  tags.lastIndex = start
   let depth = 1
   for (const tag of html.slice(start).matchAll(/<\/?div\b[^>]*>/gi)) {
     depth += tag[0].startsWith('</') ? -1 : 1
@@ -51,7 +49,7 @@ export async function GET(request: Request) {
     const html = await response.text()
     const article = extractArticle(html)
     if (!article) throw new Error('글 본문을 찾을 수 없습니다.')
-    const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.replace(/ :: Cédrai$/, '') ?? ''
+    const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.replace(/ :: (?:Cédrai|C&eacute;drai)$/, '') ?? ''
     return NextResponse.json({ title, content: `<div class="tistory-content">${cleanArticle(article)}</div>`, sourceUrl: publicUrl }, { headers: HEADERS })
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '글을 읽을 수 없습니다.' }, { status: 502, headers: HEADERS })
