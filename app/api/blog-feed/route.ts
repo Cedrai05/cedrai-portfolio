@@ -39,27 +39,33 @@ function classify(id: string, title: string) {
 }
 
 function classifySource(path: string) {
-  const source = decodeURIComponent(path).toLowerCase().replace(/\/$/, '')
+  const parts = decodeURIComponent(path).toLowerCase().split('/').filter(Boolean).slice(1)
   // Honor explicit destination categories; broad study categories such as
   // Secure/Web-Hacking, seKU, Major, and Linux are not activity evidence.
-  if (/\/(bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티)$/.test(source)) return 'BugbBounty'
-  if (/\/(개발|development|프로젝트)$/.test(source)) return '개발'
-  if (/\/(공모전|자격증|공모전\/자격증)$/.test(source)) return '공모전/자격증'
-  if (/\/category\/(dreamhack|ctf|btlo)(\/|$)/.test(source)) return 'CTF/Wargame'
-  if (/\/(논문|컨퍼런스|논문\/컨퍼런스|conference|papers?)$/.test(source)) return '논문/컨퍼런스'
+  if (parts.some((part) => /^(개인공부|블로그|기술문서)$/.test(part))) return '블로그/기술문서'
+  if (parts.some((part) => /^(bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티)$/.test(part))) return 'BugbBounty'
+  if (parts.some((part) => /^(개발|development|프로젝트)$/.test(part))) return '개발'
+  if (parts.some((part) => /^(공모전|자격증)$/.test(part))) return '공모전/자격증'
+  if (/^(dreamhack|ctf|btlo)$/.test(parts[0] ?? '')) return 'CTF/Wargame'
+  if (parts.some((part) => /^(논문|컨퍼런스|conference|papers?)$/.test(part))) return '논문/컨퍼런스'
   return undefined
 }
 
-function subcategories(html: string) {
-  const found = new Set<string>()
+function sourceCategories(html: string) {
+  const found = new Map<string, { path: string; count: number; category: string }>()
   for (const hit of html.matchAll(/href="(\/category\/[^"?#]+)"[^>]*>([\s\S]{0,300}?)<\/a>/g)) {
     const path = hit[1]
     const count = Number(decode(hit[2]).match(/\((\d+)\)/)?.[1] ?? 0)
-    if (count < 1) continue
-    const levels = decodeURIComponent(path).split('/').filter(Boolean)
-    if (levels.length >= 3 || classifySource(path)) found.add(path)
+    const category = classifySource(path)
+    if (count < 1 || count > 1000 || !category) continue
+    found.set(path, { path, count, category })
   }
-  return [...found]
+  const categories = [...found.values()]
+  // A parent page already includes its child categories. Read it once,
+  // including every page, so moves of older posts are reflected as well.
+  return categories.filter((item) => !categories.some((parent) =>
+    decodeURIComponent(item.path).startsWith(`${decodeURIComponent(parent.path)}/`) && item.category === parent.category
+  ))
 }
 
 type Post = {
@@ -130,21 +136,18 @@ export async function GET() {
     const posts = [firstPage, ...pages].flatMap(parsePosts)
     const unique = [...new Map(posts.map((post) => [post.slug, post])).values()]
     if (unique.length < count) throw new Error(`Expected ${count} posts, got ${unique.length}`)
-    const unknown = new Set(unique.filter((post) => !CATEGORY_BY_ID[post.slug.slice(8)]).map((post) => post.slug))
-    if (unknown.size) {
-      const categoryPages = await Promise.all(subcategories(firstPage).map(async (path) => {
-        try { return { path, posts: parsePosts(await getPage(1, path)) } }
-        catch { return { path, posts: [] as Post[] } }
-      }))
-      const mapped = new Map<string, string>()
-      for (const page of categoryPages) {
-        for (const post of page.posts) {
-          const category = classifySource(page.path)
-          if (unknown.has(post.slug) && category) mapped.set(post.slug, category)
-        }
+    const categoryPages = await Promise.all(sourceCategories(firstPage).map(async (source) => {
+      const pages = await Promise.all(Array.from({ length: Math.ceil(source.count / 10) },
+        (_, index) => getPage(index + 1, source.path)))
+      return { category: source.category, posts: pages.flatMap(parsePosts) }
+    }))
+    const mapped = new Map<string, string>()
+    for (const page of categoryPages) {
+      for (const post of page.posts) {
+        mapped.set(post.slug, page.category)
       }
-      for (const post of unique) post.category = mapped.get(post.slug) ?? post.category
     }
+    for (const post of unique) post.category = mapped.get(post.slug) ?? post.category
     return NextResponse.json({ posts: unique, total: unique.length }, {
       headers: { 'Access-Control-Allow-Origin': ALLOW_ORIGIN, 'Vary': 'Origin', 'Cache-Control': 'no-store' },
     })
