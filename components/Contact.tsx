@@ -3,7 +3,7 @@
 const LINKS = [
   { icon: 'GH', label: 'GITHUB', value: '/Cedrai05',            href: 'https://github.com/Cedrai05'    },
   { icon: 'TI', label: 'BLOG',   value: 'rinhye05.tistory.com', href: 'https://rinhye05.tistory.com/' },
-  { icon: '@',  label: 'EMAIL',  value: 'flsrin715@gmail.com',  href: 'mailto:flsrin715@gmail.com'    },
+  { icon: '@',  label: 'EMAIL',  value: 'fls@cedrai.info',      href: 'mailto:fls@cedrai.info'        },
 ]
 
 export default function Contact({ fullPage = false }: { fullPage?: boolean }) {
