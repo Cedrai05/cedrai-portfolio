@@ -4,17 +4,6 @@ export const dynamic = 'force-dynamic'
 
 const BLOG = 'https://rinhye05.tistory.com'
 const ALLOW_ORIGIN = 'https://cedrai05.github.io'
-const CATEGORY_BY_ID: Record<string, string> = {}
-
-for (const [category, ids] of Object.entries({
-  'CTF/Wargame': [123,116,115,113,111,110,109,108,107,105,103,101,99,98,97,96,95,93,92,88,86,85,84,82,81,80,77,62,61,53,43,37,31,30,25,24,23,22,21,20,19,16,15,14,13,12,5,3,2,1],
-  // Personal study notes are technical documents, including security theory,
-  // course exercises, Linux, and university coursework.
-  '블로그/기술문서': [122,121,120,119,118,117,114,112,106,104,102,100,94,91,90,89,87,83,79,78,76,75,74,73,72,71,70,69,68,66,65,64,63,60,59,58,57,56,55,54,52,51,50,49,48,47,46,45,44,42,41,40,39,38,36,35,34,33,32,29,27,26,17,11,10,9,8,7,6,4],
-  '논문/컨퍼런스': [28],
-})) {
-  for (const id of ids) CATEGORY_BY_ID[String(id)] = category
-}
 
 function decode(value: string) {
   return value.replace(/<[^>]*>/g, '')
@@ -26,20 +15,12 @@ function decode(value: string) {
     .replace(/\s+/g, ' ').trim()
 }
 
-function classify(id: string, title: string) {
-  if (CATEGORY_BY_ID[id]) return CATEGORY_BY_ID[id]
-  if (/\[\s*dreamhack\s*\]|\bctf\b|wargame|워게임|\bbtlo\b|핵테온/i.test(title)) return 'CTF/Wargame'
-  if (/논문|학회|컨퍼런스|conference|paper/i.test(title)) return '논문/컨퍼런스'
-  if (/공모전|자격증|경진대회/i.test(title)) return '공모전/자격증'
-  // Require explicit activity labels. A vulnerability name or programming
-  // topic alone does not imply bounty work or a development project.
-  if (/bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티/i.test(title)) return 'BugbBounty'
-  if (/\[\s*개발\s*\]|\[\s*development\s*\]|프로젝트\s*개발|개발\s*(회고|일지)/i.test(title)) return '개발'
-  return '블로그/기술문서'
+function categoryParts(path: string) {
+  return path.split('/').filter(Boolean).slice(1).map((part) => decodeURIComponent(part))
 }
 
 function classifySource(path: string) {
-  const parts = decodeURIComponent(path).toLowerCase().split('/').filter(Boolean).slice(1)
+  const parts = categoryParts(path).map((part) => part.toLowerCase())
   // Honor explicit destination categories; broad study categories such as
   // Secure/Web-Hacking, seKU, Major, and Linux are not activity evidence.
   if (parts.some((part) => /^(개인공부|블로그|기술문서)$/.test(part))) return '블로그/기술문서'
@@ -52,26 +33,29 @@ function classifySource(path: string) {
 }
 
 function sourceCategories(html: string) {
-  const found = new Map<string, { path: string; count: number; category: string }>()
+  const found = new Map<string, { path: string; count: number; category: string; parts: string[] }>()
   for (const hit of html.matchAll(/href="(\/category\/[^"?#]+)"[^>]*>([\s\S]{0,300}?)<\/a>/g)) {
     const path = hit[1]
     const count = Number(decode(hit[2]).match(/\((\d+)\)/)?.[1] ?? 0)
-    const category = classifySource(path)
-    if (count < 1 || count > 1000 || !category) continue
-    found.set(path, { path, count, category })
+    if (count < 0 || count > 1000) continue
+    const parts = categoryParts(path)
+    found.set(parts.join(' / '), { path, count, parts, category: classifySource(path) ?? '블로그/기술문서' })
   }
   const categories = [...found.values()]
-  // A parent page already includes its child categories. Read it once,
-  // including every page, so moves of older posts are reflected as well.
-  return categories.filter((item) => !categories.some((parent) =>
-    decodeURIComponent(item.path).startsWith(`${decodeURIComponent(parent.path)}/`) && item.category === parent.category
-  ))
+  // Read children to preserve the original category of each post. A parent
+  // page is only needed when it also has posts outside its direct children.
+  return categories.filter((item) => {
+    const children = categories.filter((child) => child.parts.length === item.parts.length + 1 &&
+      item.parts.every((part, index) => child.parts[index] === part))
+    return item.count > children.reduce((sum, child) => sum + child.count, 0)
+  })
 }
 
 type Post = {
   slug: string
   title: string
   category: string
+  sourceCategory: string
   date: string
   readTime: string
   summary: string
@@ -103,7 +87,8 @@ function parsePosts(html: string): Post[] {
     posts.push({
       slug: `tistory-${id}`,
       title,
-      category: classify(id, title),
+      category: '블로그/기술문서',
+      sourceCategory: '',
       date,
       readTime: protectedPost ? 'PROTECTED' : 'TISTORY LOG',
       summary: protectedPost ? '보호글 · 원문은 티스토리에서 확인하세요.' : '',
@@ -139,15 +124,22 @@ export async function GET() {
     const categoryPages = await Promise.all(sourceCategories(firstPage).map(async (source) => {
       const pages = await Promise.all(Array.from({ length: Math.ceil(source.count / 10) },
         (_, index) => getPage(index + 1, source.path)))
-      return { category: source.category, posts: pages.flatMap(parsePosts) }
+      return { source, posts: pages.flatMap(parsePosts) }
     }))
-    const mapped = new Map<string, string>()
+    const mapped = new Map<string, (typeof categoryPages)[number]['source']>()
     for (const page of categoryPages) {
       for (const post of page.posts) {
-        mapped.set(post.slug, page.category)
+        const current = mapped.get(post.slug)
+        if (!current || page.source.parts.length > current.parts.length) mapped.set(post.slug, page.source)
       }
     }
-    for (const post of unique) post.category = mapped.get(post.slug) ?? post.category
+    for (const post of unique) {
+      const source = mapped.get(post.slug)
+      if (source) {
+        post.category = source.category
+        post.sourceCategory = source.parts.join(' / ')
+      }
+    }
     return NextResponse.json({ posts: unique, total: unique.length }, {
       headers: { 'Access-Control-Allow-Origin': ALLOW_ORIGIN, 'Vary': 'Origin', 'Cache-Control': 'no-store' },
     })
