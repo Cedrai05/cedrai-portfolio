@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 const BLOG = 'https://rinhye05.tistory.com'
-const ALLOW_ORIGIN = 'https://rinhye05.github.io'
+const ALLOW_ORIGIN = 'https://cedrai05.github.io'
 const HEADERS = { 'Access-Control-Allow-Origin': ALLOW_ORIGIN, 'Vary': 'Origin', 'Cache-Control': 'no-store' }
 
 function extractArticle(html: string) {

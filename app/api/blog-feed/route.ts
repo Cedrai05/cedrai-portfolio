@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 const BLOG = 'https://rinhye05.tistory.com'
-const ALLOW_ORIGIN = 'https://rinhye05.github.io'
+const ALLOW_ORIGIN = 'https://cedrai05.github.io'
 const CATEGORY_BY_ID: Record<string, string> = {}
 
 for (const [category, ids] of Object.entries({

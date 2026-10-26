@@ -104,7 +104,7 @@ GitHub API로 `data/projects.json`을 커밋하고, Vercel이 자동 재배포�
 동작하려면 GitHub 토큰이 필요해요:
 
 1. github.com/settings/personal-access-tokens → **Fine-grained token** 생성
-2. Repository access → `rinhye05/cedrai-portfolio` 만 선택
+2. Repository access → `Cedrai05/cedrai-portfolio` 만 선택
 3. Permissions → Repository permissions → **Contents: Read and write**
 4. 발급된 토큰을 `.env.local`의 `GITHUB_TOKEN=` 에 붙여넣기 (Vercel에도 동일하게 등록)
 

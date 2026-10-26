@@ -18,7 +18,7 @@ const ABOUT = {
   activities: [
     { label: 'CTF PLATFORM', value: 'Dreamhack' },
     { label: 'BLOG',         value: 'rinhye05.tistory.com' },
-    { label: 'GITHUB',       value: 'github.com/rinhye05' },
+    { label: 'GITHUB',       value: 'github.com/Cedrai05' },
   ],
   clubs: [
     { name: 'seKUrity', role: '신입부원', period: '25.03 – 25.08' },
