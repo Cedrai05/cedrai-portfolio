@@ -105,7 +105,7 @@ function parsePosts(html: string): Post[] {
   return posts
 }
 
-async function getPage(page: number, categoryPath = '/category') {
+async function getPage(page: number, categoryPath = '/') {
   const url = `${BLOG}${categoryPath}${page === 1 ? '' : `?page=${page}`}`
   const response = await fetch(url, {
     cache: 'no-store',
