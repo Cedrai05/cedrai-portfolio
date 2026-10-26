@@ -8,9 +8,9 @@ const CATEGORY_BY_ID: Record<string, string> = {}
 
 for (const [category, ids] of Object.entries({
   'CTF/Wargame': [123,116,115,113,111,110,109,108,107,105,103,101,99,98,97,96,95,93,92,88,86,85,84,82,81,80,77,62,61,53,43,37,31,30,25,24,23,22,21,20,19,16,15,14,13,12,5,3,2,1],
-  'BugbBounty': [122,121,120,119,118,117,114,112,106,104,94,83,33,32,11,10,9,8],
-  '블로그/기술문서': [102,100,91,90,89,87,79,78,76,75,74,73,59,58,54,52,51,48,47,46,45,44,42,41,40,39,38,36,35,34,29,27,26,17,7,6,4],
-  '개발': [72,71,70,69,68,66,65,64,63,60,57,56,55,50,49],
+  // Personal study notes are technical documents, including security theory,
+  // course exercises, Linux, and university coursework.
+  '블로그/기술문서': [122,121,120,119,118,117,114,112,106,104,102,100,94,91,90,89,87,83,79,78,76,75,74,73,72,71,70,69,68,66,65,64,63,60,59,58,57,56,55,54,52,51,50,49,48,47,46,45,44,42,41,40,39,38,36,35,34,33,32,29,27,26,17,11,10,9,8,7,6,4],
   '논문/컨퍼런스': [28],
 })) {
   for (const id of ids) CATEGORY_BY_ID[String(id)] = category
@@ -28,21 +28,26 @@ function decode(value: string) {
 
 function classify(id: string, title: string) {
   if (CATEGORY_BY_ID[id]) return CATEGORY_BY_ID[id]
-  if (/dreamhack|\bctf\b|btlo|핵테온/i.test(title)) return 'CTF/Wargame'
+  if (/\[\s*dreamhack\s*\]|\bctf\b|wargame|워게임|\bbtlo\b|핵테온/i.test(title)) return 'CTF/Wargame'
   if (/논문|학회|컨퍼런스|conference|paper/i.test(title)) return '논문/컨퍼런스'
   if (/공모전|자격증|경진대회/i.test(title)) return '공모전/자격증'
-  if (/리눅스|linux|자료구조|알고리즘|개발/i.test(title)) return '개발'
-  if (/injection|xss|ssrf|csrf|취약점|웹해킹|web.hacking/i.test(title)) return 'BugbBounty'
+  // Require explicit activity labels. A vulnerability name or programming
+  // topic alone does not imply bounty work or a development project.
+  if (/bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티/i.test(title)) return 'BugbBounty'
+  if (/\[\s*개발\s*\]|\[\s*development\s*\]|프로젝트\s*개발|개발\s*(회고|일지)/i.test(title)) return '개발'
   return '블로그/기술문서'
 }
 
 function classifySource(path: string) {
-  const source = decodeURIComponent(path).toLowerCase()
+  const source = decodeURIComponent(path).toLowerCase().replace(/\/$/, '')
+  // Honor explicit destination categories; broad study categories such as
+  // Secure/Web-Hacking, seKU, Major, and Linux are not activity evidence.
+  if (/\/(bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티)$/.test(source)) return 'BugbBounty'
+  if (/\/(개발|development|프로젝트)$/.test(source)) return '개발'
+  if (/\/(공모전|자격증|공모전\/자격증)$/.test(source)) return '공모전/자격증'
   if (/\/category\/(dreamhack|ctf|btlo)(\/|$)/.test(source)) return 'CTF/Wargame'
-  if (source.includes('/secure/web-hacking') || source.includes('/seku/')) return 'BugbBounty'
-  if (source.includes('/major/') || source.includes('/secure/linux')) return '개발'
-  if (source.includes('/secure/논문')) return '논문/컨퍼런스'
-  return '블로그/기술문서'
+  if (/\/(논문|컨퍼런스|논문\/컨퍼런스|conference|papers?)$/.test(source)) return '논문/컨퍼런스'
+  return undefined
 }
 
 function subcategories(html: string) {
@@ -52,7 +57,7 @@ function subcategories(html: string) {
     const count = Number(decode(hit[2]).match(/\((\d+)\)/)?.[1] ?? 0)
     if (count < 1) continue
     const levels = decodeURIComponent(path).split('/').filter(Boolean)
-    if (levels.length >= 3 || levels[1] === 'BTLO') found.add(path)
+    if (levels.length >= 3 || classifySource(path)) found.add(path)
   }
   return [...found]
 }
@@ -134,7 +139,8 @@ export async function GET() {
       const mapped = new Map<string, string>()
       for (const page of categoryPages) {
         for (const post of page.posts) {
-          if (unknown.has(post.slug)) mapped.set(post.slug, classifySource(page.path))
+          const category = classifySource(page.path)
+          if (unknown.has(post.slug) && category) mapped.set(post.slug, category)
         }
       }
       for (const post of unique) post.category = mapped.get(post.slug) ?? post.category
