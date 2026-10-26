@@ -1,13 +1,5 @@
-import Blog from '@/components/Blog'
-import Nav from '@/components/Nav'
-import Footer from '@/components/Footer'
+import { redirect } from 'next/navigation'
 
 export default function BlogPage() {
-  return (
-    <main className="page-main">
-      <Nav />
-      <Blog />
-      <Footer />
-    </main>
-  )
+  redirect('https://rinhye05.github.io/')
 }
