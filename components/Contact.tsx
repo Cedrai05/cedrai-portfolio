@@ -2,7 +2,7 @@
 
 const LINKS = [
   { icon: 'GH', label: 'GITHUB', value: '/Cedrai05',            href: 'https://github.com/Cedrai05'    },
-  { icon: 'TI', label: 'BLOG',   value: 'cedrai05.github.io', href: 'https://cedrai05.github.io/' },
+  { icon: 'TI', label: 'BLOG',   value: 'cedrai.info/blog', href: 'https://www.cedrai.info/blog' },
   { icon: '@',  label: 'EMAIL',  value: 'fls@cedrai.info',      href: 'mailto:fls@cedrai.info'        },
 ]
 

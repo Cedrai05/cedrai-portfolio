@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 type Post = { id: string; title: string; href: string; date: string; locked: boolean }
 type Category = { name: string; path: string; count: number; posts: Post[] }
 
-const BLOG_URL = 'https://cedrai05.github.io'
+const BLOG_URL = ''
 const POSTS_PER_CATEGORY = 3
 
 // 이관된 블로그의 카테고리마다 이름 기준으로 색을 고정 배정합니다.
@@ -58,7 +58,7 @@ export default function Blog() {
 
       {categories.length === 0 && (
         <div style={{ fontSize: '13px', color: 'var(--tx2)', letterSpacing: '.1em' }}>
-          // 글을 불러오지 못했어요. <a href={BLOG_URL} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--acc)' }}>블로그에서 보기 →</a>
+          // 글을 불러오지 못했어요. <a href="/blog" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--acc)' }}>블로그에서 보기 →</a>
         </div>
       )}
 

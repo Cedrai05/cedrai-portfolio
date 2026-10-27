@@ -1,11 +1,25 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import About from '@/components/About'
 
 export default function ProfileRail() {
   const [open, setOpen] = useState(false)
+  const trigger = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    const show = () => { trigger.current = document.activeElement as HTMLElement; setOpen(true) }
+    window.addEventListener('cedrai:open-about', show)
+    return () => window.removeEventListener('cedrai:open-about', show)
+  }, [])
+  useEffect(() => {
+    if (!open) return
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const key = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', key)
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', key); if (trigger.current?.isConnected) trigger.current.focus() }
+  }, [open])
 
   return (
     <>

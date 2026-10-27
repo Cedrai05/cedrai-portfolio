@@ -71,7 +71,7 @@ cedrai-portfolio/
 
 ### 블로그 포스트
 
-글 목록은 `data/blog-catalog.json`에 있습니다. 공개글 본문과 첨부파일은 GitHub Pages 블로그의 `content/`에 저장하며, 티스토리를 실시간으로 읽지 않습니다.
+글 목록은 `data/blog-catalog.json`에 있습니다. 블로그 메인은 `/blog`이며 공개글 본문과 첨부파일은 이 저장소의 `public/blog-content/`에 저장합니다. GitHub Pages나 티스토리를 거치지 않고 읽습니다. 검색·주제 필터·목록 위치 복원과 글별 비밀번호 열람을 지원하며, 기존 포트폴리오 로그인과 테마를 함께 사용합니다.
 
 보호글 77개는 원래의 글별 비밀번호를 유지합니다. 본문·첨부파일·PBKDF2 검증값은 Vercel의 비공개 Blob 저장소 `blog-native/v1/`에만 보관합니다. `/api/native-blog/unlock`이 비밀번호를 확인하고, 한 시간 동안 해당 글의 첨부파일만 읽을 수 있는 권한을 발급합니다. 비공개 글은 공개 목록과 열람 API에서 제외합니다.
 
