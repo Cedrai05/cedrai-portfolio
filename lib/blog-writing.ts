@@ -49,7 +49,7 @@ export function renderBlogMarkdown(input:WritingInput,preview=false) {
 }
 export function metadataFromStored(post:StoredPost):BlogPost {
   const m=post.metadata
-  return {slug:m.slug,title:m.title,category:m.category,topic:m.topic||'',sourceCategory:m.sourceCategory||'',date:m.date,readTime:m.readTime,summary:post.visibility==='protected'?'관리자 또는 seKUrity 계정으로 로그인하면 읽을 수 있습니다.':m.summary,tags:m.tags,protected:post.visibility==='protected'}
+  return {slug:m.slug,title:m.title,category:m.category,topic:m.topic||'',sourceCategory:m.sourceCategory||'',date:m.date,readTime:m.readTime,summary:post.visibility==='protected'?'로그인한 사용자만 읽을 수 있습니다.':m.summary,tags:m.tags,protected:post.visibility==='protected'}
 }
 export async function readWrittenPost(slug:string,draft=false) {
   if(!validWrittenSlug(slug))return null
@@ -57,12 +57,13 @@ export async function readWrittenPost(slug:string,draft=false) {
 }
 export async function writtenMetadata(slug:string) {
   if(!validWrittenSlug(slug))return null
-  return readBlogJSON<BlogPost>(`${WRITTEN_PREFIX}catalog/${slug}.json`)
+  const post=await readBlogJSON<BlogPost>(`${WRITTEN_PREFIX}catalog/${slug}.json`)
+  return post?.protected?{...post,summary:'로그인한 사용자만 읽을 수 있습니다.'}:post
 }
 export async function listWrittenMetadata() {
   const keys=await listBlogKeys(`${WRITTEN_PREFIX}catalog/`)
   const result=await Promise.all(keys.map(key=>readBlogJSON<BlogPost>(key)))
-  return result.filter((post):post is BlogPost=>Boolean(post&&validWrittenSlug(post.slug)))
+  return result.filter((post):post is BlogPost=>Boolean(post&&validWrittenSlug(post.slug))).map(post=>post.protected?{...post,summary:'로그인한 사용자만 읽을 수 있습니다.'}:post)
 }
 export async function listDrafts() {
   const keys=await listBlogKeys(`${WRITTEN_PREFIX}drafts/`)
