@@ -24,7 +24,7 @@ function classifySource(path: string) {
   // Honor explicit destination categories; broad study categories such as
   // Secure/Web-Hacking, seKU, Major, and Linux are not activity evidence.
   if (parts.some((part) => /^(개인공부|블로그|기술문서)$/.test(part))) return '블로그/기술문서'
-  if (parts.some((part) => /^(bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티)$/.test(part))) return 'BugbBounty'
+  if (parts.some((part) => /^(bug\s*[-_]?\s*bounty|bugbbounty|버그\s*바운티)$/.test(part))) return 'Bug Bounty'
   if (parts.some((part) => /^(개발|development|프로젝트)$/.test(part))) return '개발'
   if (parts.some((part) => /^(공모전|자격증)$/.test(part))) return '공모전/자격증'
   if (/^(dreamhack|ctf|btlo)$/.test(parts[0] ?? '')) return 'CTF/Wargame'
