@@ -47,6 +47,11 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
   const [dark, setDark] = useState(true)
   useEffect(() => { try { setDark(localStorage.getItem('theme') !== 'light') } catch { /* Default theme works without storage. */ } }, [])
   const { isAdmin, isMember, login, logout } = useAuth()
+  useEffect(() => {
+    const open = () => { setMenuOpen(false); setShowLogin(true) }
+    window.addEventListener('cedrai:open-login', open)
+    return () => window.removeEventListener('cedrai:open-login', open)
+  }, [])
 
   useEffect(() => {
     if (!menuOpen && !showLogin) return
@@ -128,10 +133,10 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
       {/* 로그인 드롭다운 */}
       {showLogin && !isAdmin && (
         <div className="auth-dropdown" style={{ position: 'fixed', top: '76px', right: '1.2rem', zIndex: 200, background: 'var(--bg2)', border: '1px solid var(--bd)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '8px', width: '260px' }}>
-          <div style={{ fontSize: '11px', color: 'var(--acc2)', letterSpacing: '.14em' }}>[ ADMIN LOGIN ]</div>
-          <input value={adminIdInput} onChange={e => setAdminIdInput(e.target.value)} placeholder="ID" autoComplete="username" style={inputStyle}
+          <div style={{ fontSize: '11px', color: 'var(--acc2)', letterSpacing: '.14em' }}>[ ACCOUNT LOGIN ]</div>
+          <input value={adminIdInput} onChange={e => setAdminIdInput(e.target.value)} placeholder="ID" aria-label="로그인 아이디" autoComplete="username" style={inputStyle}
             onKeyDown={e => e.key === 'Enter' && handleLogin()} />
-          <input value={password} onChange={e => setPassword(e.target.value)} placeholder="PASSWORD" type="password" autoComplete="current-password" style={inputStyle}
+          <input value={password} onChange={e => setPassword(e.target.value)} placeholder="PASSWORD" aria-label="로그인 비밀번호" type="password" autoComplete="current-password" style={inputStyle}
             onKeyDown={e => e.key === 'Enter' && handleLogin()} />
           {loginError && <div style={{ fontSize: '11px', color: 'var(--acc4)' }}>{loginError}</div>}
           <button onClick={handleLogin} disabled={loggingIn} className="btn-primary" style={{ alignSelf: 'flex-end', fontSize: '11px' }}>

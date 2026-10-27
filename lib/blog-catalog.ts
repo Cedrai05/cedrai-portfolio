@@ -1,7 +1,7 @@
 import catalog from '@/data/blog-catalog.json'
 
-export type BlogPost = (typeof catalog.posts)[number]
-export const BLOG_POSTS: BlogPost[] = catalog.posts
+export type BlogPost = { slug:string; title:string; category:string; sourceCategory:string; date:string; readTime:string; summary:string; tags:string[]; protected:boolean; topic?:string }
+export const BLOG_POSTS: BlogPost[] = catalog.posts.map(post => ({...post,readTime:post.protected?'MEMBERS ONLY':post.readTime,summary:post.protected?'관리자 또는 seKUrity 계정으로 로그인하면 읽을 수 있습니다.':post.summary}))
 export const BLOG_CATEGORIES = ["개발", "CTF/Wargame", "Bug Bounty", "블로그/기술문서", "논문/컨퍼런스", "공모전/자격증"]
 export const BLOG_TOPICS: Record<string, string[]> = {
   "CTF/Wargame": ["BTLO", "CTF", "Dreamhack"],
@@ -14,6 +14,7 @@ const overrides: Record<string, { topic: string }> = {
 }
 
 export function topicFor(post: BlogPost) {
+  if (post.topic) return post.topic
   const parts = post.sourceCategory.toLowerCase().split(/\s*\/\s*/)
   if (post.category === '블로그/기술문서' && parts.some(part => ['seku', 'sekurity'].includes(part))) return 'seKUrity'
   const topics = BLOG_TOPICS[post.category] || []

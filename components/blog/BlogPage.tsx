@@ -1,15 +1,17 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Nav from '@/components/Nav'
+import { useAuth } from '@/lib/auth-context'
 import BlogHero from './BlogHero'
 import BlogArticle from './BlogArticle'
-import { BLOG_CATEGORIES, BLOG_POSTS, BLOG_TOPICS, dateText, postHref, topicFor, type BlogPost } from '@/lib/blog-catalog'
+import { BLOG_CATEGORIES, BLOG_TOPICS, dateText, postHref, topicFor, type BlogPost } from '@/lib/blog-catalog'
 
 type Filters = { category: string; topic: string; query: string }
 type Snapshot = Filters & { scrollY: number }
 const defaults: Filters = { category:'전체',topic:'전체',query:'' }
 const archiveKey = 'cedrai-blog-archive'
-export default function BlogPage({slug,publicContent}:{slug?:string;publicContent:string|null}) {
+export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:string;publicContent:string|null;posts:BlogPost[]}) {
+  const {isAdmin}=useAuth()
   const [filters,setFilters] = useState<Filters>(defaults)
   const [ready,setReady] = useState(false)
   const pending = useRef<Snapshot|null>(null)
@@ -76,7 +78,7 @@ export default function BlogPage({slug,publicContent}:{slug?:string;publicConten
   const counts = new Map<string,number>()
   for (const post of available) { const topic=topicFor(post); if(topic) counts.set(topic,(counts.get(topic)||0)+1) }
   const configured=BLOG_TOPICS[filters.category]
-  const topics=['전체',...(configured || [...new Set(Object.values(BLOG_TOPICS).flat())].filter(topic=>counts.has(topic)))]
+  const topics=['전체',...(configured || [...new Set([...Object.values(BLOG_TOPICS).flat(),...counts.keys()])].filter(topic=>counts.has(topic)))]
   const query=filters.query.trim().toLocaleLowerCase('ko')
   const matches=available.filter(post => (filters.topic==='전체'||topicFor(post)===filters.topic) && (!query || [post.title,post.summary,post.category,topicFor(post),post.sourceCategory,...post.tags].join(' ').toLocaleLowerCase('ko').includes(query))).sort((a:BlogPost,b:BlogPost)=>{
     if(configured) {
@@ -92,13 +94,14 @@ export default function BlogPage({slug,publicContent}:{slug?:string;publicConten
     <main id="blog-main">
       {slug ? post ? <BlogArticle post={post} initialContent={publicContent} /> : <article className="article-view"><a className="article-back" href="/blog#archive">← BACK TO ARCHIVE</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
         <BlogHero />
+        {isAdmin && <div className="blog-admin-bar"><a className="primary-button" href="/blog/write">＋ 글 작성</a><span>관리자로 로그인 중입니다.</span></div>}
         <section className="archive-section" id="archive">
           <div className="section-kicker"><span className="kicker-pill">ARCHIVE</span><span className="kicker-line" /><span>SYS://ALL_ENTRIES</span></div>
           <div className="section-heading"><div><p className="small-label">01 / INDEX</p><h2>Explore the logs<span>.</span></h2><p>관심 분야별로 정리한 생각과 실험의 기록입니다.</p></div><span className="entry-total" id="entry-total">{BLOG_POSTS.length} ENTRIES</span></div>
           <div className="archive-toolbar"><div id="category-filters" className="category-filters" role="group" aria-label="카테고리 필터">{['전체',...BLOG_CATEGORIES].map(category=><button key={category} type="button" aria-pressed={filters.category===category} onClick={()=>update({category,topic:'전체'})}>{category}</button>)}</div><label className="search-box"><span>⌕</span><input ref={search} id="search-input" type="search" placeholder="기록 검색..." aria-label="기록 검색" autoComplete="off" value={filters.query} onChange={event=>update({query:event.target.value})}/><kbd>/</kbd></label></div>
           {(configured||counts.size>0)&&<div className="topic-toolbar" id="topic-toolbar"><span className="topic-label">주제</span><div id="topic-filters" className="topic-filters" role="group" aria-label="주제 필터">{topics.map(topic=><button type="button" key={topic} aria-pressed={filters.topic===topic} onClick={()=>update({topic})}>{topic} <span>{topic==='전체'?available.length:counts.get(topic)||0}</span></button>)}</div></div>}
           <div className="result-line"><span id="result-label">{[filters.category==='전체'?'ALL ENTRIES':filters.category.toUpperCase(),filters.topic==='전체'?'':filters.topic].filter(Boolean).join(' / ')}</span><span id="result-count">{String(matches.length).padStart(2,'0')} RESULTS</span></div>
-          <div id="post-list" className="post-list">{matches.map((post,index)=><a key={post.slug} className="post-row" href={postHref(post.slug)} onClick={saveArchive} aria-label={`${post.title} ${post.protected?'보호글 열기':'읽기'}`}><span className="post-number">{String(index+1).padStart(2,'0')}</span><div className="post-content"><span className="post-category">↳ {post.category.toUpperCase()}{topicFor(post)?` / ${topicFor(post)}`:''}{post.protected&&<span className="protected-mark"> / PROTECTED</span>}</span><h3>{post.title}</h3>{post.summary&&<p>{post.summary}</p>}</div><div className="post-meta"><span>{dateText(post.date)}</span><span>{post.readTime}</span></div><span className="post-arrow">{post.protected?'🔒':'↗'}</span></a>)}</div>
+          <div id="post-list" className="post-list">{matches.map((post,index)=><a key={post.slug} className="post-row" href={postHref(post.slug)} onClick={saveArchive} aria-label={`${post.title} ${post.protected?'비밀글 열기':'읽기'}`}><span className="post-number">{String(index+1).padStart(2,'0')}</span><div className="post-content"><span className="post-category">↳ {post.category.toUpperCase()}{topicFor(post)?` / ${topicFor(post)}`:''}{post.protected&&<span className="protected-mark"> / MEMBERS ONLY</span>}</span><h3>{post.title}</h3>{post.summary&&<p>{post.summary}</p>}</div><div className="post-meta"><span>{dateText(post.date)}</span><span>{post.readTime}</span></div><span className="post-arrow">{post.protected?'🔒':'↗'}</span></a>)}</div>
           {!matches.length&&<div className="empty-state" id="empty-state"><span>NO SIGNAL FOUND</span><h3>일치하는 기록이 없습니다.</h3><p>검색어나 카테고리, 주제를 바꿔보세요.</p><button type="button" onClick={()=>{update(defaults);search.current?.focus()}}>필터 초기화 ↗</button></div>}
         </section>
         <section className="connect-section"><div><p className="small-label">02 / CONNECT</p><h2>More than notes<span>.</span></h2><p>프로젝트와 활동의 전체 기록은 포트폴리오에서 확인할 수 있습니다.</p></div><a href="/">OPEN PORTFOLIO <span>↗</span></a></section>

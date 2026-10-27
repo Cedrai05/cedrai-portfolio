@@ -27,8 +27,8 @@ export function createToken(id: string) {
 /** 유효하면 id를, 아니면 null을 돌려줍니다. */
 export function readToken(token: string | undefined): string | null {
   if (!token) return null
-  const [payload, sig] = token.split('.')
-  if (!payload || !sig) return null
+  const [payload, sig, extra] = token.split('.')
+  if (!payload || !sig || extra !== undefined) return null
 
   const expected = createHmac('sha256', secret()).update(payload).digest('base64url')
   const given = Buffer.from(sig, 'utf8')

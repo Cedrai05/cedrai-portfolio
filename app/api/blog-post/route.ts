@@ -1,14 +1,12 @@
-import { NextResponse } from 'next/server'
-import { BLOG_POSTS } from '@/lib/blog-catalog'
-import { getBlogPost } from '@/lib/blog-post'
-export async function GET(request: Request) {
-  const id = new URL(request.url).searchParams.get('id') || ''
-  const headers = { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=60' }
-  const post = BLOG_POSTS.find(post => post.slug === `tistory-${id}`)
-  if (!post) return NextResponse.json({ error: '글을 찾을 수 없습니다.' }, { status: 404, headers })
-  if (post.protected) return NextResponse.json({ error: '이 블로그에서 글 비밀번호를 입력해 주세요.' }, { status: 403, headers })
-  const article = await getBlogPost(id)
-  if (!article) return NextResponse.json({ error: '본문을 찾을 수 없습니다.' }, { status: 404, headers })
-  const origin = new URL(request.url).origin
-  return NextResponse.json({ title: article.title, content: article.contentHtml.replaceAll('/blog-content/', `${origin}/blog-content/`), sourceUrl: new URL(article.href,origin).href }, { headers })
+import { NextResponse,type NextRequest } from 'next/server'
+import { getPostMetadata,getStoredArticle } from '@/lib/blog-repository'
+import { blogRole,canReadSecret,privateBlogHeaders } from '@/lib/blog-access'
+export const dynamic='force-dynamic'
+export async function GET(request:NextRequest){
+  const headers=privateBlogHeaders(),id=new URL(request.url).searchParams.get('id')||'',slug=id.startsWith('blog-')?id:`tistory-${id}`
+  try{const post=await getPostMetadata(slug);if(!post)return NextResponse.json({error:'글을 찾을 수 없습니다.'},{status:404,headers})
+    if(post.protected&&!canReadSecret(blogRole(request)))return NextResponse.json({error:'관리자 또는 seKUrity 계정으로 로그인해 주세요.'},{status:401,headers})
+    const article=await getStoredArticle(slug);if(!article)return NextResponse.json({error:'본문을 찾을 수 없습니다.'},{status:404,headers})
+    return NextResponse.json({title:post.title,content:article.content,assets:article.assets,sourceUrl:`/blog?post=${slug}`},{headers})
+  }catch{return NextResponse.json({error:'본문을 불러오지 못했습니다.'},{status:503,headers})}
 }

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import catalog from '@/data/blog-catalog.json'
-export async function GET() {
-  return NextResponse.json({ ...catalog, source: 'native' }, { headers: { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=60' } })
-}
+import { getBlogCatalog } from '@/lib/blog-repository'
+export const dynamic='force-dynamic'
+export async function GET(){try{const posts=await getBlogCatalog();return NextResponse.json({posts,total:posts.length,source:'native'},{headers:{'Cache-Control':'no-store'}})}catch{return NextResponse.json({error:'목록을 불러오지 못했습니다.'},{status:503})}}
