@@ -13,7 +13,6 @@ export const metadata: Metadata = {
 }
 
 import { AuthProvider } from '@/lib/auth-context'
-import ProfileRail from '@/components/ProfileRail'
 
 export default function RootLayout({
   children,
@@ -27,7 +26,6 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <ProfileRail />
           <SiteShell>{children}</SiteShell>
         </AuthProvider>
       </body>

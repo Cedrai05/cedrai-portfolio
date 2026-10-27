@@ -4,9 +4,11 @@ import { usePathname } from 'next/navigation'
 import { useLayoutEffect, useRef } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import Nav from '@/components/Nav'
+import ProfileRail from '@/components/ProfileRail'
 
 export default function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
+  const isWriting = pathname === '/blog/write'
   const destinationPath = useRef<string | null>(null)
   useLayoutEffect(() => {
     if (destinationPath.current !== pathname) return
@@ -31,8 +33,11 @@ export default function SiteShell({ children }: { children: ReactNode }) {
       try { sessionStorage.setItem('visited_at', String(Date.now())) } catch { /* Optional persistence. */ }
     }
   }
-  return <div className="site-content" onClickCapture={beforeNavigate}>
-    <Nav />
-    <div key={pathname} className="route-content">{children}</div>
-  </div>
+  return <>
+    {!isWriting && <ProfileRail />}
+    <div className="site-content" style={isWriting ? { marginLeft: 0 } : undefined} onClickCapture={beforeNavigate}>
+      <Nav />
+      <div key={pathname} className="route-content">{children}</div>
+    </div>
+  </>
 }
