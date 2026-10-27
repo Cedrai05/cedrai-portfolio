@@ -17,7 +17,7 @@ const ABOUT = {
   certs: [] as { name: string; date: string; status: string }[],
   activities: [
     { label: 'CTF PLATFORM', value: 'Dreamhack' },
-    { label: 'BLOG',         value: 'rinhye05.tistory.com' },
+    { label: 'BLOG',         value: 'cedrai05.github.io' },
     { label: 'GITHUB',       value: 'github.com/Cedrai05' },
   ],
   clubs: [

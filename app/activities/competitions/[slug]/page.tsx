@@ -1,6 +1,6 @@
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
-import { getTistoryPost } from '@/lib/tistory'
+import { getBlogPost } from '@/lib/blog-post'
 import { getNotionPost } from '@/lib/notion'
 import CompetitionMaterials from '@/components/CompetitionMaterials'
 
@@ -40,7 +40,7 @@ export default async function CompetitionPage({ params }: { params: Promise<{ sl
   const { slug } = await params
   const competition = COMPETITIONS[slug]
   if (!competition) return <main><Nav /><section className="study-page"><h1>Activity not found<span>.</span></h1></section><Footer /></main>
-  const tistoryPosts = slug === 'hacktheon' ? [await getTistoryPost('19')].filter((post): post is NonNullable<typeof post> => Boolean(post)) : []
+  const blogPosts = slug === 'hacktheon' ? [await getBlogPost('19')].filter((post): post is NonNullable<typeof post> => Boolean(post)) : []
   const notionPosts = slug === 'club-union-ctf' && competition.writeups ? await Promise.all(competition.writeups.map((writeup) => writeup.notionId ? getNotionPost(writeup.notionId) : null)) : []
 
   return (
@@ -66,14 +66,14 @@ export default async function CompetitionPage({ params }: { params: Promise<{ sl
             </div>
           </details>)}
         </div>}
-        {tistoryPosts.length > 0 && (
+        {blogPosts.length > 0 && (
           <div className="writeup-grid">
-            {tistoryPosts.map((post, index) => (
+            {blogPosts.map((post, index) => (
               <details key={post.href} className="competition-writeup">
                 <summary><i>{String(index + 1).padStart(2, '0')}</i><strong>{post.title.replace(/^\[2026 헥테온\]\s*/, '')}</strong><span>WEB HACKING</span><b>＋</b></summary>
                 <div className="competition-writeup__body">
                   <article className="tistory-post">
-                    <div className="tistory-post__source"><span>WRITE-UP FROM TISTORY</span><a href={post.href} target="_blank" rel="noopener noreferrer">원문 보기 ↗</a></div>
+                    <div className="tistory-post__source"><span>FIELD NOTES</span><a href={post.href} target="_blank" rel="noopener noreferrer">블로그에서 보기 ↗</a></div>
                     <div className="tistory-post__content" dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
                   </article>
                 </div>

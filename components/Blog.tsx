@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react'
 type Post = { id: string; title: string; href: string; date: string; locked: boolean }
 type Category = { name: string; path: string; count: number; posts: Post[] }
 
-const BLOG_URL = 'https://rinhye05.tistory.com'
+const BLOG_URL = 'https://cedrai05.github.io'
 const POSTS_PER_CATEGORY = 3
 
-// 대분류는 티스토리에서 그때그때 읽어오므로, 색은 이름 기준으로 고정 배정합니다.
+// 이관된 블로그의 카테고리마다 이름 기준으로 색을 고정 배정합니다.
 const PALETTE = ['var(--acc)', 'var(--acc2)', 'var(--acc3)', '#8ed8ff', '#64c7d8', '#9bbcff']
 
 function colorFor(name: string) {
