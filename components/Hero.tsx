@@ -91,7 +91,7 @@ export default function Hero() {
             {typed}
           </div>
 
-          <p style={{ fontSize: '14px', color: 'var(--tx)', lineHeight: 1.85, maxWidth: '400px', marginBottom: '1.2rem', fontFamily: 'sans-serif' }}>
+          <p style={{ fontSize: '14px', color: 'var(--tx)', lineHeight: 1.85, marginBottom: '1.2rem', fontFamily: 'sans-serif' }}>
             현재 컴퓨터공학과에 재학중이며 보안 공부중입니다.<br />
             CTF · 포렌식 · 웹해킹 · 리버싱 · AI
           </p>
