@@ -20,7 +20,8 @@ export async function getStoredArticle(slug:string) {
   }
   if(metadata.protected) {
     const post=await readNativePost(slug)
-    if(!post||post.visibility!=='protected')return null
+    // A private archive becomes readable only after explicitly listing it as a secret post.
+    if(!post||!['protected','private'].includes(post.visibility))return null
     return {metadata,content:post.content,assets:post.assets,protected:true}
   }
   const post=await getBlogPost(slug.replace('tistory-',''))

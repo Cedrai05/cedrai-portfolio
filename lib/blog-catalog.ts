@@ -5,7 +5,7 @@ export const BLOG_POSTS: BlogPost[] = catalog.posts.map(post => ({...post,readTi
 export const BLOG_CATEGORIES = ["개발", "CTF/Wargame", "Bug Bounty", "블로그/기술문서", "논문/컨퍼런스", "공모전/자격증"]
 export const BLOG_TOPICS: Record<string, string[]> = {
   "CTF/Wargame": ["BTLO", "CTF", "Dreamhack"],
-  "블로그/기술문서": ["Forensic", "Linux", "Reversing", "Web-hacking", "seKUrity"],
+  "블로그/기술문서": ["Forensic", "Linux", "Reversing", "Web-hacking", "seKUrity", "Major"],
   "논문/컨퍼런스": ["Forensic", "Linux", "Reversing", "Web-hacking"],
 }
 const overrides: Record<string, { topic: string }> = {

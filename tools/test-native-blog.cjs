@@ -11,6 +11,7 @@ async function main(){
  const asset=crypto.randomBytes(24),name=crypto.createHash('sha256').update(asset).digest('hex')+'.png'
  await seed('blog-native/v1/assets/'+name,asset)
  await seed('blog-native/v1/posts/tistory-123.json',JSON.stringify({version:1,slug:'tistory-123',visibility:'protected',title:'Legacy test',content:'<p>SECRET_LEGACY_TEST_BODY</p><img data-native-src="'+name+'">',assets:[name],password:{hash:'legacy-verifier-must-not-leak'}}))
+ await seed('blog-native/v1/posts/tistory-63.json',JSON.stringify({version:1,slug:'tistory-63',visibility:'private',title:'Major test',content:'<p>SECRET_MAJOR_TEST_BODY</p>',assets:[name]}))
  server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','8912'],{env:{...process.env,ADMIN_ID:'local-admin',ADMIN_PASSWORD:'local-admin-password',CLUB_ID:'local-member',CLUB_PASSWORD:'local-member-password',ADMIN_SESSION_SECRET:secret,BLOB_READ_WRITE_TOKEN:'',BLOB_STORE_ID:'',VERCEL:''},stdio:'ignore'})
  for(let i=0;i<100;i++){try{if((await request('/api/me')).status===200)break}catch{}await new Promise(r=>setTimeout(r,100));if(i===99)throw Error('Local server did not start')}
  const admin=await login('local-admin','local-admin-password'),member=await login('local-member','local-member-password')
@@ -19,6 +20,12 @@ async function main(){
  assert.equal((await request('/api/me',{cookie:'cedrai_session='+signed})).data.role,null)
  assert.equal((await request('/api/native-blog/posts/tistory-123')).status,401)
  for(const cookie of [admin,member]){const r=await request('/api/native-blog/posts/tistory-123',{cookie});assert.equal(r.status,200);assert(r.data.content.includes('SECRET_LEGACY_TEST_BODY'));assert(!r.text.includes('legacy-verifier'));assert(!r.data.ticket);assert(r.headers.get('cache-control').includes('no-store'))}
+ const major=(await request('/api/native-blog/catalog')).data.posts.filter(p=>p.sourceCategory==='Major/자료구조')
+ assert.equal(major.length,7);assert(major.every(p=>p.category==='블로그/기술문서'&&p.topic==='Major'&&p.protected))
+ assert.equal((await request('/api/native-blog/posts/tistory-63')).status,401)
+ for(const cookie of [admin,member])assert.equal((await request('/api/native-blog/posts/tistory-63',{cookie})).status,200)
+ assert.equal((await request('/blog?post=tistory-63')).text.includes('SECRET_MAJOR_TEST_BODY'),false)
+ assert.equal((await request('/api/native-blog/posts/tistory-999999',{cookie:admin})).status,404)
  assert.equal((await request('/api/native-blog/unlock',{body:{slug:'tistory-123',password:'any-old-password'}})).status,410)
  const assetPath='/api/native-blog/assets?slug=tistory-123&name='+name
  assert.equal((await request(assetPath)).status,401);assert.equal((await request(assetPath,{token:'old-ticket'})).status,401)
