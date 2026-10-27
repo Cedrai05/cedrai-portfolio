@@ -13,13 +13,29 @@ export default function BlogImport() {
     setBusy(true)
     let done = 0
     try {
-      for (const file of files) {
-        const kind = /^tistory-[1-9][0-9]*\.json$/.test(file.name) ? 'posts' : /^[a-f0-9]{64}\.[a-z0-9]{1,10}$/.test(file.name) ? 'assets' : null
-        if (!kind) throw new Error(`지원하지 않는 파일: ${file.name}`)
-        setStatus(`${done}/${files.length} 이관 중…`)
-        await upload(`blog-native/v1/${kind}/${file.name}`, file, { access: 'private', handleUploadUrl: '/api/native-blog/upload', multipart: file.size > 4 * 1024 * 1024 })
-        setStatus(`${++done}/${files.length} 완료`)
+      const completed = new Set<string>(JSON.parse(sessionStorage.getItem('native-blog-import-completed') || '[]'))
+      let cursor = 0
+      done = files.filter(file => completed.has(`${file.name}:${file.size}`)).length
+      const pending = files.filter(file => !completed.has(`${file.name}:${file.size}`))
+      async function worker() {
+        while (cursor < pending.length) {
+          const file = pending[cursor++]
+          const kind = /^tistory-[1-9][0-9]*\.json$/.test(file.name) ? 'posts' : /^[a-f0-9]{64}\.[a-z0-9]{1,10}$/.test(file.name) ? 'assets' : null
+          if (!kind) throw new Error(`지원하지 않는 파일: ${file.name}`)
+          await upload(`blog-native/v1/${kind}/${file.name}`, file, { access: 'private', handleUploadUrl: '/api/native-blog/upload', multipart: file.size > 4 * 1024 * 1024 })
+          completed.add(`${file.name}:${file.size}`)
+          sessionStorage.setItem('native-blog-import-completed', JSON.stringify([...completed]))
+          setStatus(`${++done}/${files.length} 완료`)
+        }
       }
+      const results = await Promise.allSettled(Array.from({ length: Math.min(6, pending.length) }, worker))
+      const failure = results.find(result => result.status === 'rejected')
+      if (failure?.status === 'rejected') throw failure.reason
+      const response = await fetch('/api/native-blog/import-status', { cache: 'no-store' })
+      const stored = await response.json()
+      if (!response.ok) throw new Error('저장 결과 확인 실패')
+      setStatus(`${done}/${files.length} 완료 · 저장 확인: 글 ${stored.posts.length}개, 첨부파일 ${stored.assets.length}개`)
+
     } catch (error) { setStatus(`${done}/${files.length} · ${(error as Error).message}`) }
     finally { setBusy(false) }
   }
