@@ -1,8 +1,10 @@
 'use client'
 
+import Link from 'next/link'
+
 const LINKS = [
   { icon: 'GH', label: 'GITHUB', value: '/Cedrai05',            href: 'https://github.com/Cedrai05'    },
-  { icon: 'TI', label: 'BLOG',   value: 'cedrai.info/blog', href: 'https://www.cedrai.info/blog' },
+  { icon: 'TI', label: 'BLOG',   value: 'cedrai.info/blog', href: '/blog' },
   { icon: '@',  label: 'EMAIL',  value: 'fls@cedrai.info',      href: 'mailto:fls@cedrai.info'        },
 ]
 
@@ -25,7 +27,7 @@ export default function Contact({ fullPage = false }: { fullPage?: boolean }) {
       )}
       <div className="contact-wrap" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         {LINKS.map((l) => (
-          <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+          <Link key={l.label} href={l.href} prefetch={l.href === '/blog' ? true : undefined} target={l.href.startsWith('/') ? undefined : '_blank'} rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
             <div
               className="hud-corner"
               style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg2)', border: '1px solid var(--bd)', padding: '.6rem 1rem', transition: 'border-color .2s', cursor: 'pointer' }}
@@ -38,7 +40,7 @@ export default function Contact({ fullPage = false }: { fullPage?: boolean }) {
                 <div style={{ fontSize: '14px', color: 'var(--tx)' }}>{l.value}</div>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>

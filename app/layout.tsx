@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import localFont from 'next/font/local'
+import SiteShell from '@/components/SiteShell'
+
+const inter = localFont({ src: './fonts/inter-latin.woff2', variable: '--font-inter', weight: '100 900', display: 'swap' })
+const hack = localFont({ src: [{ path: './fonts/hack-regular.woff2', weight: '400' }, { path: './fonts/hack-bold.woff2', weight: '700' }], variable: '--font-hack', display: 'swap' })
 
 export const metadata: Metadata = {
   title: 'Cédrai_',
@@ -16,14 +21,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={`${inter.variable} ${hack.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hack-font@3/build/web/hack.css" />
+        <script dangerouslySetInnerHTML={{ __html: `try { document.documentElement.dataset.theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark' } catch {}` }} />
       </head>
-      <body style={{ fontFamily: "'Hack', 'Courier New', monospace" }}>
+      <body>
         <AuthProvider>
           <ProfileRail />
-          <div className="site-content">{children}</div>
+          <SiteShell>{children}</SiteShell>
         </AuthProvider>
       </body>
     </html>

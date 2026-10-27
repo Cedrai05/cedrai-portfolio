@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { upload as uploadBlob } from '@vercel/blob/client'
-import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/lib/auth-context'
 import { safeFileName } from '@/lib/file-name'
@@ -100,7 +99,7 @@ export default function ForensicStudyPage() {
 
   return (
     <main className="page-main">
-      <Nav />
+
       <section className="study-page">
         <div className="study-page__head"><div className="sec-tag sec-tag-red">SECURITY STUDY / FORENSICS</div><div className="study-page__path">STUDY://FORENSICS</div></div>
         <h1>Forensic Study<span>.</span></h1>

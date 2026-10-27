@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 const phrases = ['Computer Engineering', 'CTF', 'Forensic', 'Web Hacking', 'Reversing', 'Security', 'Python']
 export default function BlogHero() {
-  const [typed, setTyped] = useState('Computer Engineering')
+  const [typed, setTyped] = useState('')
   useEffect(() => {
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -32,7 +33,7 @@ export default function BlogHero() {
         <h1 aria-label="Field Notes."><span className="glitch" data-text="Field" aria-hidden="true">Field</span>{' '}<span className="glitch hero-title-accent" data-text="Notes." aria-hidden="true">Notes<span className="period">.</span></span></h1>
         <div className="hero-typing"><span className="visually-hidden">{phrases.join(' · ')}</span><span aria-hidden="true">{typed}</span><span className="typed-cursor" aria-hidden="true" /></div>
         <p className="hero-description">배운 것을 기록하고, 풀어낸 과정을 남깁니다.<br />개발과 보안 사이에서 쌓아가는 <em>나만의 아카이브.</em></p>
-        <div className="hero-cta"><a href="#archive" className="primary-button">./EXPLORE_LOGS <span>↘</span></a><a href="/" className="secondary-button">VIEW PORTFOLIO ↗</a></div>
+        <div className="hero-cta"><a href="#archive" className="primary-button">./EXPLORE_LOGS <span>↘</span></a><Link href="/" prefetch className="secondary-button">VIEW PORTFOLIO ↗</Link></div>
       </div>
       <div className="hero-graphic" aria-hidden="true"><div className="scanner-ring" /><div className="scanner-ring scanner-ring-two" /><div className="scanner-ring scanner-ring-three" /><div className="scanner-ring scanner-ring-four" /><div className="scanner-sweep" /><div className="scanner-cross scanner-horizontal" /><div className="scanner-cross scanner-vertical" /><div className="scanner-core" /><span className="scanner-caption">SCANNING...</span></div>
     </div>

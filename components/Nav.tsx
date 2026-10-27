@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 
@@ -35,9 +35,11 @@ function ContactLink({ onClick }: { onClick?: () => void }) {
   )
 }
 
-export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant?: 'portfolio' | 'blog'; onBlogNavigate?: () => void } = {}) {
+export default function Nav() {
+  const pathname = usePathname()
+  const variant = pathname.startsWith('/blog') ? 'blog' : 'portfolio'
   const navigation = variant === 'blog' ? [{label:'BLOG',href:'/blog'}, {label:'GITHUB ↗',href:'https://github.com/Cedrai05'}, {label:'PROJECTS ↗',href:'/projects'}, {label:'PORTFOLIO ↗',href:'/'}] : links
-  const breakpoint = variant === 'blog' ? 980 : 640
+  const breakpoint = 1100
   const [menuOpen, setMenuOpen] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const [adminIdInput, setAdminIdInput] = useState('')
@@ -45,7 +47,8 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
   const [loginError, setLoginError] = useState('')
   const [loggingIn, setLoggingIn] = useState(false)
   const [dark, setDark] = useState(true)
-  useEffect(() => { try { setDark(localStorage.getItem('theme') !== 'light') } catch { /* Default theme works without storage. */ } }, [])
+  useEffect(() => { setDark(document.documentElement.dataset.theme !== 'light') }, [])
+  useEffect(() => { setMenuOpen(false); setShowLogin(false) }, [pathname])
   const { isAdmin, isMember, login, logout } = useAuth()
   useEffect(() => {
     const open = () => { setMenuOpen(false); setShowLogin(true) }
@@ -61,10 +64,13 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
     return () => { document.removeEventListener('keydown', key); document.removeEventListener('click', outside) }
   }, [menuOpen, showLogin])
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
-    try { localStorage.setItem('theme', dark ? 'dark' : 'light') } catch { /* Optional persistence. */ }
-  }, [dark])
+  const toggleTheme = () => {
+    const next = !dark
+    setDark(next)
+    document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light')
+    try { localStorage.setItem('theme', next ? 'dark' : 'light') } catch { /* Optional persistence. */ }
+  }
+
 
   const handleLogin = async () => {
     if (loggingIn) return
@@ -82,7 +88,7 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
 
   return (
     <>
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.2rem', height: '48px', background: 'var(--bg2)', borderBottom: '1px solid var(--bd)', position: 'sticky', top: 0, zIndex: 100 }}>
+      <nav aria-label="주 메뉴" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.2rem', height: '48px', background: 'var(--bg2)', borderBottom: '1px solid var(--bd)', position: 'sticky', top: 0, zIndex: 100 }}>
 
         {/* 로고 */}
         <Link href={variant === 'blog' ? '/blog' : '/'} aria-label={variant === 'blog' ? 'Cédrai 블로그 홈' : 'Cédrai 포트폴리오 홈'} style={{ textDecoration: 'none', fontSize: '14px', fontWeight: 700, letterSpacing: '.08em', color: 'var(--txw)' }}>
@@ -92,9 +98,9 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
         {/* 데스크탑 링크 */}
         <div className="nav-desktop" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
           {navigation.map((l) => (
-            <Link key={l.label} href={l.href} target={l.href.startsWith('https://') ? '_blank' : undefined} rel={l.href.startsWith('https://') ? 'noopener noreferrer' : undefined} onClick={() => { onBlogNavigate?.(); if (l.href === '/') sessionStorage.setItem('visited_at', String(Date.now())) }} style={{ color: 'var(--tx2)', fontSize: '12px', textDecoration: 'none', letterSpacing: '.08em', transition: 'color .2s' }}
+            <Link key={l.label} href={l.href} prefetch={l.href === '/blog' || l.href === '/' ? true : undefined} aria-current={pathname === l.href ? 'page' : undefined} target={l.href.startsWith('https://') ? '_blank' : undefined} rel={l.href.startsWith('https://') ? 'noopener noreferrer' : undefined} style={{ color: pathname === l.href ? 'var(--acc)' : 'var(--tx2)', fontSize: '12px', textDecoration: 'none', letterSpacing: '.08em', transition: 'color .2s' }}
               onMouseEnter={(e) => ((e.target as HTMLElement).style.color = 'var(--acc)')}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = 'var(--tx2)')}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = pathname === l.href ? 'var(--acc)' : 'var(--tx2)')}
             >{l.label}</Link>
           ))}
         </div>
@@ -109,7 +115,7 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
           </div>
 
           {/* 다크/라이트 토글 */}
-          <button aria-label={dark ? '라이트 테마로 전환' : '다크 테마로 전환'} onClick={() => setDark(!dark)} style={{ background: 'none', border: '1px solid var(--bd)', color: 'var(--tx2)', cursor: 'pointer', fontSize: '12px', padding: '3px 8px', fontFamily: 'inherit', letterSpacing: '.06em' }}>
+          <button aria-label={dark ? '라이트 테마로 전환' : '다크 테마로 전환'} onClick={toggleTheme} style={{ background: 'none', border: '1px solid var(--bd)', color: 'var(--tx2)', cursor: 'pointer', fontSize: '12px', padding: '3px 8px', fontFamily: 'inherit', letterSpacing: '.06em' }}>
             {dark ? '☀' : '◑'}
           </button>
 
@@ -147,10 +153,10 @@ export default function Nav({ variant = 'portfolio', onBlogNavigate }: { variant
 
       {/* 모바일 드롭다운 */}
       {menuOpen && (
-        <div data-navigation-menu className="nav-mobile" style={{ position: 'fixed', top: '48px', left: 0, right: 0, zIndex: 99, background: 'var(--bg2)', borderBottom: '1px solid var(--bd)', display: 'flex', flexDirection: 'column' }}>
+        <div data-navigation-menu className="nav-mobile" style={{ position: 'fixed', top: 'var(--header-height)', left: 'var(--rail-width)', right: 0, zIndex: 99, background: 'var(--bg2)', borderBottom: '1px solid var(--bd)', display: 'flex', flexDirection: 'column' }}>
           {variant === 'blog' && <button type="button" onClick={() => { setMenuOpen(false); window.dispatchEvent(new Event('cedrai:open-about')) }} style={{padding:'14px 1.2rem',textAlign:'left',color:'var(--tx2)',background:'transparent',border:0,borderBottom:'1px solid var(--bd)'}}>ABOUT</button>}
           {navigation.map((l) => (
-            <Link key={l.label} href={l.href} target={l.href.startsWith('https://') ? '_blank' : undefined} rel={l.href.startsWith('https://') ? 'noopener noreferrer' : undefined} onClick={() => { onBlogNavigate?.(); setMenuOpen(false); if (l.href === '/') sessionStorage.setItem('visited_at', String(Date.now())) }}
+            <Link key={l.label} href={l.href} prefetch={l.href === '/blog' || l.href === '/' ? true : undefined} aria-current={pathname === l.href ? 'page' : undefined} target={l.href.startsWith('https://') ? '_blank' : undefined} rel={l.href.startsWith('https://') ? 'noopener noreferrer' : undefined} onClick={() => { setMenuOpen(false);  }}
               style={{ padding: '14px 1.2rem', color: 'var(--tx2)', fontSize: '14px', textDecoration: 'none', letterSpacing: '.10em', borderBottom: '1px solid var(--bd)' }}
             >{l.label}</Link>
           ))}

@@ -1,13 +1,15 @@
 'use client'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect,useRef,useState } from 'react'
 import { upload } from '@vercel/blob/client'
-import Nav from '@/components/Nav'
 import { useAuth } from '@/lib/auth-context'
 import { BLOG_CATEGORIES,BLOG_TOPICS,type BlogPost } from '@/lib/blog-catalog'
 
 type Draft=BlogPost&{updatedAt:string}
 export default function BlogEditor({draftSlug}:{draftSlug?:string}) {
   const {ready,isAdmin}=useAuth()
+  const router=useRouter()
   const [slug,setSlug]=useState('')
   const [title,setTitle]=useState(''),[category,setCategory]=useState(BLOG_CATEGORIES[0]),[topic,setTopic]=useState(''),[summary,setSummary]=useState(''),[tags,setTags]=useState(''),[markdown,setMarkdown]=useState('')
   const [isSecret,setIsSecret]=useState(false),[assets,setAssets]=useState<string[]>([]),[drafts,setDrafts]=useState<Draft[]>([])
@@ -34,7 +36,7 @@ export default function BlogEditor({draftSlug}:{draftSlug?:string}) {
       const data=await response.json();if(!response.ok)throw new Error(data.error||'저장하지 못했습니다.')
       if(mode==='preview'){setPreview(data.content);setStatus('')}
       else if(mode==='draft'){setStatus('임시 저장했습니다. 공개 목록에는 표시되지 않습니다.');history.replaceState(history.state,'',`/blog/write?draft=${slug}`);setDrafts(current=>[{...data.post,updatedAt:new Date().toISOString()},...current.filter(p=>p.slug!==slug)])}
-      else {setDrafts(current=>current.filter(post=>post.slug!==slug));setPublished(data.href);setStatus(isSecret?'비밀글로 업로드했습니다.':'일반글로 업로드했습니다.')}
+      else {router.refresh();setDrafts(current=>current.filter(post=>post.slug!==slug));setPublished(data.href);setStatus(isSecret?'비밀글로 업로드했습니다.':'일반글로 업로드했습니다.')}
     }catch(error){setStatus((error as Error).message)}finally{setBusy(false)}
   }
   function insert(before:string,after=''){
@@ -77,8 +79,8 @@ export default function BlogEditor({draftSlug}:{draftSlug?:string}) {
     }catch(error){setStatus((error as Error).message)}finally{setBusy(false)}
   }
   const disabled=busy||uploading||Boolean(published)
-  return <div className="blog-page"><Nav variant="blog"/><main className="blog-editor">
-    <a className="article-back" href="/blog#archive">← BACK TO ARCHIVE</a><p className="small-label">WRITE / FIELD NOTES</p><h1>글 작성<span>.</span></h1>
+  return <div className="blog-page"><main className="blog-editor">
+    <Link className="article-back" href="/blog#archive" scroll={false}>← BACK TO ARCHIVE</Link><p className="small-label">WRITE / FIELD NOTES</p><h1>글 작성<span>.</span></h1>
     {!ready?<p>로그인 확인 중…</p>:!isAdmin?<div className="protected-form"><p>관리자만 글을 작성할 수 있습니다.</p><button type="button" onClick={()=>window.dispatchEvent(new Event('cedrai:open-login'))}>관리자 로그인</button></div>:<>
       <div className="blog-editor__fields"><label>제목<input value={title} maxLength={160} disabled={disabled} onChange={e=>setTitle(e.target.value)} required placeholder="글 제목을 입력해 주세요."/></label>
       <div className="blog-editor__row"><label>카테고리<select value={category} disabled={disabled} onChange={e=>{setCategory(e.target.value);setTopic('')}}>{BLOG_CATEGORIES.map(c=><option key={c}>{c}</option>)}</select></label><label>주제{BLOG_TOPICS[category]?<select value={topic} disabled={disabled} onChange={e=>setTopic(e.target.value)}><option value="">선택 안 함</option>{BLOG_TOPICS[category].map(t=><option key={t}>{t}</option>)}</select>:<input value={topic} disabled={disabled} maxLength={60} onChange={e=>setTopic(e.target.value)} placeholder="선택 사항"/>}</label></div>
@@ -87,7 +89,7 @@ export default function BlogEditor({draftSlug}:{draftSlug?:string}) {
       <div className="blog-editor__toolbar"><button type="button" disabled={disabled} onClick={()=>insert('## ')}>제목</button><button type="button" disabled={disabled} onClick={()=>insert('**','**')}>굵게</button><button type="button" disabled={disabled} onClick={()=>insert('```\n','\n```')}>코드</button><button type="button" disabled={disabled} onClick={()=>insert('- ')}>목록</button><button type="button" disabled={disabled} onClick={()=>insert('[','](https://)')}>링크</button><label className="blog-editor__file" aria-disabled={disabled}><span aria-hidden="true">＋</span><span>이미지·첨부파일 추가</span><input type="file" aria-label="이미지·첨부파일 추가" multiple disabled={disabled} onChange={e=>{addFiles(Array.from(e.target.files||[]));e.target.value=''}}/></label></div>
       <label>본문<textarea ref={textarea} value={markdown} disabled={disabled} onChange={e=>{setMarkdown(e.target.value);setPreview(null)}} maxLength={500000} rows={20} placeholder="내용을 작성해 주세요. Markdown을 지원합니다."/></label><p className="blog-editor__hint">선택한 이미지와 첨부파일은 본문에 자동으로 추가됩니다. 파일 하나당 최대 20MB입니다.</p>
       <div className="blog-editor__actions"><button type="button" disabled={disabled||!title.trim()||!markdown.trim()} onClick={()=>save('preview')}>미리보기</button><button type="button" disabled={disabled||!title.trim()||!markdown.trim()} onClick={()=>save('draft')}>임시 저장</button><button type="button" className="primary-button" disabled={disabled||!title.trim()||!markdown.trim()} onClick={()=>save('publish')}>{busy?'처리 중…':isSecret?'비밀글 업로드':'일반글 업로드'}</button></div>
-      <p role="status" aria-live="polite">{status}</p>{published&&<div className="blog-editor__success"><a href={published}>업로드한 글 보기 →</a><a href="/blog/write">새 글 작성 →</a></div>}
+      <p role="status" aria-live="polite">{status}</p>{published&&<div className="blog-editor__success"><Link href={published}>업로드한 글 보기 →</Link><a href="/blog/write">새 글 작성 →</a></div>}
       </div>
       {preview&&<section className="blog-editor__preview"><h2>미리보기</h2><div className="article-body" dangerouslySetInnerHTML={{__html:preview}}/></section>}
       {drafts.length>0&&<section className="blog-editor__drafts"><h2>임시 저장한 글</h2>{drafts.map(draft=><div className="blog-editor__draft-row" key={draft.slug}><a href={`/blog/write?draft=${draft.slug}`}><span>{draft.title}</span><small>{draft.protected?'비밀글':'일반글'} · 이어서 작성 →</small></a><button type="button" disabled={busy} onClick={()=>removeDraft(draft)} aria-label={`${draft.title} 임시글 삭제`}>삭제</button></div>)}</section>}

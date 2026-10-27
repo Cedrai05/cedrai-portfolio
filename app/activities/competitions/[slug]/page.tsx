@@ -1,4 +1,3 @@
-import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 import { getBlogPost } from '@/lib/blog-post'
 import { getNotionPost } from '@/lib/notion'
@@ -39,13 +38,13 @@ const COMPETITIONS: Record<string, { title: string; year: string; status: string
 export default async function CompetitionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const competition = COMPETITIONS[slug]
-  if (!competition) return <main><Nav /><section className="study-page"><h1>Activity not found<span>.</span></h1></section><Footer /></main>
+  if (!competition) return <main><section className="study-page"><h1>Activity not found<span>.</span></h1></section><Footer /></main>
   const blogPosts = slug === 'hacktheon' ? [await getBlogPost('19')].filter((post): post is NonNullable<typeof post> => Boolean(post)) : []
   const notionPosts = slug === 'club-union-ctf' && competition.writeups ? await Promise.all(competition.writeups.map((writeup) => writeup.notionId ? getNotionPost(writeup.notionId) : null)) : []
 
   return (
     <main className="page-main">
-      <Nav />
+
       <section className="study-page competition-page">
         <div className="study-page__head"><div className="sec-tag">COMPETITION{competition.year ? ` / ${competition.year}` : ''}</div><div className="study-page__path">ACTIVITY://{slug.toUpperCase()}</div></div>
         <h1>{competition.title}<span>.</span></h1>

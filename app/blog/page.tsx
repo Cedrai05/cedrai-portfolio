@@ -1,9 +1,11 @@
+import { Suspense } from 'react'
+import BlogLoading from '@/components/blog/BlogLoading'
+import type { BlogPost } from '@/lib/blog-catalog'
 import { permanentRedirect } from 'next/navigation'
 import { postHref } from '@/lib/blog-catalog'
 import type { Metadata } from 'next'
 import BlogPage from '@/components/blog/BlogPage'
 import { getBlogCatalog, getPostMetadata, getStoredArticle } from '@/lib/blog-repository'
-import './blog.css'
 
 type Props = { searchParams: Promise<{ post?: string | string[] }> }
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -16,10 +18,11 @@ export default async function Page({ searchParams }: Props) {
   const slug = typeof value === 'string' ? value : undefined
   const post = slug ? await getPostMetadata(slug) : undefined
   if(post && slug!==String(post.number))permanentRedirect(postHref(post))
+  return <Suspense fallback={<BlogLoading />}><BlogContent post={post || undefined} slug={slug} /></Suspense>
+}
+
+async function BlogContent({ post, slug }: { post?: BlogPost; slug?: string }) {
   const posts = await getBlogCatalog()
   const publicPost = post && !post.protected ? await getStoredArticle(post.slug) : null
-  return <>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
-    <BlogPage key={post?.slug || slug || 'archive'} slug={post?.slug || slug} posts={posts} publicContent={publicPost?.content || null} />
-  </>
+  return <BlogPage key={post?.slug || slug || 'archive'} slug={post?.slug || slug} posts={posts} publicContent={publicPost?.content || null} />
 }

@@ -1,37 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 import LoadingScreen from '@/components/LoadingScreen'
 import ScrollReveal from '@/components/ScrollReveal'
-import Nav from '@/components/Nav'
 import Hero from '@/components/Hero'
 import Activities from '@/components/Skills'
-import Projects from '@/components/Projects'
-import Blog from '@/components/Blog'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
 
 export default function Home() {
-  const [loaded, setLoaded] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const ts = sessionStorage.getItem('visited_at')
-      if (ts && Date.now() - Number(ts) < 10 * 60 * 1000) {
-        return true
-      }
-    }
-    return false
-  })
-
-  const handleDone = () => {
-    sessionStorage.setItem('visited_at', String(Date.now()))
+  const [loaded, setLoaded] = useState(false)
+  useLayoutEffect(() => {
+    try {
+      const timestamp = Number(sessionStorage.getItem('visited_at'))
+      if (Date.now() - timestamp < 10 * 60 * 1000 || matchMedia('(prefers-reduced-motion: reduce)').matches) setLoaded(true)
+    } catch { setLoaded(true) }
+  }, [])
+  const handleDone = useCallback(() => {
+    try { sessionStorage.setItem('visited_at', String(Date.now())) } catch { /* Optional persistence. */ }
     setLoaded(true)
-  }
+  }, [])
   return (
     <>
       {!loaded && <LoadingScreen onDone={handleDone} />}
       <main className="page-main" style={{ opacity: loaded ? 1 : 0, transition: 'opacity .4s ease' }}>
-        <Nav />
-        <ScrollReveal><Hero /></ScrollReveal>
+
+        <Hero />
         <ScrollReveal delay={50}><Activities /></ScrollReveal>
         <ScrollReveal delay={50}><Contact /></ScrollReveal>
         <Footer />

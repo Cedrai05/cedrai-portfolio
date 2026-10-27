@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { upload as uploadBlob } from '@vercel/blob/client'
-import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/lib/auth-context'
 import { safeFileName } from '@/lib/file-name'
@@ -68,7 +67,7 @@ export default function RookiePage() {
 
   return (
     <main className="page-main">
-      <Nav />
+
       <section className="private-club-page">
         <div className="private-club-page__head">
           <div className="sec-tag sec-tag-red">seKUrity / 25.03—25.08</div>
