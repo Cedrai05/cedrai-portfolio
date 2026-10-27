@@ -1,3 +1,4 @@
+import { numberForWrittenPost } from '@/lib/blog-numbering'
 import { createHash } from 'node:crypto'
 import { marked, Renderer } from 'marked'
 import sanitizeHtml from 'sanitize-html'
@@ -49,7 +50,7 @@ export function renderBlogMarkdown(input:WritingInput,preview=false) {
 }
 export function metadataFromStored(post:StoredPost):BlogPost {
   const m=post.metadata
-  return {slug:m.slug,title:m.title,category:m.category,topic:m.topic||'',sourceCategory:m.sourceCategory||'',date:m.date,readTime:m.readTime,summary:post.visibility==='protected'?'로그인한 사용자만 읽을 수 있습니다.':m.summary,tags:m.tags,protected:post.visibility==='protected'}
+  return {slug:m.slug,number:m.number,title:m.title,category:m.category,topic:m.topic||'',sourceCategory:m.sourceCategory||'',date:m.date,readTime:m.readTime,summary:post.visibility==='protected'?'로그인한 사용자만 읽을 수 있습니다.':m.summary,tags:m.tags,protected:post.visibility==='protected'}
 }
 export async function readWrittenPost(slug:string,draft=false) {
   if(!validWrittenSlug(slug))return null
@@ -58,12 +59,13 @@ export async function readWrittenPost(slug:string,draft=false) {
 export async function writtenMetadata(slug:string) {
   if(!validWrittenSlug(slug))return null
   const post=await readBlogJSON<BlogPost>(`${WRITTEN_PREFIX}catalog/${slug}.json`)
-  return post?.protected?{...post,summary:'로그인한 사용자만 읽을 수 있습니다.'}:post
+  if(!post)return null
+  return {...post,number:post.number??await numberForWrittenPost(slug),summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary}
 }
 export async function listWrittenMetadata() {
   const keys=await listBlogKeys(`${WRITTEN_PREFIX}catalog/`)
   const result=await Promise.all(keys.map(key=>readBlogJSON<BlogPost>(key)))
-  return result.filter((post):post is BlogPost=>Boolean(post&&validWrittenSlug(post.slug))).map(post=>post.protected?{...post,summary:'로그인한 사용자만 읽을 수 있습니다.'}:post)
+  return Promise.all(result.filter((post):post is BlogPost=>Boolean(post&&validWrittenSlug(post.slug))).map(async post=>({...post,number:post.number??await numberForWrittenPost(post.slug),summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary})))
 }
 export async function listDrafts() {
   const keys=await listBlogKeys(`${WRITTEN_PREFIX}drafts/`)
@@ -79,14 +81,16 @@ export async function saveWriting(input:WritingInput,publish:boolean) {
   const existing=await readWrittenPost(input.slug)
   if(existing) {
     if(!publish||existing.fingerprint!==fingerprint)throw new BlogInputError('이미 업로드한 글입니다.',409)
-    const metadata=metadataFromStored(existing)
+    const metadata={...metadataFromStored(existing),number:existing.metadata.number??await numberForWrittenPost(input.slug)}
     if(!await writtenMetadata(input.slug))await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadata)
     return metadata
   }
+  const content=renderBlogMarkdown(input)
+  const number=publish?await numberForWrittenPost(input.slug):undefined
   const now=new Date().toISOString()
   const visibility=input.isSecret?'protected':'public'
-  const metadata:BlogPost={slug:input.slug,title:input.title,category:input.category,topic:input.topic,sourceCategory:input.topic?`${input.category} / ${input.topic}`:input.category,date:new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date()),readTime:`${Math.max(1,Math.ceil(input.markdown.length/700))} MIN READ`,summary:input.summary,tags:input.tags,protected:input.isSecret}
-  const record:StoredPost={version:2,metadata,visibility,markdown:input.markdown,content:renderBlogMarkdown(input),assets:input.assets,createdAt:now,updatedAt:now,fingerprint}
+  const metadata:BlogPost={slug:input.slug,number,title:input.title,category:input.category,topic:input.topic,sourceCategory:input.topic?`${input.category} / ${input.topic}`:input.category,date:new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date()),readTime:`${Math.max(1,Math.ceil(input.markdown.length/700))} MIN READ`,summary:input.summary,tags:input.tags,protected:input.isSecret}
+  const record:StoredPost={version:2,metadata,visibility,markdown:input.markdown,content,assets:input.assets,createdAt:now,updatedAt:now,fingerprint}
   await writeBlogJSON(`${WRITTEN_PREFIX}${publish?'posts':'drafts'}/${input.slug}.json`,record,!publish)
   if(publish)await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadataFromStored(record))
   return metadataFromStored(record)

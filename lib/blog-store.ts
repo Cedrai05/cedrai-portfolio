@@ -1,5 +1,5 @@
 import { get, list, put, BlobNotFoundError } from '@vercel/blob'
-import { readFile, writeFile, mkdir, readdir, rename } from 'node:fs/promises'
+import { readFile, writeFile, mkdir, readdir, rename, link, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { blobStorageEnabled } from '@/lib/blob-storage'
@@ -27,8 +27,10 @@ export async function writeBlogJSON(key: string, value: unknown, overwrite=false
   }
   const file=localPath(key)
   await mkdir(path.dirname(file),{recursive:true,mode:0o700})
-  if (!overwrite) await writeFile(file,data,{flag:'wx',mode:0o600})
-  else { const temp=file+'.'+randomUUID(); await writeFile(temp,data,{mode:0o600}); await rename(temp,file) }
+  const temp=file+'.'+randomUUID()
+  await writeFile(temp,data,{mode:0o600})
+  try { if(overwrite)await rename(temp,file);else await link(temp,file) }
+  finally { await rm(temp,{force:true}) }
 }
 export async function listBlogKeys(prefix: string) {
   if (blobStorageEnabled()) {

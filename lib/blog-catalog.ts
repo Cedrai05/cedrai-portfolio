@@ -1,7 +1,7 @@
 import catalog from '@/data/blog-catalog.json'
 
-export type BlogPost = { slug:string; title:string; category:string; sourceCategory:string; date:string; readTime:string; summary:string; tags:string[]; protected:boolean; topic?:string }
-export const BLOG_POSTS: BlogPost[] = catalog.posts.map(post => ({...post,readTime:post.protected?'MEMBERS ONLY':post.readTime,summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary}))
+export type BlogPost = { slug:string; number?:number; title:string; category:string; sourceCategory:string; date:string; readTime:string; summary:string; tags:string[]; protected:boolean; topic?:string }
+export const BLOG_POSTS: BlogPost[] = catalog.posts.map(post => ({...post,number:Number(post.slug.replace('tistory-','')),readTime:post.protected?'MEMBERS ONLY':post.readTime,summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary}))
 export const BLOG_CATEGORIES = ["개발", "CTF/Wargame", "Bug Bounty", "블로그/기술문서", "논문/컨퍼런스", "공모전/자격증"]
 export const BLOG_TOPICS: Record<string, string[]> = {
   "CTF/Wargame": ["BTLO", "CTF", "Dreamhack"],
@@ -21,6 +21,6 @@ export function topicFor(post: BlogPost) {
   return topics.find(topic => parts.includes(topic.toLowerCase())) || overrides[post.slug]?.topic || ''
 }
 
-export const postHref = (slug: string) => `/blog?post=${encodeURIComponent(slug)}`
+export const postHref = (post: Pick<BlogPost,'slug'|'number'>) => `/blog?post=${encodeURIComponent(String(post.number ?? post.slug.replace(/^tistory-/,'')))}`
 export const dateText = (date: string) => date.replaceAll('-', '.')
-export const prepareBlogContent = (content: string) => content.replaceAll('./content/media/', '/blog-content/media/').replaceAll('href="?post=', 'href="/blog?post=')
+export const prepareBlogContent = (content: string) => content.replaceAll('./content/media/', '/blog-content/media/').replaceAll('href="?post=', 'href="/blog?post=').replace(/(href="\/blog\?post=)tistory-([1-9][0-9]*)(?=["&#])/g,'$1$2')

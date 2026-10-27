@@ -1,5 +1,5 @@
 import { NextResponse,type NextRequest } from 'next/server'
-import { BLOG_PREFIX,validAsset,validSlug } from '@/lib/native-blog'
+import { BLOG_PREFIX,validAsset } from '@/lib/native-blog'
 import { getPostMetadata,getStoredArticle } from '@/lib/blog-repository'
 import { blogRole,canReadSecret,privateBlogHeaders } from '@/lib/blog-access'
 import { readBlogAsset } from '@/lib/blog-store'
@@ -15,7 +15,7 @@ export async function GET(request:NextRequest) {
   try {
     if(preview) {if(role!=='admin')return fail(403)}
     else {
-      if(!validSlug(slug))return fail(404)
+      if(!slug)return fail(404)
       const metadata=await getPostMetadata(slug)
       if(!metadata)return fail(404)
       if(metadata.protected&&!canReadSecret(role))return fail(401)
