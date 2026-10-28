@@ -286,6 +286,20 @@
 .blog-page .category-filters button, .blog-page .search-box {
   min-height: 42px; border-radius: 6px; font-size: 12px;
 }
+.blog-page .archive-search-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.blog-page .access-filter { position: relative; flex: none; }
+.blog-page .access-filter__trigger { position: relative; display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--muted); }
+.blog-page .access-filter__trigger:hover, .blog-page .access-filter__trigger[aria-expanded="true"], .blog-page .access-filter__trigger[data-active="true"] { border-color: var(--accent); background: var(--accent-dark); color: var(--accent); }
+.blog-page .access-filter__dot { position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.blog-page .access-filter__panel { position: absolute; z-index: 5; top: calc(100% + 8px); right: 0; width: 260px; max-width: calc(100vw - 32px); padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); box-shadow: 0 12px 32px rgba(0,0,0,.25); }
+.blog-page .access-filter__heading { display: block; padding: 8px 10px; font-size: 11px; color: var(--subtle); }
+.blog-page .access-filter__panel button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 42px; padding: 10px; border: 0; border-radius: 5px; background: transparent; color: var(--muted); text-align: left; font-size: 12px; }
+.blog-page .access-filter__panel button:hover, .blog-page .access-filter__panel button[aria-pressed="true"] { background: var(--accent-dark); color: var(--accent); }
+.blog-page .access-filter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 620px) {
+  .blog-page .archive-search-controls { width: 100%; }
+  .blog-page .archive-search-controls .search-box { flex: 1; min-width: 0; width: auto; }
+}
 .blog-page .primary-button, .blog-page .secondary-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
 .blog-page .connect-section {
   width: calc(100% - 2 * var(--page-gutter));

@@ -4,12 +4,13 @@ import Link from 'next/link'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/lib/auth-context'
 import BlogHero from './BlogHero'
+import BlogAccessFilter, { accessLabels, type AccessFilter } from './BlogAccessFilter'
 import BlogArticle from './BlogArticle'
 import { BLOG_CATEGORIES, BLOG_TOPICS, dateText, postHref, topicFor, type BlogPost } from '@/lib/blog-catalog'
 
-type Filters = { category: string; topic: string; query: string }
+type Filters = { category: string; topic: string; query: string; access: AccessFilter }
 type Snapshot = Filters & { scrollY: number }
-const defaults: Filters = { category:'전체',topic:'전체',query:'' }
+const defaults: Filters = { category:'전체',topic:'전체',query:'',access:'all' }
 const archiveKey = 'cedrai-blog-archive'
 export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:string;publicContent:string|null;posts:BlogPost[]}) {
   const {isAdmin}=useAuth()
@@ -41,8 +42,9 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
           const category = ['전체',...BLOG_CATEGORIES].includes(saved.category) ? saved.category : '전체'
           const topic = typeof saved.topic==='string' ? saved.topic : '전체'
           const query = typeof saved.query==='string' ? saved.query : ''
-          pending.current={category,topic,query,scrollY:Number.isFinite(saved.scrollY)?Math.max(0,saved.scrollY):0}
-          setFilters({category,topic,query})
+          const access: AccessFilter = saved.access === 'public' || saved.access === 'members' ? saved.access : 'all'
+          pending.current={category,topic,query,access,scrollY:Number.isFinite(saved.scrollY)?Math.max(0,saved.scrollY):0}
+          setFilters({category,topic,query,access})
         }
       } catch { /* Filtering works without storage. */ }
     }
@@ -89,7 +91,7 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
   const configured=BLOG_TOPICS[filters.category]
   const topics=['전체',...(configured || [...new Set([...Object.values(BLOG_TOPICS).flat(),...counts.keys()])].filter(topic=>counts.has(topic)))]
   const query=filters.query.trim().toLocaleLowerCase('ko')
-  const matches=available.filter(post => (filters.topic==='전체'||topicFor(post)===filters.topic) && (!query || [post.title,post.summary,post.category,topicFor(post),post.sourceCategory,...post.tags].join(' ').toLocaleLowerCase('ko').includes(query))).sort((a:BlogPost,b:BlogPost)=>{
+  const matches=available.filter(post => (filters.access==='all'||(filters.access==='members'?post.protected:!post.protected)) && (filters.topic==='전체'||topicFor(post)===filters.topic) && (!query || [post.title,post.summary,post.category,topicFor(post),post.sourceCategory,...post.tags].join(' ').toLocaleLowerCase('ko').includes(query))).sort((a:BlogPost,b:BlogPost)=>{
     if(configured) {
       const rank=(post:BlogPost)=>{const index=configured.indexOf(topicFor(post));return index===-1?configured.length:index}
       const difference=rank(a)-rank(b)
@@ -107,11 +109,11 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
         <section className="archive-section" id="archive">
           <div className="section-kicker"><span className="kicker-pill">ARCHIVE</span><span className="kicker-line" /><span>SYS://ALL_ENTRIES</span></div>
           <div className="section-heading"><div><p className="small-label">01 / INDEX</p><h2>Explore the logs<span>.</span></h2><p>관심 분야별로 정리한 생각과 실험의 기록입니다.</p></div><span className="entry-total" id="entry-total">{BLOG_POSTS.length} ENTRIES</span></div>
-          <div className="archive-toolbar"><div id="category-filters" className="category-filters" role="group" aria-label="카테고리 필터">{['전체',...BLOG_CATEGORIES].map(category=><button key={category} type="button" aria-pressed={filters.category===category} onClick={()=>update({category,topic:'전체'})}>{category}</button>)}</div><label className="search-box"><span>⌕</span><input ref={search} id="search-input" type="search" placeholder="기록 검색..." aria-label="기록 검색" autoComplete="off" value={filters.query} onChange={event=>update({query:event.target.value})}/><kbd>/</kbd></label></div>
+          <div className="archive-toolbar"><div id="category-filters" className="category-filters" role="group" aria-label="카테고리 필터">{['전체',...BLOG_CATEGORIES].map(category=><button key={category} type="button" aria-pressed={filters.category===category} onClick={()=>update({category,topic:'전체'})}>{category}</button>)}</div><div className="archive-search-controls"><label className="search-box"><span>⌕</span><input ref={search} id="search-input" type="search" placeholder="기록 검색..." aria-label="기록 검색" autoComplete="off" value={filters.query} onChange={event=>update({query:event.target.value})}/><kbd>/</kbd></label><BlogAccessFilter value={filters.access} onChange={access=>update({access})} /></div></div>
           {(configured||counts.size>0)&&<div className="topic-toolbar" id="topic-toolbar"><span className="topic-label">주제</span><div id="topic-filters" className="topic-filters" role="group" aria-label="주제 필터">{topics.map(topic=><button type="button" key={topic} aria-pressed={filters.topic===topic} onClick={()=>update({topic})}>{topic} <span>{topic==='전체'?available.length:counts.get(topic)||0}</span></button>)}</div></div>}
-          <div className="result-line"><span id="result-label">{[filters.category==='전체'?'ALL ENTRIES':filters.category.toUpperCase(),filters.topic==='전체'?'':filters.topic].filter(Boolean).join(' / ')}</span><span id="result-count">{String(matches.length).padStart(2,'0')} RESULTS</span></div>
+          <div className="result-line"><span id="result-label">{[filters.category==='전체'?'ALL ENTRIES':filters.category.toUpperCase(),filters.topic==='전체'?'':filters.topic,filters.access==='all'?'':accessLabels[filters.access]].filter(Boolean).join(' / ')}</span><span id="result-count" role="status" aria-live="polite">{String(matches.length).padStart(2,'0')} RESULTS</span></div>
           <div id="post-list" className="post-list">{matches.map((post,index)=><Link scroll={false} prefetch={false} key={post.slug} className="post-row" href={postHref(post)} onClick={saveArchive} aria-label={`${post.title} ${post.protected?'비밀글 열기':'읽기'}`}><span className="post-number">{String(index+1).padStart(2,'0')}</span><div className="post-content"><span className="post-category">↳ {post.category.toUpperCase()}{topicFor(post)?` / ${topicFor(post)}`:''}{post.protected&&<span className="protected-mark"> / MEMBERS ONLY</span>}</span><h3>{post.title}</h3>{post.summary&&<p>{post.summary}</p>}</div><div className="post-meta"><span>{dateText(post.date)}</span><span>{post.readTime}</span></div><span className="post-arrow">{post.protected?'🔒':'↗'}</span></Link>)}</div>
-          {!matches.length&&<div className="empty-state" id="empty-state"><span>NO SIGNAL FOUND</span><h3>일치하는 기록이 없습니다.</h3><p>검색어나 카테고리, 주제를 바꿔보세요.</p><button type="button" onClick={()=>{update(defaults);search.current?.focus()}}>필터 초기화 ↗</button></div>}
+          {!matches.length&&<div className="empty-state" id="empty-state"><span>NO SIGNAL FOUND</span><h3>일치하는 기록이 없습니다.</h3><p>검색어나 카테고리, 주제, 읽기 권한 필터를 바꿔보세요.</p><button type="button" onClick={()=>{update(defaults);search.current?.focus()}}>필터 초기화 ↗</button></div>}
         </section>
         <section className="connect-section"><div><p className="small-label">02 / CONNECT</p><h2>More than notes<span>.</span></h2><p>프로젝트와 활동의 전체 기록은 포트폴리오에서 확인할 수 있습니다.</p></div><Link href="/" prefetch className="secondary-button">OPEN PORTFOLIO <span>↗</span></Link></section>
       </div>}
