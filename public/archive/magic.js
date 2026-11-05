@@ -13,6 +13,7 @@
   let toastTimer;
   let lastTrail = 0;
   let guardian;
+  let patronusLoginTimer;
   const inertWhileOpen = [];
 
   function spark(x, y, burst = false) {
@@ -81,11 +82,15 @@
   };
   window.castPatronus = () => {
     closeMenu();
+    clearTimeout(patronusLoginTimer);
     const center = { x: innerWidth / 2, y: innerHeight * .47 };
     spark(center.x, center.y, true);
-    announce('Expecto Patronum — a silver guardian answers.');
+    announce('Expecto Patronum — 은빛 수호자가 서재의 문을 엽니다.');
     guardian?.remove();
-    if (reducedMotion.matches) return;
+    if (reducedMotion.matches) {
+      window.openArchiveLogin?.(toggle);
+      return;
+    }
     guardian = document.createElement('div');
     guardian.className = 'patronus-flight';
     guardian.setAttribute('aria-hidden', 'true');
@@ -93,6 +98,7 @@
     document.body.append(guardian);
     const current = guardian;
     setTimeout(() => { current.remove(); if (guardian === current) guardian = null; }, 3150);
+    patronusLoginTimer = setTimeout(() => window.openArchiveLogin?.(toggle), 2600);
   };
   const setLumos = enabled => {
     document.body.classList.toggle('lumos-active', enabled);

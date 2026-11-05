@@ -5,28 +5,32 @@
   dialog.innerHTML = `
     <div class="archive-login__frame">
       <button class="archive-login__close" type="button" aria-label="Close sign in">×</button>
-      <span class="archive-login__eyebrow">✦ &nbsp; THE SEALED DESK &nbsp; ✦</span>
-      <div class="archive-login__seal" aria-hidden="true">C</div>
-      <h2 id="archive-login-title">Enter the archive</h2>
-      <p class="archive-login__intro">개인 서재로 들어가는 문입니다.</p>
+      <span class="archive-login__eyebrow">✦ &nbsp; EXPECTO PATRONUM &nbsp; ✦</span>
+      <div class="archive-login__seal" aria-hidden="true">✧</div>
+      <h2 id="archive-login-title">The Guardian's Gate</h2>
+      <p class="archive-login__intro">은빛 수호자가 서재의 문을 밝혔습니다. 로그인해 주세요.</p>
       <form class="archive-login__form">
         <label for="archive-email">ACCOUNT ID</label>
         <input id="archive-email" name="id" type="text" autocomplete="username" placeholder="Account ID" required>
         <label for="archive-password">PASSWORD</label>
         <div class="archive-login__password"><input id="archive-password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required><button type="button" aria-label="Show password" aria-pressed="false">SHOW</button></div>
-        <button class="archive-login__submit" type="submit"><span>CAST ALOHOMORA</span><span aria-hidden="true">↗</span></button>
+        <button class="archive-login__submit" type="submit"><span>ENTER THE ARCHIVE</span><span aria-hidden="true">↗</span></button>
       </form>
       <p class="archive-login__notice" role="status" aria-live="polite"></p>
     </div>`;
   document.body.append(dialog);
 
   let opener;
+  window.openArchiveLogin = trigger => {
+    if (dialog.open) return;
+    opener = trigger || document.getElementById('spellbook-toggle');
+    dialog.showModal();
+    dialog.querySelector('#archive-email').focus();
+  };
   document.addEventListener('click', event => {
     const trigger = event.target.closest('[data-open-login]');
     if (!trigger) return;
-    opener = trigger;
-    dialog.showModal();
-    dialog.querySelector('#archive-email').focus();
+    window.openArchiveLogin(trigger);
   });
   const close = () => dialog.close();
   dialog.querySelector('.archive-login__close').addEventListener('click', close);
