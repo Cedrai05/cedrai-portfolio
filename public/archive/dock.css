@@ -113,4 +113,20 @@ html .spellbook .spellbook__menu{position:fixed;z-index:2;top:50%;left:50%;right
   .spellbook__charms-list strong{font-size:20px}
   .spellbook__charms-list small{font-size:10px}
 }
+@media(max-width:480px){
+  .house-orb,.spellbook{bottom:calc(9px + env(safe-area-inset-bottom,0px));width:calc((100vw - 32px)/2)}
+  .house-orb{left:10px}
+  .spellbook{right:10px}
+  .house-orb .house-picker__toggle,html .spellbook .spellbook__toggle{width:100%;min-width:0;min-height:46px;gap:6px;padding:5px 8px}
+  .house-orb .house-picker__toggle:before,html .spellbook .spellbook__toggle:before{inset:-3px}
+  .house-picker__hat{width:30px;height:30px;flex-basis:30px}
+  .house-picker__hat svg{width:22px}
+  .house-picker__label small{display:none}
+  .house-orb .house-picker__current{margin-top:0;font-size:clamp(10px,3vw,12px)}
+  .spellbook__wand{width:26px;height:26px;flex-basis:26px;font-size:19px}
+  .spellbook .spellbook__toggle>span:last-child{font-size:0}
+  .spellbook .spellbook__toggle>span:last-child:after{content:'SPELLS';font-size:11px}
+  html .spellbook .spellbook__menu{animation:none;transform:translate(-50%,-50%);filter:none;opacity:1}
+  #app-shell>footer{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
+}
 @media(prefers-reduced-motion:reduce){.spellbook__veil,.spellbook__menu,.spellbook__toggle:after,.house-orb .house-picker__menu,.house-picker__hat{animation:none!important;transition:none!important}}

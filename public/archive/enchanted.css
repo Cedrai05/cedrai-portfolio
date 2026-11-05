@@ -39,6 +39,7 @@ html .spellbook .spellbook__toast{right:clamp(14px,2.8vw,34px);bottom:99px;width
 #journal .post-row:after{content:'';position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--house-accent) 23%,var(--house-paper)),transparent 88%);transform:scaleX(0);transform-origin:left;transition:transform .43s ease}
 #journal .post-row:hover:after,#journal .post-row:focus-visible:after{transform:scaleX(1)}
 @keyframes ink-arrive{from{opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-11px)}to{opacity:1;clip-path:inset(0);transform:translateX(0)}}
+@media(max-width:600px){#journal:not([hidden]) .post-row{animation:none;opacity:1;clip-path:none;transform:none}}
 
 @media(max-width:760px){.enchanted-candles{width:37%;opacity:.72}.floating-candle:nth-child(2),.floating-candle:nth-child(4){display:none}.spellbook__charms-list{grid-template-columns:repeat(2,minmax(0,1fr))}.spellbook__charms-list button{min-height:50px}}
 @media(max-width:420px){.enchanted-candles{width:36%;opacity:.58}.floating-candle{height:66px}.floating-candle i{height:43px}.spellbook__charms-list button[data-spell="patronus"] strong{font-size:18px}}
