@@ -1,0 +1,55 @@
+.spell-effect {
+  --spell-glow: #b8e7d4;
+  position: fixed;
+  inset: 0;
+  width: min(560px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(620px, calc(100dvh - 32px));
+  margin: auto;
+  overflow: hidden;
+  padding: 0 28px 40px;
+  border: 1px solid var(--house-border);
+  color: var(--house-text);
+  background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--spell-glow) 22%, transparent), transparent 48%), linear-gradient(145deg, var(--house-mid), var(--house-deep) 65%);
+  box-shadow: 0 24px 90px #000b, inset 0 0 0 7px var(--house-deep), inset 0 0 0 8px color-mix(in srgb, var(--house-border) 55%, transparent);
+  text-align: center;
+  isolation: isolate;
+}
+.spell-effect::backdrop { background: #020907c9; backdrop-filter: blur(7px); }
+.spell-effect[open] { animation: spell-effect-enter .42s ease-out both; }
+.spell-effect[data-effect="burst"] { --spell-glow: #ffd0ae; }
+.spell-effect[data-effect="shield"] { --spell-glow: #b6dfff; }
+.spell-effect[data-effect="frost"] { --spell-glow: #d4ecff; }
+.spell-effect[data-effect="sparkle"] { --spell-glow: #f9dfa1; }
+.spell-effect[data-effect="mist"] { --spell-glow: #c7c6e9; }
+.spell-effect[data-effect="repair"] { --spell-glow: #c9eaaa; }
+.spell-effect[data-effect="fire"] { --spell-glow: #ffa760; }
+.spell-effect[data-effect="water"] { --spell-glow: #9ee7ef; }
+.spell-effect[data-effect="slice"] { --spell-glow: #f1c3c7; }
+.spell-effect[data-effect="dark"] { --spell-glow: #9fd29b; }
+.spell-effect__close { position: absolute; top: 16px; right: 17px; z-index: 2; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--house-border); border-radius: 50%; background: #0003; color: var(--house-text); font: 27px/1 'Cormorant Garamond', Georgia, serif; cursor: pointer; }
+.spell-effect__close:hover, .spell-effect__close:focus-visible { background: var(--house-mid2); outline: 2px solid var(--house-accent); outline-offset: 2px; }
+.spell-effect__stage { position: relative; display: grid; place-items: center; height: 300px; margin: 10px auto 0; }
+.spell-effect__stage::before { content: ''; position: absolute; width: 240px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, var(--spell-glow) 0, color-mix(in srgb, var(--spell-glow) 55%, transparent) 8%, transparent 64%); filter: blur(15px); opacity: .65; animation: spell-breathe 3s ease-in-out infinite; }
+.spell-effect__ring { position: absolute; width: 190px; aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--spell-glow) 70%, transparent); border-radius: 50%; box-shadow: 0 0 23px color-mix(in srgb, var(--spell-glow) 40%, transparent), inset 0 0 22px color-mix(in srgb, var(--spell-glow) 20%, transparent); animation: spell-ring 2.4s ease-out infinite; }
+.spell-effect__ring:nth-child(2) { animation-delay: -1.2s; }
+.spell-effect__sigil { z-index: 1; color: var(--spell-glow); font: 100px/1 'Cormorant Garamond', Georgia, serif; text-shadow: 0 0 18px var(--spell-glow), 0 0 50px var(--spell-glow); animation: spell-sigil 2.6s ease-in-out infinite; }
+.spell-effect[data-effect="shield"] .spell-effect__sigil { font-size: 90px; }
+.spell-effect[data-effect="shield"] .spell-effect__sigil::after { content: '◈'; }
+.spell-effect[data-effect="shield"] .spell-effect__sigil { font-size: 0; }
+.spell-effect[data-effect="shield"] .spell-effect__sigil::after { font-size: 100px; }
+.spell-effect[data-effect="water"] .spell-effect__sigil::after { content: '◈'; }
+.spell-effect[data-effect="fire"] .spell-effect__sigil { transform: rotate(15deg); }
+.spell-effect__motes { position: absolute; inset: 0; pointer-events: none; }
+.spell-effect__motes i { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; border-radius: 50%; background: var(--spell-glow); box-shadow: 0 0 10px var(--spell-glow); animation: spell-mote 2.4s ease-out var(--delay) infinite; }
+.spell-effect__copy { position: relative; z-index: 1; padding-top: 2px; }
+.spell-effect__copy::before { content: '✦'; display: block; margin-bottom: 10px; color: var(--house-accent); font-size: 18px; }
+.spell-effect__copy h2 { margin: 0; color: var(--house-text); font: italic clamp(43px, 9vw, 72px)/1.02 'Cormorant Garamond', Georgia, serif; overflow-wrap: anywhere; }
+.spell-effect__copy p { max-width: 420px; margin: 18px auto 0; color: var(--house-muted); font: 400 18px/1.65 'SchoolSafetyWizard', serif; }
+@keyframes spell-effect-enter { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes spell-ring { from { opacity: .85; transform: scale(.42) rotate(0); } to { opacity: 0; transform: scale(1.65) rotate(35deg); } }
+@keyframes spell-breathe { 50% { transform: scale(1.2); opacity: .85; } }
+@keyframes spell-sigil { 50% { opacity: .7; filter: blur(2px); } }
+@keyframes spell-mote { from { opacity: 0; transform: rotate(var(--angle)) translateX(5px) scale(.4); } 22% { opacity: 1; } to { opacity: 0; transform: rotate(var(--angle)) translateX(140px) scale(1.2); } }
+@media (max-width: 540px) { .spell-effect { padding: 0 20px 36px; } .spell-effect__stage { height: 250px; } .spell-effect__copy p { font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) { .spell-effect[open], .spell-effect__stage::before, .spell-effect__ring, .spell-effect__sigil, .spell-effect__motes i { animation: none; } .spell-effect__ring { opacity: .55; } .spell-effect__ring:nth-child(2) { transform: scale(.7); } .spell-effect__motes i { display: none; } }

@@ -79,17 +79,31 @@ $$('[data-panel]').forEach(button => button.addEventListener('click', () => open
 $('#spell-form').addEventListener('submit', event => {
   event.preventDefault();
   const input = $('#spell-input');
-  const cast = input.value.trim().toLocaleLowerCase().replace(/[^a-z]/g, '');
-  if (cast === 'expectopatronum') {
+  const cast = window.normalizeArchiveSpell(input.value);
+  if (['expectopatronum', '엑스펙토패트로눔', '익스펙토패트로눔'].includes(cast)) {
     input.value = '';
     window.castPatronus?.();
     return;
   }
-  const destinations = { finite:'home', hominumrevelio:'about', revelio:'about', accio:'work', aparecium:'journal', tempus:'calendar', lumos:'now', alohomora:'contact' };
+  const destinations = {
+    finite:'home', 피니테:'home',
+    hominumrevelio:'about', homenumrevelio:'about', 호메눔리벨리오:'about', revelio:'about', 레벨리오:'about',
+    accio:'work', 아씨오:'work', 아키오:'work',
+    aparecium:'journal', 아파레시움:'journal',
+    tempus:'calendar', 템푸스:'calendar',
+    lumos:'now', 루모스:'now',
+    alohomora:'contact', 알로호모라:'contact'
+  };
   const page = destinations[cast];
   if (!page) {
-    $('#spell-feedback').textContent = '주문을 찾지 못했습니다. 아래 주문 목록에서 골라 보세요.';
-    input.focus();
+    const spell = window.findArchiveSpell(cast);
+    if (spell) {
+      input.value = '';
+      window.showArchiveSpellEffect(spell);
+    } else {
+      $('#spell-feedback').textContent = '찾을 수 없는 주문입니다. 다른 주문을 외워 보세요.';
+      input.focus();
+    }
     return;
   }
   $('#spell-feedback').textContent = `${panelSpells[page][0]} ✦`;

@@ -30,10 +30,12 @@
   <link rel="stylesheet" href="quotes.css?v=quotes-14">
   <link rel="stylesheet" href="field-notes.css?v=notes-1">
   <link rel="stylesheet" href="login.css?v=login-2">
+  <link rel="stylesheet" href="spells.css?v=spell-effects-1">
   <script src="houses.js?v=enchanted-9" defer></script>
   <script src="magic.js?v=patronus-login-1" defer></script>
   <script src="field-notes.js?v=notes-1" defer></script>
   <script src="login.js?v=login-2" defer></script>
+  <script src="spells.js?v=spell-effects-1" defer></script>
   <script src="app.js?v=entrance-spells-1" defer></script>
   <script src="work-portraits.js?v=portraits-10" defer></script>
   <script src="quotes.js?v=quotes-14" defer></script>
@@ -141,12 +143,17 @@
       <div class="spellbook__menu" id="spellbook-menu" role="dialog" aria-label="The book of spells" hidden>
         <button class="spellbook__close" type="button" aria-label="주문서 닫기">×</button>
         <div class="spellbook__heading"><span>THE BOOK OF SPELLS</span><small>한 장을 골라 주문을 외워보세요.</small></div>
-<nav class="spell-nav" id="mobile-nav" aria-label="주문으로 장 이동"><div class="spell-nav__intro"><span>THE INCANTATION INDEX</span><p>주문을 입력하거나 골라서 다음 장을 펼쳐보세요.</p></div><form id="spell-form" class="spell-nav__form"><label for="spell-input">YOUR INCANTATION</label><div><input id="spell-input" type="text" placeholder="Revelio, Accio, Aparecium…" autocomplete="off" spellcheck="false"><button type="submit" aria-label="주문 외우기">↗</button></div><small id="spell-feedback" role="status" aria-live="polite">Revelio · Accio · Aparecium · Tempus · Lumos · Alohomora · Expecto Patronum</small></form><div class="spell-nav__list"><button data-panel="home"><span>00 · THE MAP</span><strong>Finite</strong><small>지도로 돌아가기</small></button><button data-panel="about"><span>01 · PROFILE</span><strong>Revelio</strong><small>숨겨진 소개 펼치기</small></button><button data-panel="work"><span>02 · WORK</span><strong>Accio</strong><small>활동 기록 불러오기</small></button><button data-panel="journal"><span>03 · BLOG / JOURNAL</span><strong>Aparecium</strong><small>기록의 잉크 드러내기</small></button><button data-panel="calendar"><span>04 · CALENDAR</span><strong>Tempus</strong><small>시간의 페이지 넘기기</small></button><button data-panel="now"><span>05 · NOW</span><strong>Lumos</strong><small>지금의 이야기 비추기</small></button><button data-panel="contact"><span>06 · CONTACT</span><strong>Alohomora</strong><small>편지의 길 열기</small></button></div></nav>
+<nav class="spell-nav" id="mobile-nav" aria-label="주문으로 장 이동"><div class="spell-nav__intro"><span>THE INCANTATION INDEX</span><p>주문을 입력하거나 골라서 다음 장을 펼쳐보세요.</p></div><form id="spell-form" class="spell-nav__form"><label for="spell-input">YOUR INCANTATION</label><div><input id="spell-input" type="text" placeholder="Revelio, 레벨리오, Protego…" autocomplete="off" spellcheck="false"><button type="submit" aria-label="주문 외우기">↗</button></div><small id="spell-feedback" role="status" aria-live="polite">영어 또는 한국어로 주문을 입력해 보세요.</small></form><div class="spell-nav__list"><button data-panel="home"><span>00 · THE MAP</span><strong>Finite</strong><small>지도로 돌아가기</small></button><button data-panel="about"><span>01 · PROFILE</span><strong>Revelio</strong><small>숨겨진 소개 펼치기</small></button><button data-panel="work"><span>02 · WORK</span><strong>Accio</strong><small>활동 기록 불러오기</small></button><button data-panel="journal"><span>03 · BLOG / JOURNAL</span><strong>Aparecium</strong><small>기록의 잉크 드러내기</small></button><button data-panel="calendar"><span>04 · CALENDAR</span><strong>Tempus</strong><small>시간의 페이지 넘기기</small></button><button data-panel="now"><span>05 · NOW</span><strong>Lumos</strong><small>지금의 이야기 비추기</small></button><button data-panel="contact"><span>06 · CONTACT</span><strong>Alohomora</strong><small>편지의 길 열기</small></button></div></nav>
         <div class="spellbook__charms"><span>SMALL CHARMS</span><div class="spellbook__charms-list"><button type="button" data-spell="lumos"><strong>Lumos</strong><small>아카이브에 빛 밝히기</small></button><button type="button" data-spell="revelio"><strong>Revelio</strong><small>숨겨진 통로 드러내기</small></button><button type="button" data-spell="accio"><strong>Accio</strong><small>무작위 기록 불러오기</small></button><button type="button" data-spell="patronus" aria-label="Expecto Patronum — 은빛 수호자를 불러 로그인"><strong>Expecto Patronum</strong><small>은빛 수호자 부르기 · 로그인</small></button></div></div>
       </div>
       <p class="spellbook__toast" id="spellbook-toast" role="status" aria-live="polite" hidden></p>
     </div>
   </div>
+  <dialog class="spell-effect" id="spell-effect" aria-labelledby="spell-effect-name" aria-describedby="spell-effect-description">
+    <div class="spell-effect__stage" aria-hidden="true"><span class="spell-effect__ring"></span><span class="spell-effect__ring"></span><span class="spell-effect__sigil">✦</span><span class="spell-effect__motes"></span></div>
+    <button class="spell-effect__close" type="button" aria-label="주문 효과 닫기">×</button>
+    <div class="spell-effect__copy"><h2 id="spell-effect-name"></h2><p id="spell-effect-description" lang="ko"></p></div>
+  </dialog>
   <div class="house-orb" data-house-picker></div>
   <noscript><p class="noscript">Enable JavaScript to open this archive.</p></noscript>
 </body>
