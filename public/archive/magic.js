@@ -9,6 +9,8 @@
   const homeSigil = document.querySelector('.home-sigil');
   const homeMagic = document.getElementById('home-magic');
   let busy = false;
+  let finishCurtain;
+  let curtainTimers = [];
   let summoning = false;
   let toastTimer;
   let lastTrail = 0;
@@ -118,6 +120,17 @@
     remember('cedrai-revelio', enabled);
   };
 
+  const clearCurtainTimers = () => { curtainTimers.forEach(clearTimeout); curtainTimers = []; };
+  const hideCurtain = () => {
+    clearCurtainTimers();
+    gate.classList.remove('is-visible');
+    gate.setAttribute('aria-hidden', 'true');
+    gate.inert = true;
+    busy = false;
+    finishCurtain = null;
+  };
+  document.getElementById('skip-spell-gate').addEventListener('click', () => finishCurtain?.());
+
   window.magicCurtain = (spell, caption, action, leaving = false, scene = 'journal') => {
     if (busy) return;
     if (reducedMotion.matches) { action(); return; }
@@ -127,12 +140,25 @@
     gate.dataset.scene = scene;
     gate.classList.remove('is-visible');
     void gate.offsetWidth;
+    gate.inert = false;
+    gate.setAttribute('aria-hidden', 'false');
     gate.classList.add('is-visible');
-    setTimeout(() => {
+    let acted = false;
+    const runAction = () => {
+      if (acted) return;
+      acted = true;
       action();
-      if (!leaving) setTimeout(() => { gate.classList.remove('is-visible'); busy = false; }, 420);
-    }, 560);
-    if (leaving) setTimeout(() => { gate.classList.remove('is-visible'); busy = false; }, 1800);
+      if (!leaving) curtainTimers.push(setTimeout(hideCurtain, 420));
+    };
+    finishCurtain = () => {
+      const shouldRunAction = !acted;
+      acted = true;
+      document.getElementById('skip-spell-gate').blur();
+      hideCurtain();
+      if (shouldRunAction) action();
+    };
+    curtainTimers.push(setTimeout(runAction, 560));
+    if (leaving) curtainTimers.push(setTimeout(hideCurtain, 1800));
   };
   window.magicNavigate = (url, spell = 'Aparecium', caption = '기록의 다음 장을 펼칩니다', scene = 'journal') => {
     window.magicCurtain(spell, caption, () => location.assign(url), true, scene);
@@ -212,5 +238,5 @@
     document.body.style.setProperty('--wand-x', `${event.clientX}px`);
     document.body.style.setProperty('--wand-y', `${event.clientY}px`);
   }, {passive:true});
-  window.addEventListener('pageshow', () => { gate.classList.remove('is-visible'); busy = false; });
+  window.addEventListener('pageshow', () => { clearCurtainTimers(); hideCurtain(); });
 })();

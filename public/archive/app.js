@@ -26,26 +26,28 @@ let finishMapReturn = null;
 if (document.documentElement.classList.contains('map-loading')) {
   $('#entrance').inert = true;
   let dismissed = false;
-  const dismissMap = (focusEntrance = false) => {
+  const dismissMap = (focusEntrance = false, immediate = false) => {
     if (dismissed) return;
     dismissed = true;
-    mapLoader.classList.add('is-leaving');
-    window.setTimeout(() => {
+    if (!immediate) mapLoader.classList.add('is-leaving');
+    const finish = () => {
       mapLoader.hidden = true;
       document.documentElement.classList.remove('map-loading');
       $('#entrance').inert = false;
       if (focusEntrance) $('#enter-button').focus();
-    }, 640);
+    };
+    if (immediate) finish();
+    else window.setTimeout(finish, 640);
   };
   const mapTimer = window.setTimeout(() => dismissMap(), 3300);
   $('#skip-map-loader').addEventListener('click', () => {
     window.clearTimeout(mapTimer);
-    dismissMap(true);
+    dismissMap(true, true);
   });
 } else {
   mapLoader.hidden = true;
 }
-$('#skip-map-loader').addEventListener('click', () => finishMapReturn?.());
+$('#skip-map-loader').addEventListener('click', () => finishMapReturn?.(true));
 
 function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
 function showPanel(name, push = true) {
@@ -93,20 +95,22 @@ function walkHome(push = true) {
   document.documentElement.classList.add('map-returning');
   $('#app-shell').inert = true;
 
-  function leaveMap() {
+  function leaveMap(immediate = false) {
     if (finished) return;
     finished = true;
     cancelAnimationFrame(frameId);
     finishMapReturn = null;
     showPanel('home', push);
-    mapLoader.classList.add('is-leaving');
-    window.setTimeout(() => {
+    if (!immediate) mapLoader.classList.add('is-leaving');
+    const finish = () => {
       mapLoader.hidden = true;
       mapLoader.classList.remove('is-leaving', 'is-returning');
       document.documentElement.classList.remove('map-returning');
       $('#app-shell').inert = false;
       $('.archive-mark').focus({preventScroll:true});
-    }, 620);
+    };
+    if (immediate) finish();
+    else window.setTimeout(finish, 620);
   }
   finishMapReturn = leaveMap;
 
