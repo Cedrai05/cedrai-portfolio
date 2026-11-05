@@ -1,5 +1,3 @@
-import Link from 'next/link'
-
 export default function Footer({ variant = 'portfolio' }: { variant?: 'portfolio' | 'blog' } = {}) {
   return (
     <footer
@@ -15,7 +13,7 @@ export default function Footer({ variant = 'portfolio' }: { variant?: 'portfolio
       <span style={{ fontSize: '12px', color: 'var(--tx2)', letterSpacing: '.08em' }}>
         © 2026 <span style={{ color: 'var(--acc)' }}>Cédrai</span> — THE HIDDEN ARCHIVE{variant === 'blog' ? ' / FIELD NOTES' : ''}
       </span>
-      {variant === 'blog' && <div className="footer-links"><a href="https://github.com/Cedrai05" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><Link href="/" prefetch>PORTFOLIO ↗</Link></div>}
+      {variant === 'blog' && <div className="footer-links"><a href="https://github.com/Cedrai05" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><a href="/">PORTFOLIO ↗</a></div>}
       <span style={{ fontSize: '12px', color: 'var(--tx2)', letterSpacing: '.08em' }}>
         MISCHIEF MANAGED ✦
       </span>

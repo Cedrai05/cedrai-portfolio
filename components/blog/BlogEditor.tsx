@@ -118,7 +118,7 @@ export default function BlogEditor({draftSlug}:{draftSlug?:string}) {
   }
   const disabled=busy||uploading||Boolean(published)
   return <div className="blog-page"><main className="blog-editor">
-    <Link className="article-back" href="/blog#archive" scroll={false}>← BACK TO ARCHIVE</Link><p className="small-label">WRITE / FIELD NOTES</p><h1>글 작성<span>.</span></h1>
+    <a className="article-back" href="/blog">← BACK TO ARCHIVE</a><p className="small-label">WRITE / FIELD NOTES</p><h1>글 작성<span>.</span></h1>
     {!ready?<p>로그인 확인 중…</p>:!isAdmin?<div className="protected-form"><p>관리자만 글을 작성할 수 있습니다.</p><button type="button" onClick={()=>window.dispatchEvent(new Event('cedrai:open-login'))}>관리자 로그인</button></div>:<>
       <div className="blog-editor__fields"><label>제목<input value={title} maxLength={160} disabled={disabled} onChange={e=>setTitle(e.target.value)} required placeholder="글 제목을 입력해 주세요."/></label>
       <div className="blog-editor__row"><label>카테고리<select value={category} disabled={disabled} onChange={e=>{setCategory(e.target.value);setTopic('')}}>{BLOG_CATEGORIES.map(c=><option key={c}>{c}</option>)}</select></label><label>주제{BLOG_TOPICS[category]?<select value={topic} disabled={disabled} onChange={e=>setTopic(e.target.value)}><option value="">선택 안 함</option>{BLOG_TOPICS[category].map(t=><option key={t}>{t}</option>)}</select>:<input value={topic} disabled={disabled} maxLength={60} onChange={e=>setTopic(e.target.value)} placeholder="선택 사항"/>}</label></div>

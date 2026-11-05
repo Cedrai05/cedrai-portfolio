@@ -1,6 +1,9 @@
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const pages = new Set(['home','about','work','journal','calendar','now','contact']);
+const pagePaths = {home:'/',about:'/about',work:'/projects',journal:'/blog',calendar:'/schedule',now:'/now',contact:'/contact'};
+const pathPages = {...Object.fromEntries(Object.entries(pagePaths).map(([page,path]) => [path,page])), '/work':'work', '/calendar':'calendar'};
+const pageFromLocation = () => pathPages[location.pathname] || (location.pathname === '/' && pages.has(location.hash.slice(1)) ? location.hash.slice(1) : 'home');
 const panelSpells = {
   home: ['Finite', '지도의 발자국을 따라 돌아갑니다'], about: ['Revelio', '숨겨진 소개를 드러냅니다'],
   work: ['Accio', '활동의 흔적을 불러옵니다'], journal: ['Aparecium', '보이지 않던 잉크가 나타납니다'],
@@ -57,7 +60,7 @@ function showPanel(name, push = true) {
     if (button.closest('nav')) button.setAttribute('aria-current', selected ? 'page' : 'false');
   });
   window.closeSpellbook?.();
-  if (push) history.pushState({page}, '', `/#${page}`);
+  if (push) history.pushState({page}, '', pagePaths[page]);
   window.scrollTo({top:0,behavior:'instant'});
 }
 function openPanel(name) {
@@ -111,15 +114,18 @@ $('#spell-form').addEventListener('submit', event => {
   openPanel(page);
 });
 window.addEventListener('popstate', () => {
-  const page = location.hash.slice(1);
-  const [spell, caption] = panelSpells[pages.has(page) ? page : 'home'];
-  window.magicCurtain(spell, caption, () => showPanel(page, false), false, pages.has(page) ? page : 'home');
+  const page = pageFromLocation();
+  const [spell, caption] = panelSpells[page];
+  window.magicCurtain(spell, caption, () => showPanel(page, false), false, page);
 });
-const initialPage = location.hash.slice(1);
+const initialPage = pageFromLocation();
+if (location.pathname === '/' && location.hash && pages.has(location.hash.slice(1))) {
+  history.replaceState({page:initialPage}, '', pagePaths[initialPage]);
+}
 let wasEntered = false;
 try { wasEntered = sessionStorage.getItem('cedrai-entered') === '1'; } catch {}
-if (pages.has(initialPage) || wasEntered) {
-  showPanel(initialPage || 'home', false);
+if (location.pathname !== '/' || location.hash || wasEntered) {
+  showPanel(initialPage, false);
   requestAnimationFrame(() => window.scrollTo({top:0,behavior:'instant'}));
   window.addEventListener('load', () => window.setTimeout(() => window.scrollTo({top:0,behavior:'instant'}), 0), {once:true});
 }

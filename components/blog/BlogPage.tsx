@@ -103,7 +103,7 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
     <a className="skip-link" href="#blog-main">본문으로 건너뛰기</a>
 
     <main id="blog-main">
-      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} /> : <article className="article-view"><Link className="article-back" href="/blog#archive" scroll={false}>← BACK TO ARCHIVE</Link><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
+      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} /> : <article className="article-view"><a className="article-back" href="/blog">← BACK TO ARCHIVE</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
         <BlogHero />
         {isAdmin && <div className="blog-admin-bar"><Link className="primary-button" href="/blog/write">＋ 글 작성</Link><span>관리자로 로그인 중입니다.</span></div>}
         <section className="archive-section" id="archive">
@@ -115,7 +115,7 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
           <div id="post-list" className="post-list">{matches.map((post,index)=><Link scroll={false} prefetch={false} key={post.slug} className="post-row" href={postHref(post)} onClick={saveArchive} aria-label={`${post.title} ${post.protected?'비밀글 열기':'읽기'}`}><span className="post-number">{String(index+1).padStart(2,'0')}</span><div className="post-content"><span className="post-category">↳ {post.category.toUpperCase()}{topicFor(post)?` / ${topicFor(post)}`:''}{post.protected&&<span className="protected-mark"> / MEMBERS ONLY</span>}</span><h3>{post.title}</h3>{post.summary&&<p>{post.summary}</p>}</div><div className="post-meta"><span>{dateText(post.date)}</span><span>{post.readTime}</span></div><span className="post-arrow">{post.protected?'🔒':'↗'}</span></Link>)}</div>
           {!matches.length&&<div className="empty-state" id="empty-state"><span>NO NOTE FOUND</span><h3>일치하는 기록이 없습니다.</h3><p>검색어나 카테고리, 주제, 공개 범위 필터를 바꿔보세요.</p><button type="button" onClick={()=>{update(defaults);search.current?.focus()}}>필터 초기화 ↗</button></div>}
         </section>
-        <section className="connect-section"><div><p className="small-label">THE NEXT CHAPTER</p><h2>Follow the clues<span>.</span></h2><p>프로젝트와 활동의 전체 기록은 포트폴리오에서 확인할 수 있습니다.</p></div><Link href="/#home" prefetch className="secondary-button">BACK TO THE MAP <span>↗</span></Link></section>
+        <section className="connect-section"><div><p className="small-label">THE NEXT CHAPTER</p><h2>Follow the clues<span>.</span></h2><p>프로젝트와 활동의 전체 기록은 포트폴리오에서 확인할 수 있습니다.</p></div><a href="/" className="secondary-button">BACK TO THE MAP <span>↗</span></a></section>
       </div>}
     </main>
     <Footer variant="blog" />

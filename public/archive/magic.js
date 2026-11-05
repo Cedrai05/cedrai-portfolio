@@ -153,7 +153,7 @@
       const post = choices[Math.floor(Math.random() * choices.length)];
       window.magicNavigate(`/blog?post=${encodeURIComponent(post.number || post.slug.replace(/^tistory-/, ""))}`, 'Accio', '기록 한 장을 불러옵니다', 'journal');
     } catch {
-      window.magicNavigate('/#journal', 'Accio', '기록의 잉크를 드러냅니다', 'journal');
+      window.magicNavigate('/blog', 'Accio', '기록의 잉크를 드러냅니다', 'journal');
     }
     setTimeout(() => { summoning = false; }, 2000);
   }

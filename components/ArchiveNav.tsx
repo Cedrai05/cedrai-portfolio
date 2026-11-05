@@ -6,13 +6,13 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 
 const chapters = [
-  { href: '/#home', label: 'THE MAP', number: '00' },
-  { href: '/#about', label: 'THE SEEKER', number: '01' },
-  { href: '/#work', label: 'FIELDWORK', number: '02' },
-  { href: '/#journal', label: 'FIELD NOTES', number: '03' },
-  { href: '/#calendar', label: 'THE ALMANAC', number: '04' },
-  { href: '/#now', label: 'NOW', number: '05' },
-  { href: '/#contact', label: 'SEND AN OWL', number: '06' },
+  { href: '/', label: 'THE MAP', number: '00' },
+  { href: '/about', label: 'THE SEEKER', number: '01' },
+  { href: '/projects', label: 'FIELDWORK', number: '02' },
+  { href: '/blog', label: 'FIELD NOTES', number: '03' },
+  { href: '/schedule', label: 'THE ALMANAC', number: '04' },
+  { href: '/now', label: 'NOW', number: '05' },
+  { href: '/contact', label: 'SEND AN OWL', number: '06' },
 ]
 const houses = [
   { id: 'slytherin', label: 'SLYTHERIN', mark: 'S' },
@@ -64,9 +64,9 @@ export default function ArchiveNav() {
 
   return <>
     <header className="archive-site-header">
-      <Link className="archive-site-brand" href="/#home"><span className="archive-site-brand__seal">C</span><span>CÉDRAI<small>THE HIDDEN ARCHIVE</small></span></Link>
+      <a className="archive-site-brand" href="/"><span className="archive-site-brand__seal">C</span><span>CÉDRAI<small>THE HIDDEN ARCHIVE</small></span></a>
       <nav className="archive-site-links" aria-label="아카이브 챕터">
-        {chapters.map(chapter => <Link key={chapter.number} href={chapter.href}><span>{chapter.number}</span>{chapter.label}</Link>)}
+        {chapters.map(chapter => <a key={chapter.number} href={chapter.href}><span>{chapter.number}</span>{chapter.label}</a>)}
       </nav>
       <div className="archive-site-actions">
         <button type="button" className="archive-site-house" onClick={() => { setHouseOpen(value => !value); setMenuOpen(false) }} aria-expanded={houseOpen} aria-label="기숙사 선택"><span>✦</span> {houses.find(item => item.id === house)?.label}</button>
@@ -75,7 +75,7 @@ export default function ArchiveNav() {
       </div>
     </header>
     {houseOpen && <div className="archive-house-menu" role="group" aria-label="기숙사 선택">{houses.map(item => <button key={item.id} type="button" onClick={() => chooseHouse(item.id)} aria-pressed={house === item.id}><span>{item.mark}</span><strong>{item.label}</strong></button>)}</div>}
-    {menuOpen && <nav className="archive-mobile-menu" aria-label="아카이브 챕터">{chapters.map(chapter => <Link key={chapter.number} href={chapter.href} onClick={() => setMenuOpen(false)}><span>{chapter.number} /</span>{chapter.label} <b>↗</b></Link>)}<Link href="/projects" onClick={() => setMenuOpen(false)}>PROJECT RECORDS ↗</Link><Link href="/blog" onClick={() => setMenuOpen(false)}>FULL BLOG ↗</Link><Link href="/schedule" onClick={() => setMenuOpen(false)}>FULL SCHEDULE ↗</Link></nav>}
+    {menuOpen && <nav className="archive-mobile-menu" aria-label="아카이브 챕터">{chapters.map(chapter => <a key={chapter.number} href={chapter.href} onClick={() => setMenuOpen(false)}><span>{chapter.number} /</span>{chapter.label} <b>↗</b></a>)}<Link href="/projects/records" onClick={() => setMenuOpen(false)}>PROJECT RECORDS ↗</Link><Link href="/blog/entries" onClick={() => setMenuOpen(false)}>FULL BLOG ↗</Link><Link href="/schedule/entries" onClick={() => setMenuOpen(false)}>FULL SCHEDULE ↗</Link></nav>}
     {loginOpen && !isAdmin && !isMember && <div className="archive-auth-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setLoginOpen(false) }}><div className="archive-auth-panel" role="dialog" aria-modal="true" aria-label="아카이브 로그인"><button type="button" className="archive-auth-close" onClick={() => setLoginOpen(false)} aria-label="닫기">×</button><span>✦ &nbsp; THE SEALED DESK</span><h2>Enter the archive</h2><p>개인 서재의 문을 엽니다.</p><form onSubmit={submitLogin}><label htmlFor="archive-account-id">ACCOUNT ID</label><input id="archive-account-id" value={id} onChange={event => setId(event.target.value)} autoComplete="username" required /><label htmlFor="archive-account-password">PASSWORD</label><input id="archive-account-password" type="password" value={password} onChange={event => setPassword(event.target.value)} autoComplete="current-password" required />{error && <p role="alert">{error}</p>}<button type="submit" disabled={busy}>{busy ? 'OPENING…' : 'CAST ALOHOMORA ↗'}</button></form></div></div>}
   </>
 }
