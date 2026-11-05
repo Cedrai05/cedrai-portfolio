@@ -364,3 +364,30 @@
 .blog-page .archive-reading-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:1.5rem}.blog-page .archive-reading-actions button{border:1px solid var(--bd);background:transparent;color:var(--acc);padding:9px 15px;font:600 14px 'Cormorant Garamond',Georgia,serif;letter-spacing:.1em}.blog-page .archive-reading-actions button:hover,.blog-page .archive-reading-actions button[aria-pressed='true']{background:var(--bg3)}
 /* The complete live catalogue uses the manuscript treatment from the map. */
 .archive-route-content .blog-page .hero{display:none!important}.archive-route-content .blog-page .archive-section{padding-top:12px!important}.archive-route-content .blog-page .section-kicker{display:none}.archive-route-content .blog-page .section-heading{margin:0 0 25px!important}.archive-route-content .blog-page .section-heading h2{font:500 clamp(31px,4vw,48px) 'Cormorant Garamond',Georgia,serif!important}.archive-route-content .blog-page .section-heading h2 span{display:none}.archive-route-content .blog-page .archive-toolbar,.archive-route-content .blog-page .topic-toolbar,.archive-route-content .blog-page .result-line,.archive-route-content .blog-page .post-list{background:#efe8d3;color:#25442c;padding-inline:clamp(15px,3vw,35px)}.archive-route-content .blog-page .archive-toolbar{padding-top:24px}.archive-route-content .blog-page .post-list{padding-bottom:25px;box-shadow:12px 18px 35px #0003}.archive-route-content .blog-page .category-filters button,.archive-route-content .blog-page .topic-filters button,.archive-route-content .blog-page .access-filter__trigger{border-radius:0!important;border-color:#a3b29c!important;color:#37523d!important;background:transparent!important}.archive-route-content .blog-page .category-filters button[aria-pressed=true],.archive-route-content .blog-page .topic-filters button[aria-pressed=true]{background:#25442c!important;color:#f4eedf!important}.archive-route-content .blog-page .post-row{border-bottom:1px solid #bdc7b6!important;background:transparent!important;color:#25442c!important;padding:21px 4px!important}.archive-route-content .blog-page .post-row:hover{background:#dfe8d9!important;padding-left:15px!important}.archive-route-content .blog-page .post-row :is(h3,p,.post-category,.post-meta,.post-number,.post-arrow){color:#25442c!important}.archive-route-content .blog-page .post-content h3{font-family:'SchoolSafetyWizard',serif!important}.archive-route-content .blog-page .search-box{background:#f7f1e2!important;border-color:#9caa94!important;color:#25442c!important}.archive-route-content .blog-page .search-box input{color:#25442c!important}.archive-route-content .blog-page .result-line{border-top:1px solid #bdc7b6}.archive-route-content .blog-page .connect-section{background:transparent!important}.archive-route-content .blog-page .connect-section h2{font-family:'Cormorant Garamond',Georgia,serif!important}
+
+/* Keep category, search, topics and results on one continuous parchment sheet. */
+.archive-route-content .blog-page .archive-toolbar {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: 18px 20px;
+  margin-top: 28px; padding: 24px clamp(15px, 3vw, 35px) 22px;
+}
+.archive-route-content .blog-page .category-filters { flex: 1 1 570px; min-width: 0; align-items: flex-start; }
+.archive-route-content .blog-page .archive-search-controls { flex: 0 1 300px; min-width: 220px; max-width: 100%; align-self: flex-start; margin-left: auto; }
+.archive-route-content .blog-page .topic-toolbar {
+  align-items: flex-start; gap: 16px; margin-top: 0;
+  padding: 18px clamp(15px, 3vw, 35px) 20px;
+  border-top: 1px solid #bdc7b6;
+}
+.archive-route-content .blog-page .topic-label { padding-top: 9px; color: #37523d; font: 600 13px 'Cormorant Garamond', Georgia, serif; letter-spacing: .1em; }
+.archive-route-content .blog-page .topic-filters { min-width: 0; }
+.archive-route-content .blog-page .result-line { padding-top: 17px; padding-bottom: 17px; }
+.archive-route-content .blog-page .category-filters button, .archive-route-content .blog-page .topic-filters button { white-space: nowrap; }
+@media (max-width: 1000px) {
+  .archive-route-content .blog-page .archive-toolbar { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .archive-route-content .blog-page .archive-search-controls { width: 100%; max-width: none; min-width: 0; margin-left: 0; }
+  .archive-route-content .blog-page .archive-search-controls .search-box { flex: 1; min-width: 0; width: auto; }
+}
+@media (max-width: 620px) {
+  .archive-route-content .blog-page .archive-toolbar { padding-bottom: 20px; }
+  .archive-route-content .blog-page .topic-toolbar { display: block; }
+  .archive-route-content .blog-page .topic-label { display: block; padding: 0 0 12px; }
+}
