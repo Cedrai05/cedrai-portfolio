@@ -22,7 +22,7 @@
       if (location.pathname === '/' && !location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('map-loading');
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=journal-incantation-1">
+  <link rel="stylesheet" href="style.css?v=map-return-1">
   <link rel="stylesheet" href="houses.css?v=enchanted-9">
   <link rel="stylesheet" href="dock.css?v=enchanted-9">
   <link rel="stylesheet" href="enchanted.css?v=enchanted-9">
@@ -37,7 +37,7 @@
   <script src="login.js?v=login-2" defer></script>
   <script src="spell-archive.js?v=complete-1" defer></script>
   <script src="spells.js?v=complete-1" defer></script>
-  <script src="app.js?v=chapter-paths-2" defer></script>
+  <script src="app.js?v=map-return-1" defer></script>
   <script src="work-portraits.js?v=portraits-10" defer></script>
   <script src="quotes.js?v=quotes-random-2" defer></script>
 </head>
@@ -75,6 +75,11 @@
       </g>
       <g class="map-loader__steps map-loader__mobile-steps">
         <use href="#map-step" x="470" y="558" style="--step:1.30s"/><use href="#map-step" x="500" y="547" style="--step:1.47s"/><use href="#map-step" x="530" y="537" style="--step:1.64s"/><use href="#map-step" x="560" y="525" style="--step:1.81s"/><use href="#map-step" x="590" y="514" style="--step:1.98s"/>
+      </g>
+      <g class="map-loader__return-trail" aria-hidden="true">
+        <path class="map-loader__return-route" d="M850 540 C790 512 787 452 731 445 S646 480 614 421 S576 346 520 339"/>
+        <g class="map-loader__return-steps"></g>
+        <circle class="map-loader__return-marker" r="9"/>
       </g>
     </svg>
     <div class="map-loader__inscription" aria-hidden="true"><strong>Revelio</strong></div>

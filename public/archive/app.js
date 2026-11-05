@@ -21,6 +21,7 @@ const displayTitle = post => post.title;
 const displayCategory = category => categoryLabels[category] || category;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const mapLoader = $('#map-loader');
+let finishMapReturn = null;
 
 if (document.documentElement.classList.contains('map-loading')) {
   $('#entrance').inert = true;
@@ -44,6 +45,7 @@ if (document.documentElement.classList.contains('map-loading')) {
 } else {
   mapLoader.hidden = true;
 }
+$('#skip-map-loader').addEventListener('click', () => finishMapReturn?.());
 
 function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
 function showPanel(name, push = true) {
@@ -63,12 +65,83 @@ function showPanel(name, push = true) {
   if (push) history.pushState({page}, '', pagePaths[page]);
   window.scrollTo({top:0,behavior:'instant'});
 }
+function walkHome(push = true) {
+  if (finishMapReturn) return;
+  if (reducedMotion.matches) { showPanel('home', push); return; }
+
+  const route = mapLoader.querySelector('.map-loader__return-route');
+  const trail = mapLoader.querySelector('.map-loader__return-steps');
+  const marker = mapLoader.querySelector('.map-loader__return-marker');
+  const length = route.getTotalLength();
+  const stepCount = 12;
+  const duration = 2200;
+  let frameId = 0;
+  let stepsPlaced = 0;
+  let started;
+  let finished = false;
+
+  trail.replaceChildren();
+  const start = route.getPointAtLength(0);
+  marker.setAttribute('cx', start.x);
+  marker.setAttribute('cy', start.y);
+  mapLoader.querySelector('.map-loader__inscription strong').textContent = 'Finite';
+  mapLoader.setAttribute('aria-label', 'Finite — returning to the map');
+  $('#skip-map-loader').firstChild.textContent = 'SKIP WALK ';
+  mapLoader.classList.remove('is-leaving');
+  mapLoader.classList.add('is-returning');
+  mapLoader.hidden = false;
+  document.documentElement.classList.add('map-returning');
+  $('#app-shell').inert = true;
+
+  function leaveMap() {
+    if (finished) return;
+    finished = true;
+    cancelAnimationFrame(frameId);
+    finishMapReturn = null;
+    showPanel('home', push);
+    mapLoader.classList.add('is-leaving');
+    window.setTimeout(() => {
+      mapLoader.hidden = true;
+      mapLoader.classList.remove('is-leaving', 'is-returning');
+      document.documentElement.classList.remove('map-returning');
+      $('#app-shell').inert = false;
+      $('.archive-mark').focus({preventScroll:true});
+    }, 620);
+  }
+  finishMapReturn = leaveMap;
+
+  function animate(time) {
+    if (finished) return;
+    started ??= time;
+    const progress = Math.min((time - started) / duration, 1);
+    const position = route.getPointAtLength(length * progress);
+    marker.setAttribute('cx', position.x);
+    marker.setAttribute('cy', position.y);
+    while (stepsPlaced < stepCount && progress >= (stepsPlaced + 1) / (stepCount + 1) + .035) {
+      const distance = length * (stepsPlaced + 1) / (stepCount + 1);
+      const point = route.getPointAtLength(distance);
+      const next = route.getPointAtLength(Math.min(length, distance + 2));
+      const angle = Math.atan2(next.y - point.y, next.x - point.x) * 180 / Math.PI + 90;
+      const footprint = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+      footprint.setAttribute('href', '#map-step');
+      footprint.setAttribute('x', point.x);
+      footprint.setAttribute('y', point.y);
+      footprint.setAttribute('transform', `rotate(${angle} ${point.x} ${point.y})`);
+      trail.append(footprint);
+      stepsPlaced++;
+    }
+    if (progress < 1) frameId = requestAnimationFrame(animate);
+    else window.setTimeout(leaveMap, 180);
+  }
+  frameId = requestAnimationFrame(animate);
+}
 function openPanel(name) {
   const page = pages.has(name) ? name : 'home';
   if ($(`.panel[data-page="${page}"]`)?.hidden === false) {
     window.closeSpellbook?.();
     return;
   }
+  if (page === 'home') { walkHome(); return; }
   const [spell, caption] = panelSpells[page];
   window.magicCurtain(spell, caption, () => showPanel(page), false, page);
 }
@@ -115,6 +188,7 @@ $('#spell-form').addEventListener('submit', event => {
 });
 window.addEventListener('popstate', () => {
   const page = pageFromLocation();
+  if (page === 'home') { walkHome(false); return; }
   const [spell, caption] = panelSpells[page];
   window.magicCurtain(spell, caption, () => showPanel(page, false), false, page);
 });

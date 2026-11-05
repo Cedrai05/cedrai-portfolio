@@ -58,6 +58,24 @@ html.map-loading .map-loader{display:grid}
 @keyframes map-progress{to{transform:scaleX(1)}}
 @media(max-width:760px){.map-loader__drawing{width:960px;max-width:none;left:50%;transform:translateX(-50%)}.map-loader__mobile-steps{display:block}.map-loader__inscription{min-width:100%;padding:20px 24px 30px}.map-loader__inscription strong{font-size:clamp(48px,13vw,78px)}.map-loader__progress{bottom:82px}.map-loader__skip{right:50%;bottom:25px;transform:translateX(50%)}}
 
+/* The path home leaves footprints behind the moving light on the map. */
+html.map-returning,html.map-returning body{overflow:hidden}
+html.map-returning .map-loader{display:grid}
+.map-loader__return-trail{display:none}
+.map-loader.is-returning .map-loader__folds{animation:none;opacity:1}
+.map-loader.is-returning .map-loader__lines path{animation:none;stroke-dashoffset:0}
+.map-loader.is-returning .map-loader__steps:not(.map-loader__return-steps){display:none}
+.map-loader.is-returning .map-loader__return-trail{display:block}
+.map-loader.is-returning .map-loader__return-route{fill:none;stroke:#966d3e;stroke-width:2;stroke-dasharray:3 9;opacity:.35}
+.map-loader__return-steps use{fill:#513725;stroke:none;opacity:0;animation:return-footprint .28s ease-out forwards}
+.map-loader__return-marker{fill:#f8e7ad;stroke:#6c4b2e;stroke-width:2;filter:drop-shadow(0 0 8px #b87630) drop-shadow(0 0 18px #fff3c9)}
+.map-loader.is-returning .map-loader__inscription{position:absolute;top:9%;left:50%;min-width:0;padding:0;transform:translateX(-50%);background:none;animation:none;opacity:1}
+.map-loader.is-returning .map-loader__inscription strong{font-size:clamp(46px,7vw,74px)}
+.map-loader.is-returning .map-loader__progress{display:none}
+.map-loader.is-returning .map-loader__skip{animation:none;opacity:1}
+@keyframes return-footprint{from{opacity:0;filter:blur(4px)}to{opacity:.88;filter:blur(0)}}
+@media(max-width:760px){.map-loader.is-returning .map-loader__inscription{top:13%}}
+
 /* An illuminated Slytherin archive: the rooms, notes, and spellbook share one visual language. */
 :root{--arcane-gold:#c7b17a;--arcane-glow:#b7dbb8}
 #app-shell{position:relative;isolation:isolate;background:radial-gradient(ellipse at 85% 8%,#214b36 0%,transparent 38%),radial-gradient(ellipse at 8% 85%,#143624 0%,transparent 40%),#07130f}
