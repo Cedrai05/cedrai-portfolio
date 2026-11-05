@@ -192,3 +192,10 @@ body.lumos-active::after{content:'';position:fixed;inset:0;z-index:40;pointer-ev
 .journal-topic:hover,.journal-topic.active{background:var(--house-ink);border-color:var(--house-ink);color:var(--house-paper)}
 .journal-topic:hover span,.journal-topic.active span{color:var(--house-paper)}
 @media(max-width:760px){.journal-topics{display:block}.journal-topics__label{display:block;padding:0 0 10px}}
+
+.home-intro h1[lang='en']{font:500 clamp(66px,7vw,108px)/.88 'Cormorant Garamond',Georgia,serif;letter-spacing:-.045em}
+.home-intro h1[lang='en'] em{font-style:italic;font-weight:400}
+.home-intro__copy>p.home-oath{display:grid;gap:8px;max-width:690px;margin:0;color:var(--house-text)}
+.home-oath span:first-child{font:italic 500 clamp(26px,2.6vw,36px)/1.15 'Cormorant Garamond',Georgia,serif}
+.home-oath span:last-child{font:400 clamp(15px,1.5vw,19px)/1.7 'SchoolSafetyWizard',serif}
+@media(max-width:760px){.home-intro h1[lang='en']{font-size:clamp(60px,12vw,85px)}.home-oath span:first-child{font-size:clamp(25px,6vw,33px)}}
