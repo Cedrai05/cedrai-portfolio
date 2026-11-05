@@ -46,6 +46,116 @@
       english: 'I think I can tell who the wrong sort are for myself, thanks.',
       credit: 'HARRY POTTER · PHILOSOPHER’S STONE',
       source: 'https://www.harrypotter.com/features/when-harry-potter-got-it-right'
+    },
+    {
+      english: 'Mischief managed.',
+      credit: 'THE MARAUDER’S MAP · PRISONER OF AZKABAN',
+      source: 'https://www.harrypotter.com/fact-file/objects/the-marauders-map'
+    },
+    {
+      english: 'Harry – yer a wizard.',
+      credit: 'RUBEUS HAGRID · PHILOSOPHER’S STONE',
+      source: 'https://www.harrypotter.com/quiz/the-quick-quotes-quiz'
+    },
+    {
+      english: 'Always.',
+      credit: 'SEVERUS SNAPE · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/always-why-the-princes-tale-is-the-most-emotional-chapter'
+    },
+    {
+      english: 'Anything’s possible if you’ve got enough nerve.',
+      credit: 'GINNY WEASLEY · ORDER OF THE PHOENIX',
+      source: 'https://www.harrypotter.com/quiz/the-quick-quotes-quiz'
+    },
+    {
+      english: 'Wit beyond measure is man’s greatest treasure.',
+      credit: 'LUNA LOVEGOOD · ORDER OF THE PHOENIX',
+      source: 'https://www.harrypotter.com/features/seven-reasons-to-love-luna-lovegood'
+    },
+    {
+      english: 'Don’t worry. You’re just as sane as I am.',
+      credit: 'LUNA LOVEGOOD · ORDER OF THE PHOENIX',
+      source: 'https://www.harrypotter.com/features/seven-reasons-to-love-luna-lovegood'
+    },
+    {
+      english: 'Dobby is free.',
+      credit: 'DOBBY · CHAMBER OF SECRETS',
+      source: 'https://www.harrypotter.com/features/9-times-we-really-wanted-to-give-these-harry-potter-characters-a-hug'
+    },
+    {
+      english: 'Have a biscuit, Potter.',
+      credit: 'MINERVA MCGONAGALL · ORDER OF THE PHOENIX',
+      source: 'https://www.harrypotter.com/features/9-times-we-really-wanted-to-give-these-harry-potter-characters-a-hug'
+    },
+    {
+      english: 'Constant vigilance!',
+      credit: '“MAD-EYE” MOODY · GOBLET OF FIRE',
+      source: 'https://www.harrypotter.com/features/ranked-the-defence-against-the-dark-arts-teachers'
+    },
+    {
+      english: 'Fear of a name increases fear of the thing itself.',
+      credit: 'ALBUS DUMBLEDORE · PHILOSOPHER’S STONE',
+      source: 'https://www.harrypotter.com/features/important-pieces-of-dialogue-from-philosophers-stone'
+    },
+    {
+      english: 'Curiosity is not a sin.',
+      credit: 'ALBUS DUMBLEDORE · GOBLET OF FIRE',
+      source: 'https://www.harrypotter.com/features/pearls-of-wisdom-from-professor-dumbledore'
+    },
+    {
+      english: 'We’ve all got both light and dark inside us.',
+      credit: 'SIRIUS BLACK · ORDER OF THE PHOENIX FILM',
+      source: 'https://www.harrypotter.com/features/a-complex-man-exploring-the-light-and-shade-of-severus-snape'
+    },
+    {
+      english: 'I am not worried, Harry… I am with you.',
+      credit: 'ALBUS DUMBLEDORE · HALF-BLOOD PRINCE',
+      source: 'https://www.harrypotter.com/news/15-exciting-things-we-learnt-in-the-back-to-hogwarts-showcase-2025'
+    },
+    {
+      english: 'I’m worth twelve of you, Malfoy.',
+      credit: 'NEVILLE LONGBOTTOM · PHILOSOPHER’S STONE',
+      source: 'https://www.harrypotter.com/features/how-harry-potter-and-the-philosophers-stone-tackled-bullying'
+    },
+    {
+      english: 'Until the very end.',
+      credit: 'JAMES POTTER · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/everything-we-know-about-the-marauders'
+    },
+    {
+      english: 'Are you a wizard, or what?',
+      credit: 'HERMIONE GRANGER · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/10-of-hermiones-funniest-moments'
+    },
+    {
+      english: 'I’m hoping to do some good in the world!',
+      credit: 'HERMIONE GRANGER · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/10-of-hermiones-funniest-moments'
+    },
+    {
+      english: 'The Ministry has fallen. Scrimgeour is dead. They are coming.',
+      credit: 'KINGSLEY SHACKLEBOLT · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/what-is-a-patronus'
+    },
+    {
+      english: 'You see what you expect to see, Severus.',
+      credit: 'ALBUS DUMBLEDORE · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/a-complex-man-exploring-the-light-and-shade-of-severus-snape'
+    },
+    {
+      english: 'There’s no need to call me “sir”, Professor.',
+      credit: 'HARRY POTTER · HALF-BLOOD PRINCE',
+      source: 'https://www.harrypotter.com/features/sassy-comebacks-harry-potter'
+    },
+    {
+      english: 'We are part of you. Invisible to anyone else.',
+      credit: 'SIRIUS BLACK · DEATHLY HALLOWS',
+      source: 'https://www.harrypotter.com/features/everything-we-know-about-the-marauders'
+    },
+    {
+      english: 'If there is one thing Voldemort cannot understand, it is love.',
+      credit: 'ALBUS DUMBLEDORE · PHILOSOPHER’S STONE',
+      source: 'https://www.harrypotter.com/features/how-harry-potter-and-the-philosophers-stone-tackled-bullying'
     }
   ];
 
