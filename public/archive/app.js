@@ -86,8 +86,8 @@ $('#spell-form').addEventListener('submit', event => {
     return;
   }
   const destinations = {
-    finite:'home', 피니테:'home',
-    hominumrevelio:'about', homenumrevelio:'about', 호메눔리벨리오:'about', revelio:'about', 레벨리오:'about',
+    finite:'home', 피니테:'home', 피니트:'home',
+    hominumrevelio:'about', homenumrevelio:'about', 호메눔리벨리오:'about', revelio:'about', 레벨리오:'about', 리벨리오:'about',
     accio:'work', 아씨오:'work', 아키오:'work',
     aparecium:'journal', 아파레시움:'journal',
     tempus:'calendar', 템푸스:'calendar',

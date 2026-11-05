@@ -29,6 +29,10 @@
     const spell = {name, description, effect};
     [name, ...aliases].forEach(alias => index.set(normalize(alias), spell));
   });
+  (window.archiveSpellEntries || []).forEach(([name, korean, description, effect, ...aliases]) => {
+    const spell = index.get(normalize(name)) || {name, description, effect};
+    [name, korean, ...aliases].forEach(alias => index.set(normalize(alias), spell));
+  });
 
   const dialog = document.getElementById('spell-effect');
   const motes = dialog.querySelector('.spell-effect__motes');
@@ -48,6 +52,7 @@
   window.showArchiveSpellEffect = spell => {
     window.closeSpellbook?.();
     dialog.dataset.effect = spell.effect;
+    dialog.classList.toggle('spell-effect--long', spell.name.length > 24);
     dialog.querySelector('#spell-effect-name').textContent = spell.name;
     dialog.querySelector('#spell-effect-description').textContent = spell.description;
     dialog.showModal();

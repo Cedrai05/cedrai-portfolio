@@ -46,10 +46,12 @@
 .spell-effect__copy::before { content: '✦'; display: block; margin-bottom: 10px; color: var(--house-accent); font-size: 18px; }
 .spell-effect__copy h2 { margin: 0; color: var(--house-text); font: italic clamp(43px, 9vw, 72px)/1.02 'Cormorant Garamond', Georgia, serif; overflow-wrap: anywhere; }
 .spell-effect__copy p { max-width: 420px; margin: 18px auto 0; color: var(--house-muted); font: 400 18px/1.65 'SchoolSafetyWizard', serif; }
+.spell-effect--long .spell-effect__stage { height: 245px; }
+.spell-effect--long .spell-effect__copy h2 { font-size: clamp(30px, 6vw, 50px); }
 @keyframes spell-effect-enter { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes spell-ring { from { opacity: .85; transform: scale(.42) rotate(0); } to { opacity: 0; transform: scale(1.65) rotate(35deg); } }
 @keyframes spell-breathe { 50% { transform: scale(1.2); opacity: .85; } }
 @keyframes spell-sigil { 50% { opacity: .7; filter: blur(2px); } }
 @keyframes spell-mote { from { opacity: 0; transform: rotate(var(--angle)) translateX(5px) scale(.4); } 22% { opacity: 1; } to { opacity: 0; transform: rotate(var(--angle)) translateX(140px) scale(1.2); } }
-@media (max-width: 540px) { .spell-effect { padding: 0 20px 36px; } .spell-effect__stage { height: 250px; } .spell-effect__copy p { font-size: 16px; } }
+@media (max-width: 540px) { .spell-effect { padding: 0 20px 36px; } .spell-effect__stage { height: 250px; } .spell-effect--long .spell-effect__stage { height: 205px; } .spell-effect__copy p { font-size: 16px; } }
 @media (prefers-reduced-motion: reduce) { .spell-effect[open], .spell-effect__stage::before, .spell-effect__ring, .spell-effect__sigil, .spell-effect__motes i { animation: none; } .spell-effect__ring { opacity: .55; } .spell-effect__ring:nth-child(2) { transform: scale(.7); } .spell-effect__motes i { display: none; } }
