@@ -1,0 +1,116 @@
+/* The archive tools float like enchanted objects, leaving the pages without a top bar. */
+#app-shell{position:relative}
+.app-main{padding-top:62px;min-height:100svh}
+.archive-mark{position:absolute;z-index:2;top:17px;left:max(5%,calc((100vw - 1330px)/2 + 5%));display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;color:var(--house-text);text-align:left;font:600 16px 'Cormorant Garamond',Georgia,serif;letter-spacing:.19em;cursor:pointer}
+.archive-mark small{display:block;margin-top:-2px;color:var(--house-muted);font:600 8px 'Cormorant Garamond',Georgia,serif;letter-spacing:.2em}
+.archive-mark__seal{display:grid;place-items:center;width:33px;height:33px;border:1px solid color-mix(in srgb,var(--house-accent) 60%,transparent);border-radius:50%;color:var(--house-accent);font:500 22px 'Cormorant Garamond',serif;box-shadow:0 0 13px color-mix(in srgb,var(--house-accent) 19%,transparent)}
+.archive-mark:hover .archive-mark__seal,.archive-mark:focus-visible .archive-mark__seal{box-shadow:0 0 25px color-mix(in srgb,var(--house-accent) 57%,transparent);transform:rotate(-15deg)}
+.article-main{padding-top:26px}
+.article-back-mark{display:inline-flex;align-items:center;gap:8px;margin:0 0 25px;padding:8px 4px;border-bottom:1px solid color-mix(in srgb,var(--house-accent) 55%,transparent);color:var(--house-muted);font:600 13px 'Cormorant Garamond',Georgia,serif;letter-spacing:.17em;transition:color .25s,transform .25s}
+.article-back-mark span{color:var(--house-accent);font-size:22px;line-height:.7}
+.article-back-mark:hover,.article-back-mark:focus-visible{color:var(--house-text);transform:translateX(-4px)}
+
+/* A wand opens the complete incantation book. */
+.spellbook{position:fixed;right:clamp(14px,2.8vw,34px);bottom:clamp(14px,2.8vw,31px);z-index:210}
+.spellbook__veil{position:fixed;inset:0;z-index:0;width:100%;height:100%;border:0;background:color-mix(in srgb,var(--house-deep) 86%,transparent);backdrop-filter:blur(9px);cursor:default;animation:spell-veil .3s ease both}
+.spellbook__veil[hidden]{display:none}
+html .spellbook .spellbook__toggle{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:11px;min-width:186px;min-height:59px;padding:10px 19px;border:1px solid var(--house-border);border-radius:50px;color:var(--house-text);background:radial-gradient(circle at 18% 15%,color-mix(in srgb,var(--house-accent) 21%,transparent),transparent 48%),linear-gradient(125deg,var(--house-mid),var(--house-deep));box-shadow:0 10px 31px #0009,inset 0 0 0 4px color-mix(in srgb,var(--house-accent) 9%,transparent),0 0 22px color-mix(in srgb,var(--house-accent) 20%,transparent);font:600 14px 'Cormorant Garamond',Georgia,serif;letter-spacing:.14em;transition:transform .25s,box-shadow .25s}
+html .spellbook .spellbook__toggle:before{content:'';position:absolute;inset:-7px;border:1px solid color-mix(in srgb,var(--house-accent) 33%,transparent);border-radius:50px;opacity:.55;pointer-events:none}
+html .spellbook .spellbook__toggle:after{content:'✧';position:absolute;top:-13px;right:14px;color:var(--house-spark);font:24px 'Cormorant Garamond',serif;text-shadow:0 0 13px var(--house-spark);animation:wand-glint 3.4s ease-in-out infinite}
+html .spellbook .spellbook__toggle:hover,html .spellbook .spellbook__toggle[aria-expanded="true"]{transform:translateY(-5px);box-shadow:0 16px 35px #000a,0 0 38px color-mix(in srgb,var(--house-accent) 49%,transparent)}
+.spellbook .spellbook__toggle>span:last-child{font:600 14px 'Cormorant Garamond',Georgia,serif;letter-spacing:.12em;white-space:nowrap}
+.spellbook__wand{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:50%;color:var(--house-spark);background:color-mix(in srgb,var(--house-accent) 16%,transparent);font-size:23px;line-height:1;transform:rotate(-20deg);filter:drop-shadow(0 0 5px var(--house-spark))}
+html .spellbook .spellbook__menu{position:fixed;z-index:2;top:50%;left:50%;right:auto;bottom:auto;width:min(930px,calc(100vw - 30px));max-height:calc(100dvh - 30px);overflow:auto;padding:28px clamp(22px,4vw,45px) 31px;border:2px solid var(--house-border);border-radius:9px;color:var(--house-ink);background:radial-gradient(circle at 12% 12%,#fff9e9,var(--house-paper) 52%,var(--house-paper2));box-shadow:0 27px 70px #000b,inset 0 0 0 8px var(--house-paper),inset 0 0 0 9px color-mix(in srgb,var(--house-ink) 31%,transparent);clip-path:polygon(0 13px,13px 0,calc(100% - 13px) 0,100% 13px,100% calc(100% - 13px),calc(100% - 13px) 100%,13px 100%,0 calc(100% - 13px));animation:grimoire-open .46s cubic-bezier(.16,.8,.23,1) both}
+.spellbook__menu[hidden]{display:none}
+.spellbook__menu:before{content:'✧';position:absolute;top:17px;left:21px;color:var(--house-ink);opacity:.38;font-size:25px;pointer-events:none}
+.spellbook__menu .spellbook__close{position:absolute;top:13px;right:17px;z-index:2;display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid color-mix(in srgb,var(--house-ink) 45%,transparent)!important;border-radius:50%;background:transparent!important;color:var(--house-ink)!important;font:30px/1 'Cormorant Garamond',serif!important;text-align:center}
+.spellbook__close:hover{background:color-mix(in srgb,var(--house-accent) 21%,var(--house-paper))!important}
+.spellbook__heading{padding:4px 30px 18px;margin:0;text-align:center;border-bottom:1px solid color-mix(in srgb,var(--house-ink) 32%,transparent)}
+.spellbook__heading span{color:var(--house-ink);font:500 clamp(36px,5vw,58px)/1 'Cormorant Garamond',Georgia,serif;letter-spacing:-.025em}
+.spellbook__heading small{margin-top:5px;color:var(--house-ink);font:400 14px 'SchoolSafetyWizard',serif;letter-spacing:0}
+.spell-nav{display:block;position:static;max-height:none;overflow:visible;padding:0;border:0;background:none;box-shadow:none}
+.spell-nav__intro{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:16px 0 8px;border:0}
+.spell-nav__intro span{color:var(--house-ink);font:600 13px 'Cormorant Garamond',Georgia,serif;letter-spacing:.18em}
+.spell-nav__intro p{margin:0;color:color-mix(in srgb,var(--house-ink) 70%,#fff);font:400 12px 'SchoolSafetyWizard',serif}
+.spell-nav__form{display:block;padding:7px 0 16px}
+.spell-nav__form label{display:block;margin:0 0 5px;color:var(--house-ink);font:600 11px 'Cormorant Garamond',serif;letter-spacing:.15em}
+.spell-nav__form>div{display:flex;min-height:43px;border-bottom:1px solid color-mix(in srgb,var(--house-ink) 53%,transparent);background:color-mix(in srgb,#fff 45%,transparent)}
+.spell-nav__form input{flex:1;min-width:0;padding:5px 12px;border:0;outline:0;background:none;color:var(--house-ink);font:italic 25px 'Cormorant Garamond',Georgia,serif}
+.spell-nav__form input::placeholder{color:color-mix(in srgb,var(--house-ink) 47%,#fff)}
+.spell-nav__form button{width:50px;border:0;background:none;color:var(--house-ink);font:29px 'Cormorant Garamond',serif}
+.spell-nav__form button:hover{background:color-mix(in srgb,var(--house-accent) 25%,transparent)}
+.spell-nav__form small{display:block;margin-top:5px;color:color-mix(in srgb,var(--house-ink) 65%,#fff);font:500 12px 'Cormorant Garamond',serif;letter-spacing:.07em}
+.spell-nav__list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.spell-nav__list button,.spell-nav__list a{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:112px;width:100%;padding:13px 15px;border:1px solid color-mix(in srgb,var(--house-ink) 30%,transparent);border-radius:2px;text-align:left;color:var(--house-ink);background:linear-gradient(135deg,color-mix(in srgb,#fff 47%,var(--house-paper)),var(--house-paper2));box-shadow:2px 3px 0 color-mix(in srgb,var(--house-ink) 12%,transparent);transition:transform .24s,box-shadow .24s,background .24s}
+.spell-nav__list button:after,.spell-nav__list a:after{content:'✦';position:absolute;top:10px;right:13px;color:var(--house-accent-strong);opacity:.45;font-size:13px;transition:transform .4s,opacity .4s}
+.spell-nav__list button:hover,.spell-nav__list button:focus-visible,.spell-nav__list button.selected,.spell-nav__list a:hover,.spell-nav__list a:focus-visible{transform:translateY(-4px) rotate(-.7deg);background:var(--house-paper);box-shadow:3px 7px 17px color-mix(in srgb,var(--house-ink) 24%,transparent)}
+.spell-nav__list button:hover:after,.spell-nav__list a:hover:after{transform:rotate(90deg) scale(1.3);opacity:1}
+.spell-nav__list span{color:color-mix(in srgb,var(--house-ink) 69%,#fff);font:600 10px 'Cormorant Garamond',Georgia,serif;letter-spacing:.12em}
+.spell-nav__list strong{margin:13px 0 3px;color:var(--house-ink);font:italic 31px/1 'Cormorant Garamond',Georgia,serif}
+.spell-nav__list small{color:color-mix(in srgb,var(--house-ink) 72%,#fff);font:400 11px 'SchoolSafetyWizard',serif}
+.spellbook__charms{margin-top:19px;padding-top:13px;border-top:1px solid color-mix(in srgb,var(--house-ink) 35%,transparent)}
+.spellbook__charms>span{display:block;margin-bottom:8px;color:var(--house-ink);font:600 12px 'Cormorant Garamond',Georgia,serif;letter-spacing:.19em}
+.spellbook__charms-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.spellbook__charms-list button{display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:8px 11px;border:1px solid color-mix(in srgb,var(--house-ink) 28%,transparent);border-radius:2px;background:color-mix(in srgb,var(--house-paper) 68%,#fff);text-align:left;color:var(--house-ink);transition:background .2s,transform .2s}
+.spellbook__charms-list button:hover,.spellbook__charms-list button:focus-visible{background:color-mix(in srgb,var(--house-accent) 30%,var(--house-paper));transform:translateY(-2px)}
+.spellbook__charms-list strong{font:italic 22px 'Cormorant Garamond',serif}
+.spellbook__charms-list small{color:var(--house-ink);font:400 11px 'SchoolSafetyWizard',serif}
+.spellbook__toast{position:fixed;z-index:3;right:22px;bottom:94px;max-width:310px;color:var(--house-ink);background:var(--house-paper)}
+
+/* A separate Sorting Hat seal stores the chosen house in this browser. */
+.house-orb{position:fixed;left:clamp(14px,2.8vw,34px);bottom:clamp(14px,2.8vw,31px);z-index:220}
+.spellbook:has(.spellbook__menu:not([hidden]))~.house-orb,body:has(.spellbook__menu:not([hidden])) .house-orb{opacity:0;pointer-events:none}
+.map-loading .house-orb{opacity:0;pointer-events:none}
+.house-orb .house-picker__toggle{position:relative;display:flex;align-items:center;gap:8px;min-width:193px;min-height:59px;padding:7px 12px 7px 7px;border:1px solid var(--house-border);border-radius:50px;color:var(--house-text);background:radial-gradient(circle at 16% 12%,color-mix(in srgb,var(--house-accent) 22%,transparent),transparent 48%),linear-gradient(125deg,var(--house-mid),var(--house-deep));box-shadow:0 10px 31px #0009,inset 0 0 0 4px color-mix(in srgb,var(--house-accent) 9%,transparent),0 0 22px color-mix(in srgb,var(--house-accent) 20%,transparent);font-family:'Cormorant Garamond',serif;transition:transform .25s,box-shadow .25s}
+.house-orb .house-picker__toggle:before{content:'';position:absolute;inset:-7px;border:1px solid color-mix(in srgb,var(--house-accent) 33%,transparent);border-radius:50px;opacity:.55;pointer-events:none}
+.house-orb .house-picker__toggle:hover,.house-orb .house-picker__toggle[aria-expanded="true"]{transform:translateY(-5px);box-shadow:0 16px 35px #000a,0 0 38px color-mix(in srgb,var(--house-accent) 49%,transparent)}
+.house-picker__hat{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid color-mix(in srgb,var(--house-accent) 60%,transparent);border-radius:50%;background:color-mix(in srgb,var(--house-accent) 16%,transparent);color:var(--house-accent);box-shadow:inset 0 0 14px color-mix(in srgb,var(--house-accent) 18%,transparent)}
+.house-picker__hat svg{width:29px;height:27px;overflow:visible;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.house-orb .house-picker__toggle:hover .house-picker__hat,.house-orb .house-picker__toggle[aria-expanded="true"] .house-picker__hat{animation:hat-wonder .62s ease-in-out}
+.house-picker__label{display:flex;flex-direction:column;align-items:flex-start;min-width:0;line-height:1}
+.house-picker__label small{color:var(--house-muted);font:600 9px 'Cormorant Garamond',Georgia,serif;letter-spacing:.13em;white-space:nowrap}
+.house-orb .house-picker__current{display:block;margin-top:4px;color:var(--house-text);font:600 13px 'Cormorant Garamond',Georgia,serif;letter-spacing:.09em;white-space:nowrap}
+.house-orb .house-picker__mark{display:grid;place-items:center;flex:0 0 25px;width:25px;height:25px;margin-left:auto;border:1px solid color-mix(in srgb,var(--house-accent) 58%,transparent);border-radius:50%;clip-path:none;color:var(--house-accent);background:transparent;font:600 18px 'Cormorant Garamond',serif}
+.house-orb .house-picker__menu{position:absolute;top:auto;right:auto;left:0;bottom:calc(100% + 16px);width:min(330px,calc(100vw - 28px));max-height:calc(100dvh - 110px);overflow:auto;padding:19px;border:1px solid var(--house-border);border-radius:8px;background:radial-gradient(circle at 10% 10%,#fff9e9,var(--house-paper) 65%,var(--house-paper2));color:var(--house-ink);box-shadow:0 20px 48px #000a,inset 0 0 0 6px var(--house-paper),inset 0 0 0 7px color-mix(in srgb,var(--house-ink) 28%,transparent);animation:parchment-rise .34s cubic-bezier(.2,.9,.2,1) both}
+.house-orb .house-picker__menu:before{content:'✧  THE HAT REMEMBERS';display:block;margin:0 0 12px;color:var(--house-ink);font:600 10px 'Cormorant Garamond',serif;letter-spacing:.16em;opacity:.7}
+.house-orb .house-picker__choices button{color:var(--house-ink);background:color-mix(in srgb,var(--house-paper) 55%,#fff)}
+.house-orb .house-picker__choices button:hover,.house-orb .house-picker__choices button[aria-pressed="true"]{background:color-mix(in srgb,var(--house-accent) 26%,var(--house-paper))}
+
+@keyframes spell-veil{from{opacity:0}to{opacity:1}}
+@keyframes grimoire-open{from{opacity:0;transform:translate(-50%,-45%) rotate(-2deg) scale(.91);filter:blur(8px)}to{opacity:1;transform:translate(-50%,-50%) rotate(0) scale(1);filter:blur(0)}}
+@keyframes parchment-rise{from{opacity:0;transform:translateY(24px) rotate(3deg) scale(.92);filter:blur(5px)}to{opacity:1;transform:translateY(0) rotate(0) scale(1);filter:blur(0)}}
+@keyframes hat-wonder{0%,100%{transform:rotate(0)}30%{transform:rotate(-11deg) translateY(-3px)}70%{transform:rotate(9deg) translateY(1px)}}
+@keyframes wand-glint{0%,100%{opacity:.25;transform:scale(.7) rotate(0)}50%{opacity:1;transform:scale(1.25) rotate(70deg)}}
+
+@media(max-width:760px){
+  .app-main{padding-top:55px}
+  .archive-mark{top:13px;left:5%;font-size:14px}
+  .archive-mark__seal{width:30px;height:30px;font-size:20px}
+  html .spellbook .spellbook__menu{padding:25px 22px 24px;max-height:calc(100dvh - 20px)}
+  .spellbook__heading span{font-size:38px}
+  .spell-nav__intro{display:block}
+  .spell-nav__intro p{margin-top:4px}
+  .spell-nav__list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .spell-nav__list button,.spell-nav__list a{min-height:91px;padding:10px 12px}
+  .spell-nav__list strong{font-size:27px;margin:8px 0 2px}
+  .spell-nav__list small{font-size:10px}
+}
+@media(max-width:420px){
+  html .spellbook .spellbook__toggle{min-width:151px;min-height:54px;padding:7px 12px;font-size:11px;gap:6px}
+  .spellbook .spellbook__toggle>span:last-child{font-size:11px}
+  .spellbook__wand{width:25px;height:25px;flex-basis:25px;font-size:19px}
+  .house-orb .house-picker__toggle{min-width:140px;min-height:54px;padding:6px 9px 6px 6px;gap:6px}
+  .house-picker__hat{width:36px;height:36px;flex-basis:36px}
+  .house-picker__hat svg{width:25px}
+  .house-orb .house-picker__mark{display:none}
+  .house-picker__label small{font-size:8px}
+  .house-orb .house-picker__current{font-size:11px}
+  html .spellbook .spellbook__menu{width:calc(100vw - 16px);padding:24px 17px 20px}
+  .spellbook__heading span{font-size:33px}
+  .spell-nav__form input{font-size:21px}
+  .spellbook__charms-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .spellbook__charms-list button{flex-direction:column;align-items:flex-start;gap:2px;padding:7px}
+  .spellbook__charms-list strong{font-size:20px}
+  .spellbook__charms-list small{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.spellbook__veil,.spellbook__menu,.spellbook__toggle:after,.house-orb .house-picker__menu,.house-picker__hat{animation:none!important;transition:none!important}}

@@ -1,12 +1,5 @@
-import About from '@/components/About'
-import Footer from '@/components/Footer'
+import { redirect } from 'next/navigation'
 
 export default function AboutPage() {
-  return (
-    <main className="page-main">
-
-      <About />
-      <Footer />
-    </main>
-  )
+  redirect('/#about')
 }

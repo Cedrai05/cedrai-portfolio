@@ -309,7 +309,7 @@ export default function Schedule() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
             {DAYS.map((d, i) => (
-              <div key={d} style={{ textAlign: 'center', fontSize: '11px', color: i === 0 ? '#ff6b6b' : i === 6 ? '#b7aefe' : 'var(--tx2)', padding: '4px 0', letterSpacing: '.04em' }}>{d}</div>
+              <div key={d} style={{ textAlign: 'center', fontSize: '11px', color: i === 0 || i === 6 ? 'var(--acc2)' : 'var(--tx2)', padding: '4px 0', letterSpacing: '.04em' }}>{d}</div>
             ))}
           </div>
 
@@ -326,10 +326,10 @@ export default function Schedule() {
                 <div key={day} onClick={() => setSelected(dateStr)}
                   style={{
                     textAlign: 'center', padding: '7px 2px', cursor: 'pointer', position: 'relative',
-                    background: isSel ? 'var(--acc)' : isToday ? 'rgba(183,174,254,0.15)' : 'transparent',
+                    background: isSel ? 'var(--acc)' : isToday ? 'color-mix(in srgb, var(--acc) 15%, transparent)' : 'transparent',
                     border: isSel ? '1px solid var(--acc)' : '1px solid transparent',
                     borderRadius: '2px',
-                    color: isSel ? 'var(--bg)' : col === 0 ? '#ff6b6b' : col === 6 ? '#b7aefe' : 'var(--tx)',
+                    color: isSel ? 'var(--bg)' : col === 0 || col === 6 ? 'var(--acc2)' : 'var(--tx)',
                     fontSize: '13px', fontWeight: isToday ? 700 : 400,
                     transition: 'background .15s',
                   }}

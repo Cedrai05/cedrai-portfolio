@@ -1,0 +1,43 @@
+/* A small investigator's desk for Cédrai's field notes. */
+.journal-resume{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 25px;padding:15px 19px;border:1px solid color-mix(in srgb,var(--house-accent) 44%,transparent);color:var(--house-text);background:linear-gradient(100deg,color-mix(in srgb,var(--house-mid) 75%,var(--house-deep)),var(--house-deep));box-shadow:0 12px 25px #0004}
+.journal-resume[hidden]{display:none}
+.journal-resume__copy{min-width:0;display:flex;align-items:center;gap:14px}
+.journal-resume__seal{flex:0 0 43px;display:grid;place-items:center;width:43px;height:43px;border:1px solid var(--house-accent);border-radius:50%;color:var(--house-accent);font:30px 'Cormorant Garamond',serif;box-shadow:0 0 18px color-mix(in srgb,var(--house-accent) 24%,transparent)}
+.journal-resume__copy small{display:block;color:var(--house-accent);font:600 11px 'Cormorant Garamond',serif;letter-spacing:.17em}
+.journal-resume__copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 16px 'SchoolSafetyWizard',serif}
+.journal-resume__link{flex:0 0 auto;border-bottom:1px solid var(--house-accent);padding:8px 1px;color:var(--house-text);font:600 13px 'Cormorant Garamond',serif;letter-spacing:.09em;transition:color .2s,transform .2s}
+.journal-resume__link:hover,.journal-resume__link:focus-visible{color:var(--house-accent);transform:translateX(3px)}
+.journal-shell .filter-group{flex-wrap:wrap}
+.journal-shell .filter{position:relative;white-space:nowrap;transition:background .2s,color .2s,transform .2s}
+.journal-shell .filter:hover{transform:translateY(-2px)}
+.journal-shell .filter-count{margin-left:5px;opacity:.72;font-size:.8em}
+.journal-shell .filter[data-filter="saved"]{border-color:color-mix(in srgb,var(--house-accent) 65%,var(--house-ink));color:var(--house-ink)}
+.journal-shell .filter[data-filter="saved"].active{color:var(--house-text);background:var(--house-mid)}
+.journal-shell .post-item{position:relative;border-bottom:1px solid color-mix(in srgb,var(--house-ink) 24%,transparent)}
+.journal-shell .post-row{border-bottom:0;padding-right:64px}
+.journal-shell .post-save{position:absolute;right:4px;top:50%;z-index:2;display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid color-mix(in srgb,var(--house-ink) 28%,transparent);border-radius:50%;background:color-mix(in srgb,var(--house-paper) 84%,#fff);color:var(--house-ink);font:28px/1 'Cormorant Garamond',serif;transform:translateY(-50%);transition:background .2s,box-shadow .2s,scale .2s}
+.journal-shell .post-save:hover,.journal-shell .post-save:focus-visible{background:var(--house-paper2);box-shadow:0 0 15px color-mix(in srgb,var(--house-accent) 40%,transparent);scale:1.09}
+.journal-shell .post-save[aria-pressed="true"]{background:var(--house-mid);color:var(--house-accent);border-color:var(--house-accent);box-shadow:0 0 12px color-mix(in srgb,var(--house-accent) 25%,transparent)}
+.journal-shell .post-progress{display:block;margin-top:4px;color:var(--house-ink);font:600 10px 'Cormorant Garamond',serif;letter-spacing:.1em;opacity:.72}
+.journal-shell .post-progress[hidden]{display:none}
+.article-read-progress{position:fixed;z-index:180;top:0;left:0;right:0;height:4px;pointer-events:none;background:color-mix(in srgb,var(--house-mid) 55%,transparent)}
+.article-read-progress span{display:block;width:var(--read-progress,0%);height:100%;background:var(--house-accent);box-shadow:0 0 12px var(--house-spark);transition:width .14s linear}
+.article-desk{max-width:930px;margin:0 auto 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+.article-desk__actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.article-desk button,.article-index summary{border:1px solid color-mix(in srgb,var(--house-accent) 54%,transparent);padding:9px 15px;color:var(--house-text);background:color-mix(in srgb,var(--house-mid) 55%,var(--house-deep));font:600 13px 'Cormorant Garamond',serif;letter-spacing:.1em;transition:background .2s,box-shadow .2s}
+.article-desk button:hover,.article-desk button:focus-visible,.article-index summary:hover,.article-index summary:focus-visible{background:var(--house-mid);box-shadow:0 0 16px color-mix(in srgb,var(--house-accent) 25%,transparent)}
+.article-desk button[aria-pressed="true"]{color:var(--house-accent)}
+.article-index{position:relative;min-width:190px;max-width:min(100%,420px)}
+.article-index[hidden]{display:none}
+.article-index summary{list-style:none;cursor:pointer}
+.article-index summary::-webkit-details-marker{display:none}
+.article-index summary:after{content:'⌄';margin-left:18px;color:var(--house-accent)}
+.article-index[open] summary:after{content:'⌃'}
+.article-index nav{position:absolute;z-index:3;left:0;top:calc(100% + 4px);width:min(390px,calc(100vw - 38px));max-height:min(55vh,430px);overflow:auto;padding:10px;border:1px solid var(--house-border);background:var(--house-paper);box-shadow:0 16px 32px #0009}
+.article-index nav button{display:block;width:100%;padding:9px 11px;border:0;border-bottom:1px solid color-mix(in srgb,var(--house-ink) 18%,transparent);text-align:left;color:var(--house-ink);background:transparent;font:400 14px/1.45 'SchoolSafetyWizard',serif;letter-spacing:0}
+.article-index nav button:hover,.article-index nav button:focus-visible{background:var(--house-paper2);box-shadow:none}
+.article-index nav button[data-level="3"]{padding-left:26px;font-size:13px}
+.article-content h2[id],.article-content h3[id]{scroll-margin-top:28px}
+@media(max-width:760px){.journal-resume{padding:12px 14px}.journal-resume__copy strong{font-size:14px}.journal-resume__link{font-size:11px}.journal-shell .filter{padding:8px 11px}}
+@media(max-width:480px){.journal-resume{align-items:flex-start;flex-direction:column;gap:4px}.journal-resume__link{margin-left:57px}.journal-shell .journal-tools{gap:13px}.journal-shell .filter-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.journal-shell .filter{padding:7px 4px;font-size:12px;letter-spacing:0}.journal-shell .post-row{padding-right:44px}.journal-shell .post-save{right:0;width:34px;height:34px;font-size:23px}.article-desk{flex-direction:column}.article-desk__actions{justify-content:flex-start}.article-desk button,.article-index summary{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.journal-shell .filter,.journal-shell .post-save,.article-read-progress span{transition:none}}

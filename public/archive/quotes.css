@@ -1,0 +1,19 @@
+/* Short lines from the books and films sit between chapters like illuminated marginalia. */
+.archive-quote{position:relative;max-width:900px;margin:46px auto 53px;padding:27px clamp(28px,5vw,58px) 25px;border-top:1px solid color-mix(in srgb,var(--house-accent) 42%,transparent);border-bottom:1px solid color-mix(in srgb,var(--house-accent) 28%,transparent);color:var(--house-text);background:radial-gradient(ellipse at 45% 50%,color-mix(in srgb,var(--house-mid) 28%,transparent),transparent 75%);text-align:center;isolation:isolate}
+.archive-quote:before,.archive-quote:after{position:absolute;top:-18px;color:var(--house-accent);font:29px 'Cormorant Garamond',Georgia,serif;text-shadow:0 0 15px color-mix(in srgb,var(--house-spark) 55%,transparent);animation:quote-glint 4.8s ease-in-out infinite;pointer-events:none}
+.archive-quote:before{content:'✧';left:18px}.archive-quote:after{content:'✦';right:18px;animation-delay:-2.4s}
+.archive-quote__original{margin:0 auto;color:var(--house-text);font:italic 500 clamp(31px,3.2vw,46px)/1.07 'Cormorant Garamond',Georgia,serif;letter-spacing:-.026em;text-wrap:balance;text-shadow:0 0 28px color-mix(in srgb,var(--house-spark) 22%,transparent)}
+.archive-quote cite{display:block;margin-top:16px;color:var(--house-accent);font:600 11px 'Cormorant Garamond',Georgia,serif;font-style:normal;letter-spacing:.13em}
+.archive-quote cite a{color:inherit;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s,color .2s}
+.archive-quote cite a:hover,.archive-quote cite a:focus-visible{color:var(--house-text);border-color:currentColor}
+.archive-quote--home{margin-top:52px;margin-bottom:42px;max-width:750px}
+.archive-quote--about{margin-top:55px;margin-right:0;max-width:720px}
+.archive-quote--work{margin-top:40px;margin-bottom:6px;max-width:810px}
+.archive-quote--journal{margin-top:50px;margin-bottom:38px;max-width:840px}
+.archive-quote--now{margin-top:55px}
+.archive-quote.is-quote-pending{opacity:0;transform:translateY(15px);filter:blur(4px);transition:opacity .7s ease,transform .7s ease,filter .7s ease}
+.archive-quote.is-quote-pending.is-visible{opacity:1;transform:translateY(0);filter:blur(0)}
+@keyframes quote-glint{0%,100%{opacity:.35;transform:rotate(-8deg) scale(.85)}50%{opacity:1;transform:rotate(12deg) scale(1.15)}}
+@media(max-width:760px){.archive-quote{margin:32px auto 40px;padding:25px 19px 23px}.archive-quote__original{font-size:clamp(28px,7vw,39px);line-height:1.1}.archive-quote cite{font-size:10px;letter-spacing:.08em}}
+@media(max-width:420px){.archive-quote{padding-right:12px;padding-left:12px}.archive-quote__original{font-size:29px}.archive-quote:before{left:6px}.archive-quote:after{right:6px}}
+@media(prefers-reduced-motion:reduce){.archive-quote,.archive-quote:before,.archive-quote:after{animation:none!important;transition:none!important;transform:none!important;filter:none!important}}

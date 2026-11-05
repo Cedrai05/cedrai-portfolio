@@ -186,12 +186,6 @@ export default function Projects() {
           </div>
         ))}
 
-        <div className="clip-card" style={{ background: 'var(--bg2)', padding: '1.2rem', border: '1px dashed var(--bd)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', color: 'var(--tx2)', marginBottom: '4px' }}>+</div>
-            <div style={{ fontSize: '13px', color: 'var(--tx2)', letterSpacing: '.12em' }}>MORE COMING SOON</div>
-          </div>
-        </div>
       </div>
     </section>
   )

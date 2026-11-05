@@ -22,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${inter.variable} ${hack.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `try { document.documentElement.dataset.theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark' } catch {}` }} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+        <script dangerouslySetInnerHTML={{ __html: `try { const house = localStorage.getItem('cedrai-house'); document.documentElement.dataset.house = ['slytherin','gryffindor','ravenclaw','hufflepuff'].includes(house) ? house : 'slytherin'; document.documentElement.dataset.theme = 'dark' } catch { document.documentElement.dataset.house = 'slytherin'; document.documentElement.dataset.theme = 'dark' }` }} />
       </head>
       <body>
         <AuthProvider>

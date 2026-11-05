@@ -10,7 +10,52 @@ export default function BlogArticle({post,initialContent}:{post:BlogPost;initial
   const [article,setArticle]=useState<Article|null>(initialContent?{content:initialContent,assets:[]}:null)
   const [status,setStatus]=useState('')
   const [retry,setRetry]=useState(0)
+  const [saved,setSaved]=useState(false)
+  const [resumeAt,setResumeAt]=useState(0)
   const body=useRef<HTMLDivElement>(null)
+  useEffect(()=>{
+    if(post.protected||!article||!allowed)return
+    const key='cedrai-field-notes-v1'
+    type Notes={saved:string[];progress:Record<string,number>;last:string}
+    const read=():Notes=>{
+      try { const value=JSON.parse(localStorage.getItem(key)||'{}');return {saved:Array.isArray(value.saved)?value.saved:[],progress:value.progress&&typeof value.progress==='object'?value.progress:{},last:typeof value.last==='string'?value.last:''} }
+      catch { return {saved:[],progress:{},last:''} }
+    }
+    const notes=read()
+    setSaved(notes.saved.includes(post.slug))
+    setResumeAt(Math.max(0,Math.min(100,Number(notes.progress[post.slug])||0)))
+    notes.last=post.slug
+    try { localStorage.setItem(key,JSON.stringify(notes)) } catch { /* Reading history is optional. */ }
+    let frame=0
+    const update=()=>{
+      frame=0
+      const element=body.current
+      if(!element)return
+      const start=element.offsetTop-innerHeight*.55
+      const end=element.offsetTop+element.offsetHeight-innerHeight*.45
+      const progress=Math.round(Math.max(0,Math.min(100,(scrollY-start)/Math.max(1,end-start)*100)))
+      const current=read()
+      if(progress>0&&current.progress[post.slug]!==progress){
+        current.progress[post.slug]=progress
+        try { localStorage.setItem(key,JSON.stringify(current)) } catch { /* Reading history is optional. */ }
+      }
+    }
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update)}
+    addEventListener('scroll',schedule,{passive:true})
+    addEventListener('resize',schedule)
+    schedule()
+    return()=>{removeEventListener('scroll',schedule);removeEventListener('resize',schedule);cancelAnimationFrame(frame)}
+  },[post.slug,post.protected,article,allowed])
+  const toggleSaved=()=>{
+    try {
+      const key='cedrai-field-notes-v1'
+      const notes=JSON.parse(localStorage.getItem(key)||'{}')
+      const current=Array.isArray(notes.saved)?notes.saved.filter((slug:unknown):slug is string=>typeof slug==='string'):[]
+      notes.saved=current.includes(post.slug)?current.filter((slug:string)=>slug!==post.slug):[...current,post.slug]
+      localStorage.setItem(key,JSON.stringify(notes))
+      setSaved(notes.saved.includes(post.slug))
+    } catch { /* Saving is optional. */ }
+  }
   useEffect(()=>{
     if(!allowed){setArticle(null);setStatus('');return}
     if(!ready||initialContent)return
@@ -50,6 +95,7 @@ export default function BlogArticle({post,initialContent}:{post:BlogPost;initial
   return <article id="article-view" className="article-view">
     <Link className="article-back" href="/blog#archive" scroll={false}>← BACK TO ARCHIVE</Link><div className="article-category">↳ {post.category.toUpperCase()}</div><h1>{post.title}</h1>
     <div className="article-meta"><span>{dateText(post.date)}</span><span>{post.protected?'MEMBERS ONLY':post.readTime}</span></div>
+    {visible&&!post.protected&&<div className="archive-reading-actions"><button type="button" onClick={toggleSaved} aria-pressed={saved}>{saved?'✦ NOTE SAVED':'✧ SAVE THIS NOTE'}</button>{resumeAt>=5&&resumeAt<95&&<button type="button" onClick={()=>{const element=body.current;if(!element)return;const start=element.offsetTop-innerHeight*.55;const end=element.offsetTop+element.offsetHeight-innerHeight*.45;scrollTo({top:start+(end-start)*resumeAt/100,behavior:'smooth'});setResumeAt(0)}}>RESUME AT {resumeAt}% ↗</button>}</div>}
     {visible?<div ref={body} className="article-body" dangerouslySetInnerHTML={{__html:visible.content}}/>:post.protected&&!ready?<p className="article-summary">로그인 확인 중…</p>:!allowed?<div className="protected-form"><h2>로그인이 필요한 비밀글입니다.</h2><p>로그인한 사용자만 읽을 수 있습니다.</p><button type="button" onClick={()=>window.dispatchEvent(new Event('cedrai:open-login'))}>로그인</button></div>:null}
     {allowed&&status&&<p className="article-summary" role="status">{status}{!status.includes('불러오는 중')&&<button type="button" className="blog-retry" onClick={()=>{setArticle(null);setRetry(value=>value+1)}}>다시 열기</button>}</p>}
     <div className="article-footer"><Link href="/blog#archive" scroll={false}>← ALL ENTRIES</Link></div>

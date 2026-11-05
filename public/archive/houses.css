@@ -1,0 +1,329 @@
+/* Four houses share the same archive; each keeps its own pigments and seal. */
+:root,
+html[data-house="slytherin"] {
+  --house-bg: #07130f;
+  --house-deep: #06110d;
+  --house-mid: #173d2a;
+  --house-mid2: #284f38;
+  --house-accent: #c5d3ba;
+  --house-accent-strong: #a7c9a8;
+  --house-text: #e9f0e4;
+  --house-muted: #b0c6ad;
+  --house-paper: #efe8d3;
+  --house-paper2: #dce2ce;
+  --house-ink: #25442c;
+  --house-spark: #d0edbd;
+  --house-border: #b7c5a4;
+}
+html[data-house="gryffindor"] {
+  --house-bg: #1a0b11;
+  --house-deep: #10070c;
+  --house-mid: #4b1826;
+  --house-mid2: #71303a;
+  --house-accent: #e4be75;
+  --house-accent-strong: #dfaa5d;
+  --house-text: #f5e9df;
+  --house-muted: #d4b7ad;
+  --house-paper: #f5e7cd;
+  --house-paper2: #ead7ba;
+  --house-ink: #54212a;
+  --house-spark: #f9d780;
+  --house-border: #d7af6b;
+  --arcane-gold: #e0b667;
+}
+html[data-house="ravenclaw"] {
+  --house-bg: #091624;
+  --house-deep: #07101b;
+  --house-mid: #193d63;
+  --house-mid2: #2c5577;
+  --house-accent: #d7ad78;
+  --house-accent-strong: #b88e62;
+  --house-text: #e8edf0;
+  --house-muted: #adc5d3;
+  --house-paper: #e8e8de;
+  --house-paper2: #d8dfe4;
+  --house-ink: #233f5e;
+  --house-spark: #e4cb9e;
+  --house-border: #ac8f71;
+  --arcane-gold: #c9a57a;
+}
+html[data-house="hufflepuff"] {
+  --house-bg: #1c1a14;
+  --house-deep: #11100d;
+  --house-mid: #3e3420;
+  --house-mid2: #62522b;
+  --house-accent: #efcb65;
+  --house-accent-strong: #e5bb4c;
+  --house-text: #f2e9d2;
+  --house-muted: #d2c4a0;
+  --house-paper: #f5edd4;
+  --house-paper2: #e9ddb5;
+  --house-ink: #3e3524;
+  --house-spark: #ffe28c;
+  --house-border: #d2b459;
+  --arcane-gold: #e8ca6b;
+}
+
+/* A visible, keyboard friendly house seal on entrance, chapters, and notes. */
+.header-actions,.article-header__actions{display:flex;align-items:center;gap:13px}
+.house-picker{position:relative;z-index:90;font-family:'Cormorant Garamond',Georgia,serif}
+.house-picker__toggle{display:flex;align-items:center;gap:9px;min-height:42px;border:1px solid color-mix(in srgb,var(--house-accent) 68%,transparent);padding:5px 11px 5px 6px;color:var(--house-text);background:linear-gradient(130deg,var(--house-mid),var(--house-deep));box-shadow:0 4px 18px #0006,0 0 16px color-mix(in srgb,var(--house-accent) 15%,transparent);font:600 12px 'Cormorant Garamond',Georgia,serif;letter-spacing:.14em;white-space:nowrap;transition:transform .2s,border-color .2s,box-shadow .2s}
+.house-picker__toggle:hover,.house-picker__toggle[aria-expanded="true"]{transform:translateY(-2px);border-color:var(--house-accent);box-shadow:0 7px 20px #0008,0 0 23px color-mix(in srgb,var(--house-accent) 38%,transparent)}
+.house-picker__mark{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border:1px solid color-mix(in srgb,var(--house-accent) 72%,transparent);clip-path:polygon(50% 0,90% 15%,90% 58%,50% 100%,10% 58%,10% 15%);background:color-mix(in srgb,var(--house-accent) 18%,var(--house-deep));color:var(--house-accent);font:600 20px 'Cormorant Garamond',Georgia,serif;letter-spacing:0}
+.house-picker__chevron{font-size:16px;letter-spacing:0;line-height:1;transition:transform .2s}.house-picker__toggle[aria-expanded="true"] .house-picker__chevron{transform:rotate(180deg)}
+.house-picker__menu{position:absolute;top:calc(100% + 9px);right:0;width:min(318px,calc(100vw - 30px));max-height:min(570px,calc(100dvh - 80px));overflow:auto;padding:17px;color:#2f3129;background:linear-gradient(145deg,#f5edd8,#e4dfcb);border:1px solid #b3a789;box-shadow:0 18px 45px #000a,inset 0 0 0 5px #efe7d3,inset 0 0 0 6px #b2a9909c;animation:ink-reveal .24s ease both}
+.house-picker__heading{padding:3px 5px 12px;border-bottom:1px solid #a4a48b;margin-bottom:8px}.house-picker__heading span{display:block;font:600 18px 'Cormorant Garamond',Georgia,serif;letter-spacing:.15em}.house-picker__heading small{display:block;margin-top:4px;color:#666858;font:400 12px 'SchoolSafetyWizard',serif;letter-spacing:0}
+.house-picker__choices{display:grid;gap:5px}.house-picker__choices button{--choice-dark:#153523;--choice-light:#b8ceb6;display:flex;align-items:center;gap:12px;min-height:60px;width:100%;padding:8px 9px;text-align:left;color:#36372a;background:#eee9d8;border:1px solid transparent;transition:background .18s,transform .18s,border-color .18s}.house-picker__choices button:hover,.house-picker__choices button:focus-visible{background:#fff8e8;transform:translateX(3px);border-color:var(--choice-dark)}.house-picker__choices button[aria-pressed="true"]{background:#f9f2df;border-color:var(--choice-dark)}.house-picker__choices button[data-house-choice="gryffindor"]{--choice-dark:#7c2434;--choice-light:#dfb96b}.house-picker__choices button[data-house-choice="ravenclaw"]{--choice-dark:#234d72;--choice-light:#be9a72}.house-picker__choices button[data-house-choice="hufflepuff"]{--choice-dark:#3d3521;--choice-light:#e7bf4f}
+.house-picker__choice-mark{display:grid;place-items:center;flex:0 0 39px;width:39px;height:43px;color:var(--choice-light);background:var(--choice-dark);clip-path:polygon(50% 0,95% 13%,95% 62%,50% 100%,5% 62%,5% 13%);font:600 24px 'Cormorant Garamond',serif}.house-picker__choices strong{display:block;font:600 18px 'Cormorant Garamond',serif;letter-spacing:.1em}.house-picker__choices small{display:block;color:#666858;font:400 12px 'SchoolSafetyWizard',serif;letter-spacing:0}.house-picker__choices i{margin-left:auto;color:var(--choice-dark);font:20px 'Cormorant Garamond',serif;opacity:0}.house-picker__choices button[aria-pressed="true"] i{opacity:1}
+.entrance-top .house-picker__toggle{min-height:34px;font-size:11px;background:color-mix(in srgb,var(--house-deep) 84%,transparent)}.entrance-top .house-picker__mark{width:24px;height:24px;flex-basis:24px;font-size:17px}
+
+/* The original Slytherin artwork stays intact. Other houses repaint every room. */
+html:not([data-house="slytherin"]) body,
+html:not([data-house="slytherin"]) .article-page{background:var(--house-bg);color:var(--house-text)}
+html:not([data-house="slytherin"]) .entrance{background:radial-gradient(ellipse at 50% 31%,var(--house-mid2),var(--house-bg) 42%,var(--house-deep) 81%)}
+html:not([data-house="slytherin"]) .entrance-wash{background:radial-gradient(ellipse at 50% 55%,transparent 0 24%,color-mix(in srgb,var(--house-deep) 86%,transparent) 75%)}
+html:not([data-house="slytherin"]) .archway{border-color:color-mix(in srgb,var(--house-accent) 73%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--house-mid) 55%,transparent),var(--house-deep) 65%);box-shadow:0 0 0 14px var(--house-bg),0 0 0 15px color-mix(in srgb,var(--house-accent) 40%,transparent),0 0 65px color-mix(in srgb,var(--house-accent) 16%,transparent),inset 0 0 80px color-mix(in srgb,var(--house-accent) 10%,transparent)}
+html:not([data-house="slytherin"]) .archway:before{border-color:color-mix(in srgb,var(--house-accent) 44%,transparent)}
+html:not([data-house="slytherin"]) .archway:after{background:linear-gradient(var(--house-accent),transparent)}
+html:not([data-house="slytherin"]) .archway-crest{color:var(--house-accent);filter:drop-shadow(0 0 16px color-mix(in srgb,var(--house-accent) 44%,transparent))}
+html:not([data-house="slytherin"]) .entrance h1,
+html:not([data-house="slytherin"]) .home-intro h1{color:var(--house-text)}
+html:not([data-house="slytherin"]) .entrance h1 em,
+html:not([data-house="slytherin"]) .home-intro h1 em{color:var(--house-accent)}
+html:not([data-house="slytherin"]) .entrance-copy>p:not(.overline),
+html:not([data-house="slytherin"]) .entrance-note,
+html:not([data-house="slytherin"]) .entrance-top,
+html:not([data-house="slytherin"]) .entrance-bottom{color:var(--house-muted)}
+html:not([data-house="slytherin"]) .overline{color:var(--house-accent)}
+html:not([data-house="slytherin"]) .enter-button,
+html:not([data-house="slytherin"]) .menu-toggle{border-color:var(--house-border);color:var(--house-text);background:linear-gradient(120deg,var(--house-mid),var(--house-deep));box-shadow:inset 0 0 0 4px var(--house-deep),inset 0 0 0 5px color-mix(in srgb,var(--house-accent) 50%,transparent),0 9px 28px #0008}
+html:not([data-house="slytherin"]) .enter-button:hover,
+html:not([data-house="slytherin"]) .menu-toggle:hover{border-color:var(--house-accent);background:linear-gradient(120deg,var(--house-mid2),var(--house-mid));box-shadow:0 0 32px color-mix(in srgb,var(--house-accent) 35%,transparent),0 14px 30px #0009}
+html:not([data-house="slytherin"]) .enter-button__sigil,
+html:not([data-house="slytherin"]) .enter-button__arrow,
+html:not([data-house="slytherin"]) .menu-toggle__star{color:var(--house-accent)}
+html:not([data-house="slytherin"]) #app-shell{background:radial-gradient(ellipse at 85% 8%,var(--house-mid) 0%,transparent 38%),radial-gradient(ellipse at 8% 85%,color-mix(in srgb,var(--house-mid) 65%,var(--house-bg)) 0%,transparent 40%),var(--house-bg)}
+html:not([data-house="slytherin"]) #app-shell:before{background-image:radial-gradient(circle at 7% 18%,var(--house-spark) 0 1px,transparent 1.8px),radial-gradient(circle at 61% 7%,var(--house-spark) 0 1px,transparent 1.8px),radial-gradient(circle at 91% 31%,var(--house-spark) 0 1px,transparent 1.8px),radial-gradient(circle at 30% 74%,var(--house-spark) 0 1px,transparent 1.8px),radial-gradient(circle at 77% 88%,var(--house-spark) 0 1px,transparent 1.8px)}
+html:not([data-house="slytherin"]) .site-header,
+html:not([data-house="slytherin"]) .article-header{background:linear-gradient(90deg,var(--house-deep),var(--house-bg));border-bottom-color:color-mix(in srgb,var(--house-accent) 43%,transparent)}
+html:not([data-house="slytherin"]) .brand,
+html:not([data-house="slytherin"]) .brand small,
+html:not([data-house="slytherin"]) .panel-head,
+html:not([data-house="slytherin"]) .panel-back,
+html:not([data-house="slytherin"]) .chapter-title h2,
+html:not([data-house="slytherin"]) .work-list strong,
+html:not([data-house="slytherin"]) .article-intro h1{color:var(--house-text)}
+html:not([data-house="slytherin"]) .brand-symbol,
+html:not([data-house="slytherin"]) .panel-head{border-color:color-mix(in srgb,var(--house-accent) 48%,transparent)}
+html:not([data-house="slytherin"]) .panel-head:before,
+html:not([data-house="slytherin"]) .chapter-title>span,
+html:not([data-house="slytherin"]) .chapter-title:after,
+html:not([data-house="slytherin"]) .article-category,
+html:not([data-house="slytherin"]) .article-topline{color:var(--house-accent)}
+html:not([data-house="slytherin"]) .home-intro__copy>p:not(.overline),
+html:not([data-house="slytherin"]) .chapter-title p,
+html:not([data-house="slytherin"]) .about-copy p,
+html:not([data-house="slytherin"]) .work-list small,
+html:not([data-house="slytherin"]) .now-card p,
+html:not([data-house="slytherin"]) .article-meta{color:var(--house-muted)}
+html:not([data-house="slytherin"]) .home-magic__mote{background:var(--house-spark);box-shadow:0 0 8px 2px color-mix(in srgb,var(--house-spark) 50%,transparent)}
+html:not([data-house="slytherin"]) .home-sigil__ring{border-color:color-mix(in srgb,var(--house-accent) 75%,transparent);background:radial-gradient(circle,var(--house-mid),var(--house-deep) 70%);box-shadow:0 0 0 14px color-mix(in srgb,var(--house-accent) 7%,transparent),0 0 0 15px color-mix(in srgb,var(--house-accent) 27%,transparent),0 0 0 39px color-mix(in srgb,var(--house-accent) 14%,transparent),0 0 65px color-mix(in srgb,var(--house-accent) 25%,transparent)}
+html:not([data-house="slytherin"]) .home-sigil__ring:before,
+html:not([data-house="slytherin"]) .home-sigil__ring:after{border-color:color-mix(in srgb,var(--house-accent) 54%,transparent)}
+html:not([data-house="slytherin"]) .home-sigil__ring b,
+html:not([data-house="slytherin"]) .home-sigil__ring small,
+html:not([data-house="slytherin"]) .home-sigil__orbit{color:var(--house-accent)}
+html:not([data-house="slytherin"]) .hero-cast,
+html:not([data-house="slytherin"]) .spellbook__toggle{border-color:var(--house-border);color:var(--house-text);background:linear-gradient(130deg,var(--house-mid),var(--house-deep));box-shadow:0 8px 26px #0008,0 0 20px color-mix(in srgb,var(--house-accent) 23%,transparent)}
+html:not([data-house="slytherin"]) .hero-cast:hover,
+html:not([data-house="slytherin"]) .spellbook__toggle:hover{background:var(--house-mid2);box-shadow:0 0 28px color-mix(in srgb,var(--house-accent) 45%,transparent)}
+html:not([data-house="slytherin"]) .chapter-card{background:linear-gradient(135deg,var(--house-paper),var(--house-paper2));box-shadow:3px 4px 0 color-mix(in srgb,var(--house-accent) 38%,#555),8px 12px 22px #0008}
+html:not([data-house="slytherin"]) .chapter-card:hover,
+html:not([data-house="slytherin"]) .chapter-card:focus-visible{background:linear-gradient(135deg,#fff8e9,var(--house-paper));box-shadow:4px 6px 0 var(--house-border),11px 23px 40px #0009,0 0 30px color-mix(in srgb,var(--house-accent) 30%,transparent)}
+html:not([data-house="slytherin"]) .chapter-card:before{border-color:color-mix(in srgb,var(--house-ink) 30%,transparent);background:repeating-linear-gradient(125deg,transparent 0 45px,color-mix(in srgb,var(--house-ink) 8%,transparent) 46px 47px)}
+html:not([data-house="slytherin"]) .chapter-card:after,
+html:not([data-house="slytherin"]) .chapter-no,
+html:not([data-house="slytherin"]) .chapter-icon,
+html:not([data-house="slytherin"]) .chapter-action,
+html:not([data-house="slytherin"]) .card-secret{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .chapter-card strong{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .chapter-whisper{color:color-mix(in srgb,var(--house-ink) 75%,#777)}
+html:not([data-house="slytherin"]) .chapter-action{border-top-color:color-mix(in srgb,var(--house-ink) 35%,transparent)}
+html:not([data-house="slytherin"]) .mobile-nav:not([hidden]),
+html:not([data-house="slytherin"]) .journal-shell,
+html:not([data-house="slytherin"]) .spellbook__menu{background:radial-gradient(circle at 90% 8%,#fff6e6,var(--house-paper) 65%,var(--house-paper2));color:var(--house-ink);border-color:var(--house-border);box-shadow:0 18px 42px #0008,inset 0 0 0 6px var(--house-paper),inset 0 0 0 7px color-mix(in srgb,var(--house-ink) 36%,transparent)}
+html:not([data-house="slytherin"]) .spell-nav__intro,
+html:not([data-house="slytherin"]) .journal-caption{border-color:color-mix(in srgb,var(--house-ink) 35%,transparent);color:var(--house-ink)}
+html:not([data-house="slytherin"]) .spell-nav__intro p,
+html:not([data-house="slytherin"]) .spell-nav__form label,
+html:not([data-house="slytherin"]) .spell-nav__form small,
+html:not([data-house="slytherin"]) .spell-nav__form input,
+html:not([data-house="slytherin"]) .spell-nav__form>div button{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .spell-nav__form>div{border-color:var(--house-ink)}
+html:not([data-house="slytherin"]) .spell-nav__list button{background:linear-gradient(140deg,#fff9e9,var(--house-paper2));border-color:color-mix(in srgb,var(--house-ink) 36%,transparent);color:var(--house-ink);box-shadow:2px 3px 0 color-mix(in srgb,var(--house-ink) 25%,transparent)}
+html:not([data-house="slytherin"]) .spell-nav__list button:hover,
+html:not([data-house="slytherin"]) .spell-nav__list button.selected{background:#fff9e9;box-shadow:2px 7px 15px color-mix(in srgb,var(--house-ink) 20%,transparent)}
+html:not([data-house="slytherin"]) .spell-nav__list span,
+html:not([data-house="slytherin"]) .spell-nav__list small{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .filter.active{background:var(--house-mid);border-color:var(--house-mid);color:var(--house-text)}
+html:not([data-house="slytherin"]) .filter{border-color:color-mix(in srgb,var(--house-ink) 38%,transparent);color:var(--house-ink)}
+html:not([data-house="slytherin"]) .post-row{border-color:color-mix(in srgb,var(--house-ink) 25%,transparent)}
+html:not([data-house="slytherin"]) .post-row:hover{background:color-mix(in srgb,var(--house-accent) 24%,var(--house-paper))}
+html:not([data-house="slytherin"]) .post-text strong,
+html:not([data-house="slytherin"]) .post-index,
+html:not([data-house="slytherin"]) .post-arrow{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .about-copy,
+html:not([data-house="slytherin"]) .now-card,
+html:not([data-house="slytherin"]) .calendar-shell,
+html:not([data-house="slytherin"]) .contact-options a,
+html:not([data-house="slytherin"]) .article-pagination a{background:radial-gradient(circle at 90% 9%,color-mix(in srgb,var(--house-accent) 11%,transparent),transparent 40%),linear-gradient(145deg,var(--house-mid),var(--house-deep));border-color:color-mix(in srgb,var(--house-accent) 45%,transparent);box-shadow:inset 0 0 0 5px var(--house-deep),inset 0 0 0 6px color-mix(in srgb,var(--house-accent) 24%,transparent)}
+html:not([data-house="slytherin"]) .about-copy dd,
+html:not([data-house="slytherin"]) .contact-options strong{color:var(--house-text)}
+html:not([data-house="slytherin"]) .about-copy dt,
+html:not([data-house="slytherin"]) .contact-options span,
+html:not([data-house="slytherin"]) .calendar-weekdays span,
+html:not([data-house="slytherin"]) .calendar-day,
+html:not([data-house="slytherin"]) .calendar-detail{color:var(--house-muted)}
+html:not([data-house="slytherin"]) .calendar-head,
+html:not([data-house="slytherin"]) .calendar-weekdays span,
+html:not([data-house="slytherin"]) .calendar-day{border-color:color-mix(in srgb,var(--house-accent) 22%,transparent)}
+html:not([data-house="slytherin"]) .calendar-day:hover,
+html:not([data-house="slytherin"]) .calendar-day.selected{background:var(--house-mid2);box-shadow:inset 0 0 22px color-mix(in srgb,var(--house-accent) 19%,transparent)}
+html:not([data-house="slytherin"]) .calendar-day.today{box-shadow:inset 0 0 0 1px var(--house-accent)}
+html:not([data-house="slytherin"]) .calendar-day i{background:var(--house-accent);box-shadow:0 0 10px var(--house-accent)}
+html:not([data-house="slytherin"]) .work-list a{border-color:color-mix(in srgb,var(--house-accent) 30%,transparent)}
+html:not([data-house="slytherin"]) .work-list a:hover{background:linear-gradient(90deg,var(--house-mid),var(--house-bg))}
+html:not([data-house="slytherin"]) .work-list span,
+html:not([data-house="slytherin"]) .work-list b,
+html:not([data-house="slytherin"]) .quiet-link{color:var(--house-accent)}
+html:not([data-house="slytherin"]) .article-book{background:var(--house-paper);border-color:var(--house-border);box-shadow:inset 0 0 0 7px var(--house-paper),inset 0 0 0 8px color-mix(in srgb,var(--house-ink) 34%,transparent),12px 20px 45px #0006}
+html:not([data-house="slytherin"]) .article-book__spine{background:var(--house-mid)}
+html:not([data-house="slytherin"]) .article-content{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .article-content h2,
+html:not([data-house="slytherin"]) .article-content h3,
+html:not([data-house="slytherin"]) .article-content h4,
+html:not([data-house="slytherin"]) .article-content a{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .article-content pre{background:var(--house-deep);color:var(--house-text)}
+html:not([data-house="slytherin"]) .article-marginalia{background:var(--house-paper2);color:var(--house-ink);border-color:var(--house-border)}
+html:not([data-house="slytherin"]) .spellbook__menu button{color:var(--house-ink);border-color:color-mix(in srgb,var(--house-ink) 24%,transparent)}
+html:not([data-house="slytherin"]) .spellbook__menu button:hover,
+html:not([data-house="slytherin"]) .spellbook__menu button[aria-pressed="true"]{background:color-mix(in srgb,var(--house-accent) 24%,var(--house-paper))}
+html:not([data-house="slytherin"]) .spellbook__menu small,
+html:not([data-house="slytherin"]) .spellbook__heading small{color:var(--house-ink)}
+html:not([data-house="slytherin"]) footer{border-color:color-mix(in srgb,var(--house-accent) 30%,transparent);color:var(--house-muted)}
+
+/* Keep each destination's animation while using the selected house's pigment. */
+html:not([data-house="slytherin"]) .spell-gate{color:var(--house-text)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="home"],
+html:not([data-house="slytherin"]) .spell-gate[data-scene="entrance"]{background:radial-gradient(circle,var(--house-paper),var(--house-paper2))}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="home"] .spell-gate__name,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="entrance"] .spell-gate__name,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="home"] small,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="entrance"] small,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="about"] .spell-gate__name,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="about"] small{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="home"] .spell-gate__scene:after,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="entrance"] .spell-gate__scene:after{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="about"],
+html:not([data-house="slytherin"]) .spell-gate[data-scene="calendar"]{background:radial-gradient(circle,var(--house-mid2),var(--house-deep) 76%)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="about"] .spell-gate__scene i:first-child{background:linear-gradient(130deg,var(--house-paper),var(--house-paper2));border-color:var(--house-paper)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="work"]{background:linear-gradient(105deg,var(--house-deep),var(--house-mid2) 52%,var(--house-deep))}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="work"] .spell-gate__scene i{background:linear-gradient(90deg,transparent,var(--house-spark),transparent);box-shadow:0 0 18px var(--house-spark)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="journal"]{background:var(--house-deep)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="journal"] .spell-gate__scene i:first-child,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="journal"] .spell-gate__scene i:nth-child(2){background:linear-gradient(115deg,var(--house-paper2),var(--house-paper) 70%,var(--house-paper2))}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="journal"] .spell-gate__name,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="journal"] small{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="calendar"] .spell-gate__scene i:first-child{border-color:var(--house-accent);box-shadow:0 0 0 27px color-mix(in srgb,var(--house-accent) 32%,transparent),inset 0 0 50px color-mix(in srgb,var(--house-accent) 15%,transparent)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="calendar"] .spell-gate__scene i:nth-child(2){background:var(--house-accent);box-shadow:0 0 16px var(--house-accent)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="now"]{background:var(--house-deep)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="now"] .spell-gate__scene{background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--house-spark) 55%,transparent),transparent 15%),conic-gradient(from 0deg at 50% 50%,transparent,color-mix(in srgb,var(--house-accent) 31%,transparent),transparent,color-mix(in srgb,var(--house-spark) 38%,transparent),transparent)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="contact"]{background:var(--house-deep)}
+html:not([data-house="slytherin"]) .spell-gate[data-scene="contact"] .spell-gate__scene i:first-child,
+html:not([data-house="slytherin"]) .spell-gate[data-scene="contact"] .spell-gate__scene i:nth-child(2){background:linear-gradient(90deg,var(--house-mid),var(--house-deep));border-color:var(--house-border);box-shadow:inset 0 0 0 7px var(--house-deep),inset 0 0 0 8px color-mix(in srgb,var(--house-accent) 45%,transparent)}
+
+@media(max-width:760px){
+  .header-actions,.article-header__actions{gap:8px}
+  .site-header{padding-inline:4%}
+  .house-picker__toggle{padding:5px;min-height:36px}
+  .house-picker__current,.house-picker__chevron{display:none}
+  .house-picker__mark{width:27px;height:27px;flex-basis:27px}
+  .entrance-top .house-picker__toggle{padding:3px}
+  .article-header__back{font-size:12px;white-space:nowrap}
+}
+@media(max-width:540px){
+  .site-header .brand{font-size:19px;gap:8px}
+  .site-header .brand-symbol{width:38px;height:40px;font-size:29px;flex:0 0 38px}
+  .site-header .menu-toggle{font-size:11px;padding:7px;gap:4px}
+  .site-header .menu-toggle span:nth-child(2){font-size:11px}
+  .site-header .menu-toggle__star{font-size:15px}
+  .site-header .menu-toggle__arrow{font-size:15px}
+  .house-picker__toggle{min-height:34px;padding:3px}
+  .house-picker__mark{width:25px;height:25px;flex-basis:25px;font-size:17px}
+  .article-header{padding-inline:4%}
+  .article-header .brand{font-size:18px;gap:7px}
+  .article-header .brand-symbol{width:37px;height:39px;font-size:28px}
+  .article-header__back{font-size:11px;letter-spacing:0}
+}
+@media(max-width:380px){
+  .site-header .brand small{font-size:7px}
+  .site-header .menu-toggle span:nth-child(2){font-size:0}
+  .site-header .menu-toggle span:nth-child(2):after{content:'SPELLS';font-size:11px}
+  .article-header__back{font-size:0}
+  .article-header__back:after{content:'← JOURNAL';font-size:12px}
+}
+html:not([data-house="slytherin"]) .home-sigil__halo{background:radial-gradient(circle,color-mix(in srgb,var(--house-accent) 23%,transparent),transparent 67%)}
+html:not([data-house="slytherin"]) .journal-shell:before,
+html:not([data-house="slytherin"]) .journal-shell:after,
+html:not([data-house="slytherin"]) .post-row:before{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .search-wrap,
+html:not([data-house="slytherin"]) .search-wrap input,
+html:not([data-house="slytherin"]) .post-text small,
+html:not([data-house="slytherin"]) .journal-caption,
+html:not([data-house="slytherin"]) .more-button,
+html:not([data-house="slytherin"]) .empty-posts{color:var(--house-ink)}
+html:not([data-house="slytherin"]) .more-button{border-color:var(--house-ink)}
+html:not([data-house="slytherin"]) .more-button:hover{background:color-mix(in srgb,var(--house-accent) 22%,var(--house-paper))}
+html:not([data-house="slytherin"]) .calendar-head button{color:var(--house-text);border-color:var(--house-accent)}
+html:not([data-house="slytherin"]) .calendar-head button:hover{background:var(--house-mid2)}
+html:not([data-house="slytherin"]) .contact-options a:after{color:var(--house-accent)}
+html:not([data-house="slytherin"]) .article-intro__rune{color:var(--house-accent);filter:drop-shadow(0 0 9px var(--house-accent))}
+html:not([data-house="slytherin"]) .article-content:before{color:var(--house-ink);border-color:color-mix(in srgb,var(--house-ink) 35%,transparent)}
+html:not([data-house="slytherin"]) .article-return .button{border-color:var(--house-accent)}
+html:not([data-house="slytherin"]) .article-return .button:hover{background:var(--house-mid)}
+html:not([data-house="slytherin"]) .spellbook__toast{color:var(--house-ink);border-color:var(--house-border);background:var(--house-paper)}
+html:not([data-house="slytherin"]) .spellbook__toggle span{color:var(--house-accent)}
+@media(max-width:760px){.house-picker__menu{position:fixed;top:76px;right:15px;left:auto;width:min(318px,calc(100vw - 30px))}}
+.archway-crest{transform:translateY(-22px)}
+
+/* A small Sorting Hat ceremony appears only when the visitor changes houses. */
+.house-picker__voice{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:9px 8px 2px;border:0;border-top:1px solid #b3aa91;background:none;color:#575743;text-align:left;font:600 12px 'Cormorant Garamond',Georgia,serif;letter-spacing:.14em}
+.house-picker__voice:hover{color:#232d22}.house-picker__voice>span:first-child{font-size:19px;line-height:1}.house-picker__voice[aria-pressed="false"]{opacity:.65}.house-picker__voice:focus-visible{outline-color:#4e5943}
+.sorting-reveal{--sorting-accent:#b7d2bc;--sorting-core:#23432e;position:fixed;inset:0;z-index:1200;display:grid;place-items:center;overflow:hidden;padding:55px 22px;color:#f4ecdb;background:radial-gradient(ellipse at 50% 45%,var(--sorting-core),#0d1011 72%);opacity:0;pointer-events:none;isolation:isolate;transition:opacity .26s ease}
+.sorting-reveal[hidden]{display:none}
+.sorting-reveal.is-visible{opacity:1;pointer-events:auto}.sorting-reveal.is-leaving{opacity:0}
+.sorting-reveal[data-sorting-house="gryffindor"]{--sorting-accent:#e8bd73;--sorting-core:#55202a}
+.sorting-reveal[data-sorting-house="ravenclaw"]{--sorting-accent:#d0ad83;--sorting-core:#173e62}
+.sorting-reveal[data-sorting-house="hufflepuff"]{--sorting-accent:#f3d173;--sorting-core:#55482a}
+.sorting-reveal__aura{position:absolute;inset:-35%;background:radial-gradient(circle at 50% 47%,color-mix(in srgb,var(--sorting-accent) 18%,transparent),transparent 28%),repeating-conic-gradient(from -9deg at 50% 50%,color-mix(in srgb,var(--sorting-accent) 7%,transparent) 0deg 1deg,transparent 1deg 21deg);opacity:.7;animation:sorting-aura 12s linear infinite;pointer-events:none}
+.sorting-reveal__aura:before,.sorting-reveal__aura:after{content:'';position:absolute;left:50%;top:50%;width:min(520px,85vw);aspect-ratio:1;border:1px solid color-mix(in srgb,var(--sorting-accent) 22%,transparent);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 30px color-mix(in srgb,var(--sorting-accent) 4%,transparent),0 0 0 31px color-mix(in srgb,var(--sorting-accent) 13%,transparent)}
+.sorting-reveal__aura:after{width:min(720px,110vw);border-style:dashed;opacity:.4}
+.sorting-reveal__stars{position:absolute;inset:0;pointer-events:none}.sorting-reveal__stars i{position:absolute;color:var(--sorting-accent);font:28px 'Cormorant Garamond',serif;opacity:0;animation:sorting-star 2.7s ease-in-out infinite}.sorting-reveal__stars i:nth-child(1){left:16%;top:18%;animation-delay:.2s}.sorting-reveal__stars i:nth-child(2){left:76%;top:15%;animation-delay:1.2s}.sorting-reveal__stars i:nth-child(3){left:83%;top:62%;animation-delay:.6s}.sorting-reveal__stars i:nth-child(4){left:12%;top:67%;animation-delay:1.8s}.sorting-reveal__stars i:nth-child(5){left:31%;top:79%;animation-delay:1s}.sorting-reveal__stars i:nth-child(6){left:67%;top:82%;animation-delay:2.1s}
+.sorting-reveal__content{position:relative;z-index:1;display:grid;justify-items:center;align-content:center;width:min(920px,100%);min-height:570px;text-align:center}
+.sorting-reveal__eyebrow{color:var(--sorting-accent);font:600 15px 'Cormorant Garamond',Georgia,serif;letter-spacing:.36em;margin:0 0 12px;opacity:0;animation:sorting-ink .5s ease .15s both}
+.sorting-reveal__hat{width:clamp(155px,21vw,225px);height:auto;filter:drop-shadow(0 18px 20px #0009) drop-shadow(0 0 25px color-mix(in srgb,var(--sorting-accent) 30%,transparent));transform-origin:50% 80%;animation:sorting-hat-think 1.35s ease-in-out infinite alternate}.sorting-reveal__hat svg{width:100%;overflow:visible}.sorting-reveal__hat-crown{fill:#5b4635;stroke:#d0b989;stroke-width:2.3;stroke-linejoin:round}.sorting-reveal__hat-fold{fill:none;stroke:#b99b75;stroke-width:3.1;stroke-linecap:round}.sorting-reveal__hat-face{fill:#2c221d;stroke:#af936d;stroke-width:2;transform-origin:50% 70%;transition:transform .35s}.sorting-reveal__hat-brim{fill:#35291f;stroke:#c7aa7c;stroke-width:2.2}
+.sorting-reveal__line{min-height:1.5em;max-width:700px;margin:5px 0 0;color:#f4e8d3;font:italic 500 clamp(30px,4.5vw,55px)/1.2 'Cormorant Garamond',Georgia,serif;text-shadow:0 2px 15px #000b;opacity:0;animation:sorting-ink .6s ease .3s both}
+.sorting-reveal__house{display:block;max-width:100%;margin:2px 0 0;color:var(--sorting-accent);font:600 clamp(48px,8.4vw,118px)/.95 'Cormorant Garamond',Georgia,serif;letter-spacing:.08em;text-shadow:0 0 22px color-mix(in srgb,var(--sorting-accent) 50%,transparent),0 3px 20px #0009;opacity:0;transform:scale(.62) translateY(18px);filter:blur(8px)}
+.sorting-reveal.is-announced .sorting-reveal__house{animation:sorting-shout .68s cubic-bezier(.14,1.3,.25,1) both}.sorting-reveal.is-announced .sorting-reveal__hat-face{transform:scaleY(1.42)}.sorting-reveal.is-announced .sorting-reveal__hat{animation:sorting-hat-shout .45s ease both}.sorting-reveal.is-announced .sorting-reveal__aura:before{animation:sorting-burst .65s ease-out both}
+.sorting-reveal__after{display:block;margin-top:17px;color:color-mix(in srgb,var(--sorting-accent) 84%,#fff);font:600 12px 'Cormorant Garamond',Georgia,serif;letter-spacing:.25em;opacity:0;transition:opacity .5s ease .35s}.sorting-reveal.is-announced .sorting-reveal__after{opacity:.85}
+.sorting-reveal__skip{position:absolute;z-index:2;top:25px;right:clamp(20px,5vw,70px);border:1px solid color-mix(in srgb,var(--sorting-accent) 56%,transparent);padding:10px 16px;color:#f5ebd7;background:#121a17a6;font:600 12px 'Cormorant Garamond',Georgia,serif;letter-spacing:.18em}.sorting-reveal__skip:hover{background:var(--sorting-core);border-color:var(--sorting-accent)}
+@keyframes sorting-aura{to{transform:rotate(360deg)}}
+@keyframes sorting-ink{from{opacity:0;transform:translateY(18px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes sorting-hat-think{from{transform:rotate(-3deg) translateY(1px)}to{transform:rotate(3deg) translateY(-7px)}}
+@keyframes sorting-hat-shout{0%{transform:scale(.92) rotate(-5deg)}60%{transform:scale(1.1) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes sorting-shout{0%{opacity:0;transform:scale(.62) translateY(18px);filter:blur(8px)}60%{opacity:1;transform:scale(1.08) translateY(-5px);filter:blur(0)}100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}}
+@keyframes sorting-burst{0%{opacity:.3;transform:translate(-50%,-50%) scale(.5)}100%{opacity:1;transform:translate(-50%,-50%) scale(1.45)}}
+@keyframes sorting-star{0%,100%{opacity:0;transform:translateY(15px) scale(.5)}45%{opacity:.9;transform:translateY(-7px) scale(1.2)}}
+@media(max-width:760px){.sorting-reveal__content{min-height:460px}.sorting-reveal__eyebrow{font-size:12px;letter-spacing:.28em}.sorting-reveal__hat{width:165px}.sorting-reveal__line{font-size:clamp(29px,7vw,43px)}.sorting-reveal__house{font-size:clamp(42px,11vw,72px);letter-spacing:.03em}.sorting-reveal__after{font-size:10px;letter-spacing:.16em}}
+@media(max-width:380px){.sorting-reveal__hat{width:140px}.sorting-reveal__house{font-size:40px}.sorting-reveal__content{min-height:420px}}
+@media(prefers-reduced-motion:reduce){.sorting-reveal,.sorting-reveal__aura,.sorting-reveal__stars i,.sorting-reveal__hat,.sorting-reveal__line,.sorting-reveal__eyebrow,.sorting-reveal__house,.sorting-reveal__after{animation:none!important;transition:none!important}.sorting-reveal__line,.sorting-reveal__eyebrow,.sorting-reveal.is-announced .sorting-reveal__house,.sorting-reveal.is-announced .sorting-reveal__after{opacity:1;transform:none;filter:none}}

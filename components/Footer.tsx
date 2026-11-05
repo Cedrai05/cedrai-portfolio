@@ -13,11 +13,11 @@ export default function Footer({ variant = 'portfolio' }: { variant?: 'portfolio
       }}
     >
       <span style={{ fontSize: '12px', color: 'var(--tx2)', letterSpacing: '.08em' }}>
-        © 2026 <span style={{ color: 'var(--acc)' }}>Cédrai</span> — {variant === 'blog' ? 'FIELD NOTES' : 'NEXT.JS + VERCEL'}
+        © 2026 <span style={{ color: 'var(--acc)' }}>Cédrai</span> — THE HIDDEN ARCHIVE{variant === 'blog' ? ' / FIELD NOTES' : ''}
       </span>
       {variant === 'blog' && <div className="footer-links"><a href="https://github.com/Cedrai05" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><Link href="/" prefetch>PORTFOLIO ↗</Link></div>}
       <span style={{ fontSize: '12px', color: 'var(--tx2)', letterSpacing: '.08em' }}>
-        BREAK → UNDERSTAND → BUILD
+        MISCHIEF MANAGED ✦
       </span>
     </footer>
   )

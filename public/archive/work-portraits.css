@@ -1,0 +1,62 @@
+/* The work chapter becomes a small enchanted portrait gallery. */
+.work-list.is-enchanted{display:grid;gap:22px;border:0}
+.work-list.is-enchanted .work-entry{position:relative;display:grid;grid-template-columns:90px minmax(0,1fr) minmax(260px,32%) 31px;grid-template-areas:"number copy art arrow";align-items:center;gap:clamp(15px,2.6vw,35px);min-height:226px;padding:21px 8px;border:0;border-top:1px solid color-mix(in srgb,var(--house-accent) 39%,transparent);border-bottom:1px solid color-mix(in srgb,var(--house-accent) 24%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--house-mid) 25%,transparent),transparent 57%);box-shadow:none;transition:background .35s,padding .35s}
+.work-list.is-enchanted .work-entry:nth-child(2){grid-template-columns:minmax(260px,32%) 90px minmax(0,1fr) 31px;grid-template-areas:"art number copy arrow";background:linear-gradient(270deg,color-mix(in srgb,var(--house-mid) 25%,transparent),transparent 57%)}
+.work-list.is-enchanted .work-entry:hover,.work-list.is-enchanted .work-entry:focus-visible{padding-left:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--house-mid) 45%,transparent),transparent 75%)}
+.work-list.is-enchanted .work-entry:nth-child(2):hover,.work-list.is-enchanted .work-entry:nth-child(2):focus-visible{background:linear-gradient(270deg,color-mix(in srgb,var(--house-mid) 45%,transparent),transparent 75%)}
+.work-list.is-enchanted .work-entry:before{content:'✦';left:-7px;color:var(--house-accent);opacity:.42}
+.work-list.is-enchanted .work-entry:hover:before,.work-list.is-enchanted .work-entry:focus-visible:before{opacity:1}
+.work-entry__number{grid-area:number;align-self:start;padding-top:9px;color:var(--house-accent)!important;font:600 13px 'Cormorant Garamond',Georgia,serif!important;letter-spacing:.15em!important;white-space:nowrap}
+.work-entry__copy{grid-area:copy;display:flex;flex-direction:column;align-items:flex-start;gap:13px;min-width:0}
+.work-list.is-enchanted .work-entry__copy strong{color:var(--house-text);font:500 clamp(30px,3.2vw,43px)/1.04 'Cormorant Garamond',Georgia,serif}
+.work-list.is-enchanted .work-entry__copy small{color:var(--house-muted);font:400 16px/1.65 'SchoolSafetyWizard',serif;letter-spacing:0}
+.work-entry__arrow{grid-area:arrow;align-self:start;padding-top:7px;color:var(--house-accent)!important;font:400 25px 'Cormorant Garamond',Georgia,serif!important;transition:transform .3s}
+.work-entry:hover .work-entry__arrow,.work-entry:focus-visible .work-entry__arrow{transform:translate(4px,-4px)}
+.work-portrait{grid-area:art;position:relative;display:block;width:100%;aspect-ratio:1.87;min-height:170px;overflow:hidden;border:7px ridge color-mix(in srgb,var(--house-accent) 55%,#665c49);background:radial-gradient(circle at 75% 18%,color-mix(in srgb,var(--house-mid2) 71%,#121d1c),var(--house-deep) 71%);box-shadow:0 0 0 1px color-mix(in srgb,var(--house-accent) 44%,transparent),0 13px 25px #0008,inset 0 0 0 1px color-mix(in srgb,var(--house-accent) 55%,transparent),inset 0 0 27px #0009;transform:perspective(700px) rotateY(0) rotateZ(0);transition:transform .4s ease,box-shadow .4s ease}
+.work-portrait:before{content:'✧';position:absolute;z-index:3;top:5px;left:10px;color:var(--house-accent);font:22px 'Cormorant Garamond',serif;text-shadow:0 0 12px var(--house-spark);opacity:.75}
+.work-portrait:after{content:'';position:absolute;z-index:2;inset:0;background:linear-gradient(108deg,transparent 28%,#fff6 50%,transparent 71%);transform:translateX(-130%);transition:transform .75s ease;pointer-events:none}
+.work-entry:hover .work-portrait,.work-entry:focus-visible .work-portrait{transform:perspective(700px) rotateY(-2deg) rotateZ(-.5deg) translateY(-4px);box-shadow:0 0 0 1px var(--house-accent),0 20px 35px #0009,0 0 34px color-mix(in srgb,var(--house-spark) 25%,transparent)}
+.work-entry:nth-child(2):hover .work-portrait,.work-entry:nth-child(2):focus-visible .work-portrait{transform:perspective(700px) rotateY(2deg) rotateZ(.5deg) translateY(-4px)}
+.work-entry:hover .work-portrait:after,.work-entry:focus-visible .work-portrait:after{transform:translateX(130%)}
+.work-portrait svg{position:relative;display:block;width:100%;height:100%;transform:translate(var(--portrait-x,0),var(--portrait-y,0)) scale(1.045);transition:transform .25s ease;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--house-spark) 20%,transparent))}
+.portrait-horizon{fill:color-mix(in srgb,var(--house-mid) 62%,#0b141a)}
+.portrait-orbit,.portrait-constellation{fill:none;stroke:color-mix(in srgb,var(--house-accent) 53%,transparent);stroke-width:1.2}
+.portrait-orbit{stroke-dasharray:3 7}
+.portrait-page,.portrait-book,.portrait-castle,.portrait-lens,.portrait-lock,.portrait-quill,.portrait-seal{transform-box:fill-box;transform-origin:center;transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s,opacity .7s}
+.portrait-page path:first-child,.portrait-book path:first-child,.portrait-book path:nth-child(2){fill:color-mix(in srgb,var(--house-paper) 90%,#fff);stroke:var(--house-accent);stroke-width:2}
+.portrait-page path:not(:first-child),.portrait-book path:last-child{fill:none;stroke:color-mix(in srgb,var(--house-ink) 65%,transparent);stroke-width:2;stroke-linecap:round}
+.portrait-page .portrait-print{stroke-width:2.5;opacity:.7}
+.portrait-lens circle{fill:#dff7ff23;stroke:#e8f5e7;stroke-width:5}
+.portrait-lens circle:nth-child(2){stroke-width:1.5;stroke-dasharray:5 8}
+.portrait-lens path{fill:none;stroke:#e8f5e7;stroke-width:12;stroke-linecap:round}
+.portrait-lens .portrait-lens-glint{stroke-width:3;opacity:.75}
+.portrait-moon{fill:color-mix(in srgb,var(--house-spark) 45%,#e6e9d0);filter:drop-shadow(0 0 16px var(--house-spark))}
+.portrait-castle path:first-child{fill:color-mix(in srgb,var(--house-mid) 75%,#101218);stroke:var(--house-accent);stroke-width:2}
+.portrait-castle path:last-child{fill:none;stroke:var(--house-accent);stroke-width:2.5}
+.portrait-lock circle{fill:var(--house-deep);stroke:var(--house-accent);stroke-width:3}
+.portrait-lock circle:nth-child(2){fill:none;stroke-width:1.4;stroke-dasharray:4 5}
+.portrait-lock path{fill:var(--house-spark);stroke:none}
+.portrait-beam{fill:var(--house-spark);opacity:0;filter:blur(14px);transition:opacity .7s}
+.portrait-book path:last-child{fill:none;stroke:color-mix(in srgb,var(--house-ink) 58%,transparent);stroke-width:2;stroke-linecap:round}
+.portrait-ink{fill:none;stroke:var(--house-ink);stroke-width:3;stroke-linecap:round;stroke-dasharray:170;stroke-dashoffset:170;transition:stroke-dashoffset 1s ease}
+.portrait-quill path:first-child{fill:color-mix(in srgb,var(--house-accent) 74%,#f4ecdc);stroke:var(--house-text);stroke-width:2}
+.portrait-quill path:not(:first-child){fill:none;stroke:var(--house-ink);stroke-width:2;stroke-linecap:round}
+.portrait-seal circle{fill:color-mix(in srgb,var(--house-accent) 65%,#7d3e35);stroke:var(--house-ink);stroke-width:3}
+.portrait-seal path{fill:var(--house-paper)}
+.portrait-spark{fill:var(--house-spark);filter:drop-shadow(0 0 6px var(--house-spark));animation:portrait-twinkle 3s ease-in-out infinite}
+.portrait-spark--two{animation-delay:-1.5s}
+.work-entry:hover .portrait-page,.work-entry:focus-visible .portrait-page{transform:translate(-4px,4px) rotate(-2deg)}
+.work-entry:hover .portrait-lens,.work-entry:focus-visible .portrait-lens{transform:translate(-18px,8px) rotate(-3deg)}
+.work-entry:hover .portrait-castle,.work-entry:focus-visible .portrait-castle{transform:translateY(-5px)}
+.work-entry:hover .portrait-lock,.work-entry:focus-visible .portrait-lock{transform:rotate(28deg) scale(1.08);filter:drop-shadow(0 0 12px var(--house-spark))}
+.work-entry:hover .portrait-beam,.work-entry:focus-visible .portrait-beam{opacity:.35}
+.work-entry:hover .portrait-book,.work-entry:focus-visible .portrait-book{transform:translateY(-4px)}
+.work-entry:hover .portrait-quill,.work-entry:focus-visible .portrait-quill{transform:translate(-12px,-8px) rotate(-8deg)}
+.work-entry:hover .portrait-ink,.work-entry:focus-visible .portrait-ink{stroke-dashoffset:0}
+.work-entry:hover .portrait-seal,.work-entry:focus-visible .portrait-seal{transform:rotate(16deg) scale(1.09);filter:drop-shadow(0 0 11px var(--house-spark))}
+@keyframes portrait-twinkle{0%,100%{opacity:.25;transform:scale(.6)}50%{opacity:1;transform:scale(1.3)}}
+
+@media(max-width:900px){.work-list.is-enchanted .work-entry,.work-list.is-enchanted .work-entry:nth-child(2){grid-template-columns:64px minmax(0,1fr) minmax(200px,34%) 26px;gap:14px}.work-portrait{min-height:145px}.work-list.is-enchanted .work-entry__copy strong{font-size:32px}}
+@media(max-width:700px){.work-list.is-enchanted .work-entry,.work-list.is-enchanted .work-entry:nth-child(2){grid-template-columns:minmax(0,1fr) minmax(135px,42%) 22px;grid-template-areas:"number art arrow" "copy art arrow";align-items:start;min-height:165px;padding:18px 4px;gap:9px 14px}.work-entry__copy{gap:8px}.work-list.is-enchanted .work-entry__copy strong{font-size:29px}.work-list.is-enchanted .work-entry__copy small{font-size:14px}.work-portrait{min-height:0;aspect-ratio:1.3}}
+@media(max-width:480px){.work-list.is-enchanted{gap:18px}.work-list.is-enchanted .work-entry,.work-list.is-enchanted .work-entry:nth-child(2){grid-template-columns:minmax(0,1fr) 22px;grid-template-areas:"number arrow" "art art" "copy copy";gap:9px;min-height:0;padding:14px 3px 18px}.work-portrait{aspect-ratio:1.87;min-height:175px}.work-list.is-enchanted .work-entry__copy strong{font-size:31px}.work-list.is-enchanted .work-entry__copy small{font-size:15px}.work-entry__number,.work-entry__arrow{padding-top:0}}
+@media(prefers-reduced-motion:reduce){.work-list.is-enchanted .work-entry,.work-portrait,.work-portrait svg,.portrait-page,.portrait-book,.portrait-castle,.portrait-lens,.portrait-lock,.portrait-quill,.portrait-seal,.portrait-ink,.portrait-beam,.work-entry__arrow{transition:none!important}.portrait-spark{animation:none!important;opacity:.6}.work-entry:hover .work-portrait,.work-entry:focus-visible .work-portrait,.work-entry:nth-child(2):hover .work-portrait,.work-entry:nth-child(2):focus-visible .work-portrait{transform:none}.work-portrait:after{display:none}}

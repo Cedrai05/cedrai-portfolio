@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <base href="/archive/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071210">
+  <meta name="description" content="Cédrai의 보안·디지털 포렌식 기록을 담은 마법의 아카이브.">
+  <title>Cédrai — The Hidden Archive</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script>
+    try {
+      const house = localStorage.getItem('cedrai-house');
+      document.documentElement.dataset.house = ['slytherin','gryffindor','ravenclaw','hufflepuff'].includes(house) ? house : 'slytherin';
+      if (!location.hash && sessionStorage.getItem('cedrai-entered') !== '1' && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('map-loading');
+    } catch {
+      document.documentElement.dataset.house = 'slytherin';
+      if (!location.hash && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('map-loading');
+    }
+  </script>
+  <link rel="stylesheet" href="style.css?v=enchanted-9">
+  <link rel="stylesheet" href="houses.css?v=enchanted-9">
+  <link rel="stylesheet" href="dock.css?v=enchanted-9">
+  <link rel="stylesheet" href="enchanted.css?v=enchanted-9">
+  <link rel="stylesheet" href="work-portraits.css?v=portraits-10">
+  <link rel="stylesheet" href="quotes.css?v=quotes-14">
+  <link rel="stylesheet" href="field-notes.css?v=notes-1">
+  <link rel="stylesheet" href="login.css?v=login-1">
+  <script src="houses.js?v=enchanted-9" defer></script>
+  <script src="magic.js?v=enchanted-9" defer></script>
+  <script src="field-notes.js?v=notes-1" defer></script>
+  <script src="login.js?v=login-1" defer></script>
+  <script src="app.js?v=notes-1" defer></script>
+  <script src="work-portraits.js?v=portraits-10" defer></script>
+  <script src="quotes.js?v=quotes-14" defer></script>
+</head>
+<body>
+  <div class="spell-gate" id="spell-gate" aria-hidden="true"><div class="spell-gate__scene" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="spell-gate__rune">✧</div><span class="spell-gate__name" id="spell-gate-name">Revelio</span><small id="spell-gate-caption">기록을 펼치는 중</small></div>
+  <div class="map-loader" id="map-loader" role="status" aria-label="The hidden map is appearing">
+    <div class="map-loader__folds" aria-hidden="true"></div>
+    <svg class="map-loader__drawing" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <g id="map-step" fill="#533c2b"><ellipse cx="-6" cy="-3" rx="5" ry="8" transform="rotate(-24 -6 -3)"/><ellipse cx="6" cy="4" rx="5" ry="8" transform="rotate(23 6 4)"/></g>
+      </defs>
+      <g class="map-loader__lines map-loader__lines--frame">
+        <path pathLength="100" d="M36 56H1164V664H36Z M55 74H1145V646H55Z"/>
+        <path pathLength="100" d="M96 112H1104M96 608H1104M114 130V590M1086 130V590"/>
+        <path pathLength="100" d="M399 56V664M801 56V664"/>
+      </g>
+      <g class="map-loader__lines map-loader__lines--rooms">
+        <path pathLength="100" d="M134 166H320V250H270V294H134Z M165 194H285V223H165Z M134 333H295V480H245V539H134Z M164 363H267V450H164Z"/>
+        <path pathLength="100" d="M431 132H768V183H705V214H494V183H431Z M465 506H735V568H465Z M514 525H687V550H514Z"/>
+        <path pathLength="100" d="M875 162H1061V267H1015V300H875Z M904 191H1032V241H904Z M885 394H1062V548H1018V577H885Z M915 424H1033V519H915Z"/>
+      </g>
+      <g class="map-loader__lines map-loader__lines--routes">
+        <path pathLength="100" d="M320 210H370V290H430M295 408H368V483H456M769 158H829V210H875M736 538H812V471H885"/>
+        <path pathLength="100" d="M362 247C401 247 402 345 462 345M812 208C763 222 775 320 718 326M330 537C424 595 470 585 525 570M860 405C796 367 744 399 713 433"/>
+        <path pathLength="100" d="M104 311H337M867 350H1092M414 596H786M404 94V168M796 563V626"/>
+      </g>
+      <g class="map-loader__lines map-loader__lines--ornament">
+        <path pathLength="100" d="M600 76L608 96 628 104 608 112 600 132 592 112 572 104 592 96Z M600 590L606 604 620 610 606 616 600 630 594 616 580 610 594 604Z"/>
+        <path pathLength="100" d="M92 96l25 0m-12-12v24M1108 96l-25 0m12-12v24M92 624h25m-12-12v24M1108 624h-25m12-12v24"/>
+        <path pathLength="100" d="M530 240C505 217 470 219 449 242M670 240c25-23 60-21 81 2M530 475c-25 23-60 21-81-2M670 475c25 23 60 21 81-2"/>
+      </g>
+      <g class="map-loader__steps">
+        <use href="#map-step" x="189" y="555" style="--step:1.12s"/><use href="#map-step" x="215" y="535" style="--step:1.27s"/><use href="#map-step" x="246" y="515" style="--step:1.42s"/><use href="#map-step" x="282" y="496" style="--step:1.57s"/><use href="#map-step" x="320" y="486" style="--step:1.72s"/><use href="#map-step" x="355" y="470" style="--step:1.87s"/>
+        <use href="#map-step" x="816" y="278" style="--step:1.38s"/><use href="#map-step" x="844" y="263" style="--step:1.53s"/><use href="#map-step" x="871" y="247" style="--step:1.68s"/><use href="#map-step" x="898" y="231" style="--step:1.83s"/><use href="#map-step" x="925" y="215" style="--step:1.98s"/>
+      </g>
+      <g class="map-loader__steps map-loader__mobile-steps">
+        <use href="#map-step" x="470" y="558" style="--step:1.30s"/><use href="#map-step" x="500" y="547" style="--step:1.47s"/><use href="#map-step" x="530" y="537" style="--step:1.64s"/><use href="#map-step" x="560" y="525" style="--step:1.81s"/><use href="#map-step" x="590" y="514" style="--step:1.98s"/>
+      </g>
+    </svg>
+    <div class="map-loader__inscription" aria-hidden="true"><span>THE SECRET ROUTE TO</span><strong>THE HIDDEN<br>ARCHIVE</strong><em>Revelio</em><p>발자국을 따라 숨겨진 기록이 드러납니다.</p></div>
+    <div class="map-loader__progress" aria-hidden="true"><span>INK REVEALING</span><i></i><span>01 / 06</span></div>
+    <button class="map-loader__skip" id="skip-map-loader" type="button">SKIP INTRO <span aria-hidden="true">↗</span></button>
+  </div>
+  <section class="entrance" id="entrance" aria-labelledby="entrance-title">
+    <div class="entrance-wash" aria-hidden="true"></div>
+    <div class="entrance-top"><span>CÉDRAI / PERSONAL ARCHIVE</span><span>THE HIDDEN ARCHIVE</span></div>
+    <div class="archway" aria-hidden="true"><div class="archway-inner"><div class="archway-crest"><svg viewBox="0 0 100 130"><path d="M50 5 89 17v46c0 27-18 47-39 61C29 110 11 90 11 63V17Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M50 12 82 22v40c0 22-13 39-32 52-19-13-32-30-32-52V22Z" fill="none" stroke="currentColor" stroke-opacity=".48"/><path d="M29 46c8-11 33-13 40-1 7 13-8 22-20 23-18 2-21 11-15 16 9 7 25 0 34-6-3 15-23 24-37 17-14-7-13-26-1-33 9-5 25-3 28-12 2-8-15-10-29-4Z" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round"/><circle cx="67" cy="42" r="1.5" fill="currentColor"/></svg></div></div></div>
+    <div class="entrance-copy"><p class="overline">BEHIND THE STONE WALL</p><h1 id="entrance-title">The hidden<br><em>archive.</em></h1><p>흔적을 따라, 숨겨진 기록을 펼쳐보세요.</p><button id="enter-button" class="enter-button" type="button"><span class="enter-button__sigil" aria-hidden="true">✦</span><span class="enter-button__words"><small>CAST ALOHOMORA</small><strong>OPEN THE ARCHIVE</strong></span><span class="enter-button__arrow" aria-hidden="true">↗</span></button><span class="entrance-note">PRESS TO ENTER</span></div>
+    <div class="entrance-bottom"><span data-house-location>UNDER THE LAKE</span><span>01 — 06</span></div>
+  </section>
+
+  <div id="app-shell" hidden>
+    <button class="archive-mark" type="button" data-panel="home" aria-label="Cédrai home"><span class="archive-mark__seal">C</span><span>CÉDRAI<small>THE HIDDEN ARCHIVE</small></span></button>
+    <main class="app-main">
+      <section class="panel home-panel" id="home" data-page="home" hidden>
+        <div class="panel-head"><span>THE <span data-house-name>SLYTHERIN</span> ARCHIVE</span><span>CHAPTER 00 / THE MAP</span></div>
+        <div class="home-intro">
+          <div class="home-magic" id="home-magic" aria-hidden="true"><div class="enchanted-candles"><span class="floating-candle" style="--c-x:8%;--c-y:8%;--c-delay:-1s;--c-scale:.8"><i></i></span><span class="floating-candle" style="--c-x:29%;--c-y:32%;--c-delay:-3.6s;--c-scale:.65"><i></i></span><span class="floating-candle" style="--c-x:66%;--c-y:0%;--c-delay:-2s;--c-scale:.95"><i></i></span><span class="floating-candle" style="--c-x:91%;--c-y:30%;--c-delay:-4.7s;--c-scale:.72"><i></i></span></div></div>
+          <div class="home-intro__copy"><p class="overline">THE MAP HAS OPENED</p><h1>비밀은 언제나<br><em>흔적을 남긴다.</em></h1><p>안녕하세요, Cédrai입니다. 컴퓨터공학을 전공하며 보안과 디지털 포렌식을 공부하고 있습니다. 이곳에 활동과 공부의 흔적을 모았습니다.</p><div class="home-intro__marks"><span>COMPUTER SCIENCE</span><i>✦</i><span>DIGITAL FORENSICS</span></div><button class="hero-cast" data-spell="lumos" type="button"><span class="hero-cast__label">CAST LUMOS</span><i aria-hidden="true">✧</i></button></div>
+          <button class="home-sigil" type="button" data-spell="lumos" aria-label="Cast Lumos"><span class="home-sigil__halo" aria-hidden="true"></span><span class="home-sigil__ring" aria-hidden="true"><span>✦</span><img class="home-sigil__portrait" src="/Suguru%20Geto.jpeg" alt="" decoding="async"><small>ARCANA · CÉDRAI · 2026</small></span><span class="home-sigil__orbit" aria-hidden="true">✧</span><span class="home-sigil__hint" aria-hidden="true">TOUCH TO CAST LUMOS</span></button>
+        </div>
+        <div class="chapter-grid" aria-label="Explore the archive">
+          <button class="chapter-card" data-panel="about"><span class="chapter-no">01 / PROFILE</span><span class="chapter-icon">◈</span><strong>The Seeker</strong><span class="chapter-whisper">단서를 좇는 사람의 이야기</span><span class="chapter-action">CAST REVELIO ↗</span><span class="card-secret" data-revelio hidden>THE DOSSIER UNSEALED</span></button>
+          <button class="chapter-card" data-panel="work"><span class="chapter-no">02 / WORK</span><span class="chapter-icon">⌕</span><strong>Fieldwork</strong><span class="chapter-whisper">탐구와 실험으로 남긴 활동</span><span class="chapter-action">CAST ACCIO ↗</span><span class="card-secret" data-revelio hidden>TRACES FOUND</span></button>
+          <button class="chapter-card" data-panel="journal"><span class="chapter-no">03 / BLOG · JOURNAL</span><span class="chapter-icon">⌁</span><strong>Field Notes</strong><span class="chapter-whisper">배운 것을 한 장씩 기록한 노트</span><span class="chapter-action">CAST APARECIUM ↗</span><span class="card-secret" data-revelio hidden>INK REVEALED</span></button>
+          <button class="chapter-card" data-panel="calendar"><span class="chapter-no">04 / CALENDAR</span><span class="chapter-icon">◇</span><strong>The Almanac</strong><span class="chapter-whisper">날짜마다 새겨 둔 작은 이야기</span><span class="chapter-action">CAST TEMPUS ↗</span><span class="card-secret" data-revelio hidden>TIME UNFOLDS</span></button>
+          <button class="chapter-card" data-panel="now"><span class="chapter-no">05 / NOW</span><span class="chapter-icon">✧</span><strong>At This Moment</strong><span class="chapter-whisper">지금의 일상을 비추는 페이지</span><span class="chapter-action">CAST LUMOS ↗</span><span class="card-secret" data-revelio hidden>A LIGHT IN THE DARK</span></button>
+          <button class="chapter-card" data-panel="contact"><span class="chapter-no">06 / CONTACT</span><span class="chapter-icon">↗</span><strong>Send an Owl</strong><span class="chapter-whisper">편지를 보내는 길</span><span class="chapter-action">CAST ALOHOMORA ↗</span><span class="card-secret" data-revelio hidden>THE PATH IS OPEN</span></button>
+        </div>
+        <button class="secret-route" id="secret-route" data-revelio data-spell="accio" type="button" hidden><span>✦</span> A SECRET PASSAGE HAS APPEARED <small>OPEN A RANDOM FIELD NOTE ↗</small></button>
+      </section>
+
+      <section class="panel" id="about" data-page="about" hidden>
+        <div class="panel-head"><span>CHAPTER 01</span><button class="panel-back" data-panel="home">← ALL CHAPTERS</button></div>
+        <div class="chapter-title"><span>ABOUT / PROFILE</span><h2>The Seeker</h2><p>단서를 따라온 사람의 이야기를 펼쳐봅니다.</p></div>
+        <div class="dossier">
+          <div class="dossier__intro">
+            <div class="dossier__portrait"><img src="/Suguru%20Geto.jpeg" alt="Cédrai 프로필 이미지" loading="lazy"><span>CÉDRAI · THE SEEKER</span></div>
+            <div class="dossier__intro-copy"><span class="dossier__eyebrow">✦ &nbsp; THE SEEKER'S DOSSIER</span><h3>흔적을 읽고,<br><em>진실을 찾아갑니다.</em></h3><p>건국대학교 글로컬캠퍼스 컴퓨터공학과에 재학 중입니다. 보안에 관심이 많고, 디지털 포렌식 수사관을 목표로 공부하고 있습니다.</p><p>보안 소모임 seKUrity에서 CTF와 웹 보안, 리버싱, 포렌식을 배우고 기록합니다.</p></div>
+          </div>
+          <div class="dossier__grid">
+            <section class="dossier__card"><span class="dossier__eyebrow">01 / THE ACADEMY</span><h3>Education</h3><dl><div><dt>UNIVERSITY</dt><dd>Konkuk Univ. GLOCAL</dd></div><div><dt>MAJOR</dt><dd>Computer Engineering</dd></div><div><dt>STATUS</dt><dd>Enrolled</dd></div><div><dt>LOCATION</dt><dd>Chungju, Korea</dd></div></dl></section>
+            <section class="dossier__card"><span class="dossier__eyebrow">02 / FIELD RECORDS</span><h3>Activities</h3><dl><div><dt>CTF PLATFORM</dt><dd>Dreamhack</dd></div><div><dt>FIELD NOTES</dt><dd><a href="/blog">블로그 기록 ↗</a></dd></div><div><dt>GITHUB</dt><dd><a href="https://github.com/Cedrai05" target="_blank" rel="noopener noreferrer">Cedrai05 ↗</a></dd></div></dl></section>
+            <section class="dossier__card"><span class="dossier__eyebrow">03 / UNCLAIMED SCROLLS</span><h3>Certifications</h3><p>아직 준비 중인 기록입니다.</p></section>
+            <section class="dossier__card"><span class="dossier__eyebrow">04 / THE COMMON ROOM</span><h3>seKUrity</h3><ul class="dossier__clubs"><li><strong>신입부원</strong><span>25.03 — 25.08</span></li><li><strong>기존부원</strong><span>25.09 — 현재</span></li><li><strong>홍보</strong><span>26.09 — 현재</span></li><li><strong>포렌식 스터디장</strong><span>26.09 — 현재</span></li></ul></section>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="work" data-page="work" hidden><div class="panel-head"><span>CHAPTER 02</span><button class="panel-back" data-panel="home">← ALL CHAPTERS</button></div><div class="chapter-title"><span>SELECTED WORK</span><h2>Fieldwork</h2><p>공부와 대회에서 발견한 흔적을 모았습니다.</p></div><div class="work-list"><a href="/activities/forensic-study"><span>01 / FORENSICS</span><strong>Digital Forensics Study</strong><small>디지털 증거와 아티팩트를 공부한 기록</small><b>↗</b></a><a href="/activities/competitions/ku-ctf"><span>02 / CTF</span><strong>KU CTF 2025</strong><small>웹 문제 제작과 풀이 기록</small><b>↗</b></a><a href="/activities/competitions/msg-ctf"><span>03 / CTF</span><strong>MSG CTF 2025</strong><small>대회 운영과 문제 제작 기록</small><b>↗</b></a><a href="/activities/competitions/club-union-ctf"><span>04 / CTF</span><strong>Club Union CTF</strong><small>동아리 연합 CTF 기록</small><b>↗</b></a><a href="/activities/competitions/hacktheon"><span>05 / CTF</span><strong>Hacktheon 2026</strong><small>핵테온 대회 기록</small><b>↗</b></a><a href="/activities/competitions/chungcheong-cyber"><span>06 / COMPETITION</span><strong>Chungcheong Cyber</strong><small>충청권 사이버보안 경진대회</small><b>↗</b></a></div><div id="project-records" class="project-records" hidden></div><div class="archive-actions archive-actions--work"><a href="/projects">PROJECT RECORDS & EDITING ↗</a><a href="/club/sekurity/rookie">seKUrity ROOKIE ↗</a></div><a class="quiet-link" href="https://github.com/Cedrai05" target="_blank" rel="noopener noreferrer">EXPLORE MORE ON GITHUB ↗</a></section>
+
+      <section class="panel" id="journal" data-page="journal" hidden><div class="panel-head"><span>CHAPTER 03 · BLOG</span><button class="panel-back" data-panel="home">← ALL CHAPTERS</button></div><div class="chapter-title"><span>THE BLOG / JOURNAL</span><h2>Field Notes</h2><p>보안과 디지털 포렌식에서 찾은 단서를 한 장씩 기록합니다.</p></div><div class="journal-resume" id="journal-resume" hidden><div class="journal-resume__copy"><span class="journal-resume__seal" aria-hidden="true">✧</span><div><small>UNFINISHED CASE</small><strong id="journal-resume-title"></strong></div></div><a class="journal-resume__link" id="journal-resume-link" href="#">CONTINUE READING ↗</a></div><div class="journal-shell"><div class="journal-tools"><label class="search-wrap"><span aria-hidden="true">⌕</span><input id="post-search" type="search" placeholder="Search notes" aria-label="Search field notes"></label><div class="filter-group" role="group" aria-label="Filter notes"><button class="filter active" data-filter="all" aria-pressed="true">ALL <span class="filter-count" data-count="all"></span></button><button class="filter" data-filter="CTF/Wargame" aria-pressed="false">CTF <span class="filter-count" data-count="CTF/Wargame"></span></button><button class="filter" data-filter="tech" aria-pressed="false">TECH <span class="filter-count" data-count="tech"></span></button><button class="filter" data-filter="논문/컨퍼런스" aria-pressed="false">PAPERS <span class="filter-count" data-count="논문/컨퍼런스"></span></button><button class="filter" data-filter="개발" aria-pressed="false">DEV <span class="filter-count" data-count="개발"></span></button><button class="filter" data-filter="Bug Bounty" aria-pressed="false">BUG BOUNTY <span class="filter-count" data-count="Bug Bounty"></span></button><button class="filter" data-filter="공모전/자격증" aria-pressed="false">OTHER <span class="filter-count" data-count="공모전/자격증"></span></button><button class="filter" data-filter="saved" aria-pressed="false">✦ SAVED <span class="filter-count" data-count="saved"></span></button></div></div><div class="journal-caption"><span id="post-count">Opening the archive…</span><span>FIELD NOTES / CÉDRAI</span></div><div id="post-list" class="post-list" aria-live="polite"></div><button class="more-button" id="more-posts" type="button">MORE NOTES ↓</button></div><div class="journal-access"><div><span>THE SEALED DESK</span><p>공개 기록을 둘러보거나, 개인 서재의 문을 두드려 보세요.</p></div><div class="archive-actions"><a href="/blog">OPEN FULL BLOG ↗</a><button type="button" data-open-login><span aria-hidden="true">✦</span> SIGN IN TO THE ARCHIVE <span aria-hidden="true">↗</span></button></div></div></section>
+
+      <section class="panel" id="calendar" data-page="calendar" hidden><div class="panel-head"><span>CHAPTER 04</span><button class="panel-back" data-panel="home">← ALL CHAPTERS</button></div><div class="chapter-title"><span>THE CALENDAR</span><h2>The Almanac</h2><p>날짜를 누르면 그날의 기록이 나타납니다.</p></div><div class="calendar-shell"><div class="calendar-head"><button id="prev-month" type="button" aria-label="Previous month">←</button><h3 id="calendar-title"></h3><button id="next-month" type="button" aria-label="Next month">→</button></div><div class="calendar-weekdays"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div><div class="calendar-grid" id="calendar-grid"></div><div class="calendar-detail" id="calendar-detail">날짜를 누르면 그날의 기록이 나타납니다.</div><div class="calendar-ledger"><h3>THE DATED RECORDS</h3><div id="calendar-ledger-list"></div></div><a class="archive-manage-link" href="/schedule">전체 일정 · 할 일 · 편집 ↗</a></div></section>
+
+      <section class="panel" id="now" data-page="now" hidden><div class="panel-head"><span>CHAPTER 05</span><button class="panel-back" data-panel="home">← ALL CHAPTERS</button></div><div class="chapter-title"><span>CURRENT CHAPTER</span><h2>At This Moment</h2><p>요즘의 생각과 일상을 담은 페이지입니다.</p></div><div class="now-layout"><div class="now-card"><span id="now-date"></span><p id="now-text"></p><div id="now-history" class="now-history"></div><a class="archive-manage-link" href="/now">전체 NOW 기록 · 편집 ↗</a></div></div></section>
+
+      <section class="panel" id="contact" data-page="contact" hidden><div class="panel-head"><span>CHAPTER 06</span><button class="panel-back" data-panel="home">← ALL CHAPTERS</button></div><div class="chapter-title"><span>SEND A LETTER</span><h2>Send an Owl</h2><p>함께 이야기하고 싶다면 편지를 보내주세요.</p></div><div class="contact-options"><a href="mailto:fls@cedrai.info"><span>01 / EMAIL</span><strong>fls@cedrai.info</strong><b>↗</b></a><a href="https://github.com/Cedrai05"><span>02 / GITHUB</span><strong>Cedrai05</strong><b>↗</b></a><a href="/blog"><span>03 / FIELD NOTES</span><strong>블로그 전체 보기</strong><b>↗</b></a></div></section>
+    </main>
+    <footer><span>© 2026 CÉDRAI</span><span>COMPUTER ENGINEERING · SECURITY · FORENSICS</span><button data-panel="home">BACK TO MAP ↑</button></footer>
+    <div class="spellbook" id="spellbook">
+      <button class="spellbook__veil" type="button" aria-label="주문서 닫기" hidden></button>
+      <button class="spellbook__toggle" id="spellbook-toggle" type="button" aria-expanded="false" aria-controls="spellbook-menu" aria-label="주문서 펼치기"><span class="spellbook__wand" aria-hidden="true">✦</span><span>OPEN SPELLBOOK</span></button>
+      <div class="spellbook__menu" id="spellbook-menu" role="dialog" aria-label="The book of spells" hidden>
+        <button class="spellbook__close" type="button" aria-label="주문서 닫기">×</button>
+        <div class="spellbook__heading"><span>THE BOOK OF SPELLS</span><small>한 장을 골라 주문을 외워보세요.</small></div>
+<nav class="spell-nav" id="mobile-nav" aria-label="주문으로 장 이동"><div class="spell-nav__intro"><span>THE INCANTATION INDEX</span><p>주문을 입력하거나 골라서 다음 장을 펼쳐보세요.</p></div><form id="spell-form" class="spell-nav__form"><label for="spell-input">YOUR INCANTATION</label><div><input id="spell-input" type="text" placeholder="Revelio, Accio, Aparecium…" autocomplete="off" spellcheck="false"><button type="submit" aria-label="주문 외우기">↗</button></div><small id="spell-feedback" role="status" aria-live="polite">Revelio · Accio · Aparecium · Tempus · Lumos · Alohomora</small></form><div class="spell-nav__list"><button data-panel="home"><span>00 · THE MAP</span><strong>Finite</strong><small>지도로 돌아가기</small></button><button data-panel="about"><span>01 · PROFILE</span><strong>Revelio</strong><small>숨겨진 소개 펼치기</small></button><button data-panel="work"><span>02 · WORK</span><strong>Accio</strong><small>활동 기록 불러오기</small></button><button data-panel="journal"><span>03 · BLOG / JOURNAL</span><strong>Aparecium</strong><small>기록의 잉크 드러내기</small></button><button data-panel="calendar"><span>04 · CALENDAR</span><strong>Tempus</strong><small>시간의 페이지 넘기기</small></button><button data-panel="now"><span>05 · NOW</span><strong>Lumos</strong><small>지금의 이야기 비추기</small></button><button data-panel="contact"><span>06 · CONTACT</span><strong>Alohomora</strong><small>편지의 길 열기</small></button></div></nav>
+        <div class="spellbook__charms"><span>SMALL CHARMS</span><div class="spellbook__charms-list"><button type="button" data-spell="lumos"><strong>Lumos</strong><small>아카이브에 빛 밝히기</small></button><button type="button" data-spell="revelio"><strong>Revelio</strong><small>숨겨진 통로 드러내기</small></button><button type="button" data-spell="accio"><strong>Accio</strong><small>무작위 기록 불러오기</small></button><button type="button" data-spell="patronus"><strong>Expecto Patronum</strong><small>은빛 수호자 부르기</small></button></div></div>
+      </div>
+      <p class="spellbook__toast" id="spellbook-toast" role="status" aria-live="polite" hidden></p>
+    </div>
+  </div>
+  <div class="house-orb" data-house-picker></div>
+  <noscript><p class="noscript">Enable JavaScript to open this archive.</p></noscript>
+</body>
+</html>
