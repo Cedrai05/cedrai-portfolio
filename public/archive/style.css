@@ -199,3 +199,13 @@ body.lumos-active::after{content:'';position:fixed;inset:0;z-index:40;pointer-ev
 .home-oath span:first-child{font:italic 500 clamp(26px,2.6vw,36px)/1.15 'Cormorant Garamond',Georgia,serif}
 .home-oath span:last-child{font:400 clamp(15px,1.5vw,19px)/1.7 'SchoolSafetyWizard',serif}
 @media(max-width:760px){.home-intro h1[lang='en']{font-size:clamp(60px,12vw,85px)}.home-oath span:first-child{font-size:clamp(25px,6vw,33px)}}
+
+.map-loader__inscription{min-width:0;padding:24px 36px}
+.map-loader__inscription strong{font:500 clamp(68px,10vw,130px)/1 'Cormorant Garamond',Georgia,serif;letter-spacing:-.04em}
+.map-loader__progress{width:min(260px,55vw)}
+.map-loader__progress i{width:100%;flex:none}
+.entrance-copy h1{font:500 clamp(66px,10vw,126px)/1 'Cormorant Garamond',Georgia,serif;letter-spacing:-.04em;white-space:nowrap}
+.entrance-copy .enter-button{margin-top:50px;min-width:260px}
+.entrance-copy .enter-button__words strong{font:600 26px 'Cormorant Garamond',Georgia,serif;letter-spacing:.06em}
+@media(max-width:760px){.map-loader__inscription strong{font-size:clamp(64px,15vw,96px)}.entrance-copy h1{font-size:clamp(64px,14vw,90px)}.entrance-copy .enter-button{margin-top:34px}}
+@media(max-width:420px){.entrance-copy h1{font-size:clamp(56px,13vw,70px)}}

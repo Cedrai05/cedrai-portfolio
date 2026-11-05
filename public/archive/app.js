@@ -72,7 +72,7 @@ function openPanel(name) {
 function enter() {
   $('#entrance').classList.add('opening');
   try { sessionStorage.setItem('cedrai-entered','1'); } catch {}
-  window.magicCurtain('Alohomora', '돌문 너머의 지도를 펼칩니다', () => showPanel('home'), false, 'entrance');
+  window.magicCurtain('Alohomora', '', () => showPanel('home'), false, 'entrance');
 }
 $('#enter-button').addEventListener('click', enter);
 $$('[data-panel]').forEach(button => button.addEventListener('click', () => openPanel(button.dataset.panel)));
