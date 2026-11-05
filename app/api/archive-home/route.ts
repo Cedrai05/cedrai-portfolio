@@ -3,6 +3,7 @@ import { getBlogCatalog } from '@/lib/blog-repository'
 import { CONTENT } from '@/lib/content'
 import { isGithubConfigured, readFile } from '@/lib/github'
 import type { ScheduleData, NowPost, Project } from '@/lib/data'
+import { BLOG_TOPICS, topicFor } from '@/lib/blog-catalog'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,10 +36,12 @@ export async function GET() {
         number: post.number,
         title: post.title,
         category: post.category,
+        topic: topicFor(post),
         date: post.date,
         summary: post.summary,
         protected: post.protected,
       })),
+      topicGroups: BLOG_TOPICS,
       events: (schedule as ScheduleData).events,
       todos: (schedule as ScheduleData).todos,
       nowPosts,

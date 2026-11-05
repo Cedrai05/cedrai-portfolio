@@ -7,8 +7,9 @@ const panelSpells = {
   calendar: ['Tempus', '시간의 페이지를 넘깁니다'], now: ['Lumos', '지금의 이야기를 비춥니다'],
   contact: ['Alohomora', '편지를 보낼 길을 엽니다']
 };
-let content = { posts: [], events: [], todos: [], nowPosts: [], projects: [], now: null };
+let content = { posts: [], topicGroups: {}, events: [], todos: [], nowPosts: [], projects: [], now: null };
 let activeFilter = 'all';
+let activeTopic = 'all';
 let visiblePosts = 6;
 let calendarDate = new Date();
 const dateFormat = new Intl.DateTimeFormat('en-US', { year:'numeric', month:'long', day:'numeric' });
@@ -112,14 +113,27 @@ if (pages.has(initialPage) || wasEntered) {
 function renderPosts() {
   const search = $('#post-search').value.trim().toLocaleLowerCase();
   const matchesFilter = post => activeFilter === 'all' || (activeFilter === 'saved' ? window.fieldNotes.isSaved(post.slug) : post.category === (activeFilter === 'tech' ? '블로그/기술문서' : activeFilter));
-  const list = content.posts.filter(post => matchesFilter(post) && (`${post.title} ${post.category} ${post.summary || ''}`).toLocaleLowerCase().includes(search));
+  const available = content.posts.filter(matchesFilter);
+  renderTopics(available);
+  const list = available.filter(post => (activeTopic === 'all' || post.topic === activeTopic) && (`${post.title} ${post.category} ${post.topic || ''} ${post.summary || ''}`).toLocaleLowerCase().includes(search));
   $('#post-list').innerHTML = list.length ? list.slice(0, visiblePosts).map((post,index) => {
     const saved = window.fieldNotes.isSaved(post.slug);
     const progress = window.fieldNotes.getProgress(post.slug);
-    return `<div class="post-item" style="--ink-order:${index % 8}"><a class="post-row" style="--ink-order:${index % 8}" href="/blog?post=${encodeURIComponent(post.number || post.slug.replace(/^tistory-/, ""))}" aria-label="Read ${escapeHtml(displayTitle(post))}"><span class="post-index">${String(index+1).padStart(2,'0')}</span><span class="post-text"><small>${escapeHtml(displayCategory(post.category))} · ${escapeHtml(post.date)}${post.protected ? ' · ✦ SEALED' : ''}</small><strong lang="${/[가-힣]/.test(displayTitle(post)) ? 'ko' : 'en'}">${escapeHtml(displayTitle(post))}</strong>${progress > 0 ? `<span class="post-progress">${progress >= 95 ? 'READ' : `${progress}% READ`}</span>` : ''}</span><span class="post-arrow">↗</span></a><button class="post-save" type="button" data-save-post="${escapeHtml(post.slug)}" aria-pressed="${saved}" aria-label="${saved ? 'Remove saved note' : 'Save note'}: ${escapeHtml(displayTitle(post))}" title="${saved ? 'Remove from saved' : 'Save this note'}">${saved ? '✦' : '✧'}</button></div>`;
+    return `<div class="post-item" style="--ink-order:${index % 8}"><a class="post-row" style="--ink-order:${index % 8}" href="/blog?post=${encodeURIComponent(post.number || post.slug.replace(/^tistory-/, ""))}" aria-label="Read ${escapeHtml(displayTitle(post))}"><span class="post-index">${String(index+1).padStart(2,'0')}</span><span class="post-text"><small>${escapeHtml(displayCategory(post.category))}${post.topic ? ` / ${escapeHtml(post.topic)}` : ''} · ${escapeHtml(post.date)}${post.protected ? ' · ✦ SEALED' : ''}</small><strong lang="${/[가-힣]/.test(displayTitle(post)) ? 'ko' : 'en'}">${escapeHtml(displayTitle(post))}</strong>${progress > 0 ? `<span class="post-progress">${progress >= 95 ? 'READ' : `${progress}% READ`}</span>` : ''}</span><span class="post-arrow">↗</span></a><button class="post-save" type="button" data-save-post="${escapeHtml(post.slug)}" aria-pressed="${saved}" aria-label="${saved ? 'Remove saved note' : 'Save note'}: ${escapeHtml(displayTitle(post))}" title="${saved ? 'Remove from saved' : 'Save this note'}">${saved ? '✦' : '✧'}</button></div>`;
   }).join('') : `<div class="empty-posts">${activeFilter === 'saved' && !search ? '아직 보관한 기록이 없습니다. 글 옆의 별을 눌러 추가해 보세요.' : 'No matching notes.'}</div>`;
   $('#post-count').textContent = `${list.length} ${activeFilter === 'saved' ? 'saved' : 'archive'} notes`;
   $('#more-posts').hidden = list.length <= visiblePosts;
+}
+function renderTopics(available) {
+  const category = activeFilter === 'tech' ? '블로그/기술문서' : activeFilter;
+  const configured = content.topicGroups[category];
+  const counts = new Map();
+  available.forEach(post => { if (post.topic) counts.set(post.topic, (counts.get(post.topic) || 0) + 1); });
+  const ordered = configured || [...new Set(Object.values(content.topicGroups).flat())];
+  const topics = configured || [...ordered.filter(topic => counts.has(topic)), ...[...counts.keys()].filter(topic => !ordered.includes(topic))];
+  const wrapper = $('#journal-topics');
+  wrapper.hidden = topics.length === 0;
+  $('#journal-topic-options').innerHTML = ['all', ...topics].map(topic => `<button type="button" class="journal-topic${activeTopic === topic ? ' active' : ''}" data-topic="${escapeHtml(topic)}" aria-pressed="${activeTopic === topic}">${topic === 'all' ? 'ALL TOPICS' : escapeHtml(topic)} <span>${topic === 'all' ? available.length : counts.get(topic) || 0}</span></button>`).join('');
 }
 function renderJournalDesk() {
   const counts = {
@@ -146,9 +160,14 @@ $('#post-search').addEventListener('input', () => { visiblePosts=6; renderPosts(
 $$('.filter').forEach(button => button.addEventListener('click', () => {
   $$('.filter').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-pressed','false'); });
   button.classList.add('active'); button.setAttribute('aria-pressed','true');
-  activeFilter=button.dataset.filter; visiblePosts=6; renderPosts();
+  activeFilter=button.dataset.filter; activeTopic='all'; visiblePosts=6; renderPosts();
   if(!reducedMotion.matches) { $('#post-list').classList.remove('list-enter'); void $('#post-list').offsetWidth; $('#post-list').classList.add('list-enter'); }
 }));
+$('#journal-topic-options').addEventListener('click', event => {
+  const button = event.target.closest('[data-topic]');
+  if (!button) return;
+  activeTopic=button.dataset.topic; visiblePosts=6; renderPosts();
+});
 $('#more-posts').addEventListener('click', () => { visiblePosts+=6; renderPosts(); });
 $('#post-list').addEventListener('click', event => {
   const save = event.target.closest('[data-save-post]');
