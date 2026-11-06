@@ -5,7 +5,7 @@ import sanitizeHtml from 'sanitize-html'
 import { BLOG_CATEGORIES, BLOG_TOPICS, type BlogPost } from '@/lib/blog-catalog'
 import { validAsset, validWrittenSlug, WRITTEN_PREFIX } from '@/lib/native-blog'
 import { readBlogJSON, writeBlogJSON, listBlogKeys } from '@/lib/blog-store'
-export type StoredPost = { version:2; metadata:BlogPost; content:string; markdown:string; assets:string[]; visibility:'public'|'protected'; createdAt:string; updatedAt:string; fingerprint:string; archivedAt?:string }
+export type StoredPost = { version:2; renderVersion?:2; metadata:BlogPost; content:string; markdown:string; assets:string[]; visibility:'public'|'protected'; createdAt:string; updatedAt:string; fingerprint:string; archivedAt?:string }
 export class BlogInputError extends Error { constructor(message:string, public status=400) { super(message) } }
 export type WritingInput = {slug:string;title:string;category:string;topic:string;summary:string;tags:string[];markdown:string;assets:string[];isSecret:boolean}
 function string(value:unknown,max:number,label:string) { if(typeof value!=='string'||value.length>max)throw new BlogInputError(`${label} 입력을 확인해 주세요.`);return value.trim() }
@@ -35,7 +35,7 @@ export function renderBlogMarkdown(input:WritingInput,preview=false) {
     if(name&&!assets.has(name))throw new BlogInputError('본문에서 사용한 첨부파일을 업로드해 주세요.')
     return `<a ${name?`data-native-href="${name}" download`: `href="${escape(href)}"`}${title?` title="${escape(title)}"`:''}>${renderer.parser.parseInline(tokens)}</a>`
   }
-  const raw=marked.parse(input.markdown,{renderer,gfm:true,async:false}) as string
+  const raw=marked.parse(input.markdown,{renderer,gfm:true,breaks:true,async:false}) as string
   const clean=sanitizeHtml(raw,{
     allowedTags:[...sanitizeHtml.defaults.allowedTags,'img','details','summary','del','mark'],
     allowedAttributes:{a:['href','title','rel','download','data-native-href','referrerpolicy'],img:['src','alt','title','loading','decoding','referrerpolicy','data-native-src'],code:['class'],th:['colspan','rowspan'],td:['colspan','rowspan'],ol:['start']},
@@ -47,6 +47,10 @@ export function renderBlogMarkdown(input:WritingInput,preview=false) {
   })
   const content=`<div class="tistory-content">${clean}</div>`
   return preview ? content.replace(/data-native-(src|href)="([a-f0-9]{64}\.[a-z0-9]{1,10})"/g,(_match,attr,name)=>`${attr}="/api/native-blog/assets?preview=1&amp;name=${name}"`) : content
+}
+export function renderedWrittenContent(post:StoredPost) {
+  if(post.renderVersion===2)return post.content
+  return renderBlogMarkdown({slug:post.metadata.slug,title:post.metadata.title,category:post.metadata.category,topic:post.metadata.topic||'',summary:post.metadata.summary,tags:post.metadata.tags,markdown:post.markdown,assets:post.assets,isSecret:post.visibility==='protected'})
 }
 export function metadataFromStored(post:StoredPost):BlogPost {
   const m=post.metadata
@@ -90,7 +94,7 @@ export async function saveWriting(input:WritingInput,publish:boolean) {
   const now=new Date().toISOString()
   const visibility=input.isSecret?'protected':'public'
   const metadata:BlogPost={slug:input.slug,number,title:input.title,category:input.category,topic:input.topic,sourceCategory:input.topic?`${input.category} / ${input.topic}`:input.category,date:new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul'}).format(new Date()),readTime:`${Math.max(1,Math.ceil(input.markdown.length/700))} MIN READ`,summary:input.summary,tags:input.tags,protected:input.isSecret}
-  const record:StoredPost={version:2,metadata,visibility,markdown:input.markdown,content,assets:input.assets,createdAt:now,updatedAt:now,fingerprint}
+  const record:StoredPost={version:2,renderVersion:2,metadata,visibility,markdown:input.markdown,content,assets:input.assets,createdAt:now,updatedAt:now,fingerprint}
   await writeBlogJSON(`${WRITTEN_PREFIX}${publish?'posts':'drafts'}/${input.slug}.json`,record,!publish)
   if(publish)await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadataFromStored(record))
   return metadataFromStored(record)
@@ -117,7 +121,7 @@ export async function updateWriting(input:WritingInput,revision:unknown) {
     tags:input.tags,
     protected:input.isSecret,
   }
-  const record:StoredPost={...existing,metadata,visibility,markdown:input.markdown,content,assets:input.assets,updatedAt:new Date().toISOString(),fingerprint}
+  const record:StoredPost={...existing,renderVersion:2,metadata,visibility,markdown:input.markdown,content,assets:input.assets,updatedAt:new Date().toISOString(),fingerprint}
   const postKey=`${WRITTEN_PREFIX}posts/${input.slug}.json`
   await writeBlogJSON(postKey,record,true)
   try { await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadataFromStored(record),true) }

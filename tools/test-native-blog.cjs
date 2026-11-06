@@ -38,7 +38,7 @@ async function main(){
  assert.equal((await request('/blog?post=63')).status,200)
  assert.equal((await request('/api/native-blog/posts/63')).status,401)
  assert.equal((await request('/api/native-blog/posts/63',{cookie:member})).status,200)
- const baseInput={title:'Local publishing test',category:'개발',topic:'Tests',summary:'Public summary',tags:['tests'],markdown:'# Test\n\nPUBLIC_TEST_BODY\n\n![picture](attachment:'+name+')\n\n<script>alert(1)</script>\n\n<a href="javascript:alert(1)">bad link</a>\n\n<img src="x" onerror="alert(1)">',assets:[name],isSecret:false,mode:'publish'}
+ const baseInput={title:'Local publishing test',category:'개발',topic:'Tests',summary:'Public summary',tags:['tests'],markdown:'# Test\n\nPUBLIC_TEST_BODY\n**BOLD_TEST_LINE**\nSOFT_BREAK_TEST\n\n![picture](attachment:'+name+')\n\n<script>alert(1)</script>\n\n<a href="javascript:alert(1)">bad link</a>\n\n<img src="x" onerror="alert(1)">',assets:[name],isSecret:false,mode:'publish'}
  const pub={...baseInput,slug:uuid()}
  const sec={...baseInput,slug:uuid(),title:'Local members-only test',summary:'SECRET_SUMMARY',markdown:'SECRET_NEW_TEST_BODY\n\n![picture](attachment:'+name+')',isSecret:true}
  const draft={...baseInput,slug:uuid(),mode:'draft',markdown:'DRAFT_TEST_BODY',assets:[]}
@@ -49,11 +49,13 @@ async function main(){
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...pub,isSecret:'true'}})).status,400)
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...pub,title:''}})).status,400)
  const preview=await request('/api/native-blog/write',{cookie:admin,body:{...pub,mode:'preview'}})
- assert.equal(preview.status,200);assert(!preview.data.content.includes('<script'));assert(!preview.data.content.includes('onerror'));assert(!preview.data.content.includes('javascript:'))
+ assert.equal(preview.status,200);assert.match(preview.data.content,/<strong>BOLD_TEST_LINE<\/strong><br\s*\/>SOFT_BREAK_TEST/);assert(!preview.data.content.includes('<script'));assert(!preview.data.content.includes('onerror'));assert(!preview.data.content.includes('javascript:'))
  const published=await request('/api/native-blog/write',{cookie:admin,body:pub});assert.equal(published.status,200);assert.match(published.data.href,/^\/blog\?post=[0-9]+$/);assert(Number.isSafeInteger(published.data.post.number)&&published.data.post.number>123)
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:pub})).status,200)
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...pub,title:'Changed'}})).status,409)
- const publicBody=await request('/api/native-blog/posts/'+pub.slug);assert.equal(publicBody.status,200);assert(publicBody.data.content.includes('PUBLIC_TEST_BODY'));assert(publicBody.data.content.includes('/api/native-blog/assets?slug='))
+ const oldRenderPath=path.join(root,'blog-native/v2/posts',pub.slug+'.json'),oldRenderPost=JSON.parse(await fs.readFile(oldRenderPath,'utf8'))
+ delete oldRenderPost.renderVersion;oldRenderPost.content='<div class="tistory-content"><p>STALE_RENDER</p></div>';await fs.writeFile(oldRenderPath,JSON.stringify(oldRenderPost))
+ const publicBody=await request('/api/native-blog/posts/'+pub.slug);assert.equal(publicBody.status,200);assert(publicBody.data.content.includes('PUBLIC_TEST_BODY'));assert.match(publicBody.data.content,/<strong>BOLD_TEST_LINE<\/strong><br\s*\/>SOFT_BREAK_TEST/);assert(!publicBody.data.content.includes('STALE_RENDER'));assert(publicBody.data.content.includes('/api/native-blog/assets?slug='))
  assert.equal((await request('/api/native-blog/assets?slug='+pub.slug+'&name='+name)).status,200)
  const secretPublished=await request('/api/native-blog/write',{cookie:admin,body:sec});assert.equal(secretPublished.status,200);assert.notEqual(secretPublished.data.post.number,published.data.post.number)
  assert.equal((await request('/api/native-blog/posts/'+sec.slug)).status,401)
@@ -104,6 +106,6 @@ async function main(){
  assert.equal((await request('/api/native-blog/upload',{cookie:member,form})).status,403)
  assert.equal((await request('/api/native-blog/upload',{cookie:admin,form})).status,200)
  assert.equal((await request('/api/native-blog/posts/tistory-123',{cookie:admin+'.extra'})).status,401)
- console.log('Passed: numeric URLs, legacy redirects, canonical links, collision-free concurrent numbering, admin/member/anonymous access, legacy and new secret bodies/assets, old password/ticket denial, draft privacy, public publish and edit, stale edit rejection, visibility changes, immediate catalog updates, duplicate protection, Markdown sanitization, CSRF, upload permissions, unknown/suffixed sessions.')
+ console.log('Passed: numeric URLs, legacy redirects, canonical links, collision-free concurrent numbering, admin/member/anonymous access, legacy and new secret bodies/assets, old password/ticket denial, draft privacy, public publish and edit, Markdown soft breaks and bold, old rendered post refresh, stale edit rejection, visibility changes, immediate catalog updates, duplicate protection, Markdown sanitization, CSRF, upload permissions, unknown/suffixed sessions.')
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{server?.kill('SIGTERM');const idDir=path.join(root,'blog-native/v2/ids');for(const file of await fs.readdir(idDir).catch(()=>[])){const target=path.join(idDir,file);const claim=JSON.parse(await fs.readFile(target,'utf8'));if(numberedSlugs.has(claim.slug))await fs.rm(target,{force:true})}for(const file of [...new Set(created)])await fs.rm(file,{force:true});for(const [file,data] of restore)await fs.writeFile(file,data)})

@@ -2,7 +2,7 @@ import { slugForPostNumber } from '@/lib/blog-numbering'
 import { BLOG_POSTS, prepareBlogContent, type BlogPost } from '@/lib/blog-catalog'
 import { getBlogPost } from '@/lib/blog-post'
 import { readNativePost, validSlug } from '@/lib/native-blog'
-import { listWrittenMetadata, readWrittenPost, writtenMetadata } from '@/lib/blog-writing'
+import { listWrittenMetadata, readWrittenPost, renderedWrittenContent, writtenMetadata } from '@/lib/blog-writing'
 export async function getBlogCatalog():Promise<BlogPost[]> {
   return [...BLOG_POSTS,...await listWrittenMetadata()].sort((a,b)=>b.date.localeCompare(a.date)||b.slug.localeCompare(a.slug))
 }
@@ -18,7 +18,8 @@ export async function getStoredArticle(value:string) {
   if(slug.startsWith('blog-')) {
     const post=await readWrittenPost(slug)
     if(!post||post.metadata.slug!==slug||metadata.protected!==(post.visibility==='protected'))return null
-    const content=metadata.protected?post.content:post.content.replace(/data-native-(src|href)="([a-f0-9]{64}\.[a-z0-9]{1,10})"/g,(_match,attr,name)=>post.assets.includes(name)?`${attr}="/api/native-blog/assets?slug=${slug}&amp;name=${name}"`:'')
+    const rendered=renderedWrittenContent(post)
+    const content=metadata.protected?rendered:rendered.replace(/data-native-(src|href)="([a-f0-9]{64}\.[a-z0-9]{1,10})"/g,(_match,attr,name)=>post.assets.includes(name)?`${attr}="/api/native-blog/assets?slug=${slug}&amp;name=${name}"`:'')
     return {metadata,content:prepareBlogContent(content),assets:post.assets,protected:metadata.protected}
   }
   if(metadata.protected) {

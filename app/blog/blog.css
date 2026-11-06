@@ -542,3 +542,4 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
 .blog-page--article .article-edit-link:hover{color:var(--txw)}
 .blog-page--article .article-edit-link:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 .blog-editor--archive .blog-editor__load-status{margin:0 0 1rem;color:var(--txw)}
+.archive-route-content .blog-page .article-body .tistory-content strong{font-weight:800;-webkit-text-stroke:.35px currentColor}
