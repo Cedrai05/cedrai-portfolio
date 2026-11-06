@@ -447,11 +447,15 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
 .archive-route-content .blog-page--writer .blog-editor__actions>.primary-button{background:var(--folio-ink);color:#f7f1df;border-color:var(--folio-ink);padding-inline:20px}
 .archive-route-content .blog-page--writer .blog-editor__actions>.primary-button:hover:not(:disabled){background:color-mix(in srgb,var(--folio-ink) 85%,#fff);color:#fff}
 .archive-route-content .blog-page--writer .blog-editor__preview,
-.archive-route-content .blog-page--writer .blog-editor__drafts{display:block;margin-top:28px;border-top:1px solid var(--folio-line)!important}
+.archive-route-content .blog-page--writer .blog-editor__drafts{display:block;min-width:0;max-width:100%;margin-top:28px;padding:clamp(25px,4.5vw,52px)!important;border-top:1px solid var(--folio-line)!important}
 .archive-route-content .blog-page--writer .blog-editor__preview h2,
 .archive-route-content .blog-page--writer .blog-editor__drafts h2{color:var(--folio-ink);font:500 32px 'Cormorant Garamond',Georgia,serif}
 .archive-route-content .blog-page--writer .blog-editor__preview .article-body{margin:0;padding:0;border:0;background:transparent;box-shadow:none;color:var(--folio-ink)!important}
-.archive-route-content .blog-page--writer .blog-editor__draft-row{border-color:var(--folio-line)}
+.archive-route-content .blog-page--writer .blog-editor__draft-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;min-width:0;border-color:var(--folio-line)}
+.archive-route-content .blog-page--writer .blog-editor__draft-row>a{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;overflow-wrap:anywhere}
+.archive-route-content .blog-page--writer .blog-editor__draft-row>a>span{max-width:100%;overflow-wrap:anywhere;font:500 25px/1.25 'Cormorant Garamond','SchoolSafetyWizard',serif}
+.archive-route-content .blog-page--writer .blog-editor__draft-row>a>small{max-width:100%;color:var(--folio-muted);white-space:normal}
+.archive-route-content .blog-page--writer .blog-editor__draft-row>button{flex:none;white-space:nowrap;border-radius:0;border-color:var(--folio-line);background:transparent}
 .archive-route-content .blog-page--writer .blog-editor__draft-row>a,
 .archive-route-content .blog-page--writer .blog-editor__draft-row>button,
 .archive-route-content .blog-page--writer .blog-editor__success a,
@@ -493,6 +497,8 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
   .archive-route-content .blog-page--writer .blog-editor__drafts,
   .archive-route-content .blog-page--article .article-body,
   .archive-route-content .blog-page--article .protected-form{padding:24px 19px}
+  .archive-route-content .blog-page--writer .blog-editor__preview,
+  .archive-route-content .blog-page--writer .blog-editor__drafts{padding:24px 19px!important}
   .archive-route-content .blog-page--writer .blog-editor__actions{display:grid;grid-template-columns:1fr 1fr}
   .archive-route-content .blog-page--writer .blog-editor__actions>.primary-button{grid-column:1/-1}
   .archive-route-content .blog-page--writer .blog-editor__toolbar{grid-template-columns:repeat(3,minmax(0,1fr))}
