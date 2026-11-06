@@ -504,3 +504,23 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
   .archive-route-content .blog-page--writer .blog-editor__toolbar{grid-template-columns:repeat(3,minmax(0,1fr))}
   .archive-route-content .blog-page--writer .blog-editor .blog-editor__file{grid-column:1/-1}
 }
+
+/* The blog starts below the site header, so a negative offset leaves this link visible. */
+.blog-page .skip-link{
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:200;
+  width:1px;
+  height:1px;
+  padding:0;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+}
+.blog-page .skip-link:focus-visible{
+  width:auto;
+  height:auto;
+  padding:10px 14px;
+  clip-path:none;
+}
