@@ -524,3 +524,15 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
   padding:10px 14px;
   clip-path:none;
 }
+
+.blog-page .archive-reading-actions .saved-shelf-link{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid var(--bd);
+  padding:9px 15px;
+  color:var(--acc);
+  font:600 14px 'Cormorant Garamond','SchoolSafetyWizard',Georgia,serif;
+  letter-spacing:.04em;
+}
+.blog-page .archive-reading-actions .saved-shelf-link:hover{background:var(--bg3)}
+.blog-page .archive-reading-actions .saved-shelf-link:focus-visible{outline:2px solid var(--acc);outline-offset:3px}

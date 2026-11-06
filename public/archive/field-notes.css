@@ -13,6 +13,7 @@
 .journal-shell .filter-count{margin-left:5px;opacity:.72;font-size:.8em}
 .journal-shell .filter[data-filter="saved"]{border-color:color-mix(in srgb,var(--house-accent) 65%,var(--house-ink));color:var(--house-ink)}
 .journal-shell .filter[data-filter="saved"].active{color:var(--house-text);background:var(--house-mid)}
+.journal-shelf-note{margin:18px 0 0;padding:14px 16px;border:1px solid color-mix(in srgb,var(--house-ink) 28%,transparent);background:color-mix(in srgb,var(--house-paper2) 72%,transparent);color:var(--house-ink);font:400 15px/1.6 'SchoolSafetyWizard',serif}
 .journal-shell .post-item{position:relative;border-bottom:1px solid color-mix(in srgb,var(--house-ink) 24%,transparent)}
 .journal-shell .post-row{border-bottom:0;padding-right:64px}
 .journal-shell .post-save{position:absolute;right:4px;top:50%;z-index:2;display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid color-mix(in srgb,var(--house-ink) 28%,transparent);border-radius:50%;background:color-mix(in srgb,var(--house-paper) 84%,#fff);color:var(--house-ink);font:28px/1 'Cormorant Garamond',serif;transform:translateY(-50%);transition:background .2s,box-shadow .2s,scale .2s}

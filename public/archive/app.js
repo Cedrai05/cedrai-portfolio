@@ -11,7 +11,7 @@ const panelSpells = {
   contact: ['Alohomora', '편지를 보낼 길을 엽니다']
 };
 let content = { posts: [], topicGroups: {}, events: [], todos: [], nowPosts: [], projects: [], now: null };
-let activeFilter = 'all';
+let activeFilter = new URLSearchParams(location.search).get('saved') === '1' ? 'saved' : 'all';
 let activeTopic = 'all';
 let visiblePosts = 6;
 let calendarDate = new Date();
@@ -206,13 +206,14 @@ function renderPosts() {
   const matchesFilter = post => activeFilter === 'all' || (activeFilter === 'saved' ? window.fieldNotes.isSaved(post.slug) : post.category === (activeFilter === 'tech' ? '블로그/기술문서' : activeFilter));
   const available = content.posts.filter(matchesFilter);
   renderTopics(available);
+  $('#journal-shelf-note').hidden = activeFilter !== 'saved';
   const list = available.filter(post => (activeTopic === 'all' || post.topic === activeTopic) && (`${post.title} ${post.category} ${post.topic || ''} ${post.summary || ''}`).toLocaleLowerCase().includes(search));
   $('#post-list').innerHTML = list.length ? list.slice(0, visiblePosts).map((post,index) => {
     const saved = window.fieldNotes.isSaved(post.slug);
     const progress = window.fieldNotes.getProgress(post.slug);
-    return `<div class="post-item" style="--ink-order:${index % 8}"><a class="post-row" style="--ink-order:${index % 8}" href="/blog?post=${encodeURIComponent(post.number || post.slug.replace(/^tistory-/, ""))}" aria-label="Read ${escapeHtml(displayTitle(post))}"><span class="post-index">${String(index+1).padStart(2,'0')}</span><span class="post-text"><small>${escapeHtml(displayCategory(post.category))}${post.topic ? ` / ${escapeHtml(post.topic)}` : ''} · ${escapeHtml(post.date)}${post.protected ? ' · ✦ SEALED' : ''}</small><strong lang="${/[가-힣]/.test(displayTitle(post)) ? 'ko' : 'en'}">${escapeHtml(displayTitle(post))}</strong>${progress > 0 ? `<span class="post-progress">${progress >= 95 ? 'READ' : `${progress}% READ`}</span>` : ''}</span><span class="post-arrow">↗</span></a><button class="post-save" type="button" data-save-post="${escapeHtml(post.slug)}" aria-pressed="${saved}" aria-label="${saved ? 'Remove saved note' : 'Save note'}: ${escapeHtml(displayTitle(post))}" title="${saved ? 'Remove from saved' : 'Save this note'}">${saved ? '✦' : '✧'}</button></div>`;
-  }).join('') : `<div class="empty-posts">${activeFilter === 'saved' && !search ? '아직 보관한 기록이 없습니다. 글 옆의 별을 눌러 추가해 보세요.' : 'No matching notes.'}</div>`;
-  $('#post-count').textContent = `${list.length} ${activeFilter === 'saved' ? 'saved' : 'archive'} notes`;
+    return `<div class="post-item" style="--ink-order:${index % 8}"><a class="post-row" style="--ink-order:${index % 8}" href="/blog?post=${encodeURIComponent(post.number || post.slug.replace(/^tistory-/, ""))}${activeFilter === 'saved' ? '&saved=1' : ''}" aria-label="Read ${escapeHtml(displayTitle(post))}"><span class="post-index">${String(index+1).padStart(2,'0')}</span><span class="post-text"><small>${escapeHtml(displayCategory(post.category))}${post.topic ? ` / ${escapeHtml(post.topic)}` : ''} · ${escapeHtml(post.date)}${post.protected ? ' · ✦ SEALED' : ''}</small><strong lang="${/[가-힣]/.test(displayTitle(post)) ? 'ko' : 'en'}">${escapeHtml(displayTitle(post))}</strong>${progress > 0 ? `<span class="post-progress">${progress >= 95 ? 'READ' : `${progress}% READ`}</span>` : ''}</span><span class="post-arrow">↗</span></a><button class="post-save" type="button" data-save-post="${escapeHtml(post.slug)}" aria-pressed="${saved}" aria-label="${saved ? '서재에서 빼기' : '서재에 담기'}: ${escapeHtml(displayTitle(post))}" title="${saved ? '서재에서 빼기' : '서재에 담기'}">${saved ? '✦' : '✧'}</button></div>`;
+  }).join('') : `<div class="empty-posts">${activeFilter === 'saved' && !search && activeTopic === 'all' ? '아직 보관한 기록이 없습니다. 글에서 「내 서재에 담기」를 누르거나 글 옆의 별을 눌러 주세요.' : '조건에 맞는 기록이 없습니다.'}</div>`;
+  $('#post-count').textContent = activeFilter === 'saved' ? `MY SHELF · ${list.length} ${list.length === 1 ? 'NOTE' : 'NOTES'}` : `${list.length} archive notes`;
   $('#more-posts').hidden = list.length <= visiblePosts;
 }
 function renderTopics(available) {
@@ -248,10 +249,22 @@ function renderJournalDesk() {
   }
 }
 $('#post-search').addEventListener('input', () => { visiblePosts=6; renderPosts(); });
+if (activeFilter === 'saved') {
+  $('.filter[data-filter="all"]').classList.remove('active');
+  $('.filter[data-filter="all"]').setAttribute('aria-pressed', 'false');
+  $('.filter[data-filter="saved"]').classList.add('active');
+  $('.filter[data-filter="saved"]').setAttribute('aria-pressed', 'true');
+}
 $$('.filter').forEach(button => button.addEventListener('click', () => {
   $$('.filter').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-pressed','false'); });
   button.classList.add('active'); button.setAttribute('aria-pressed','true');
   activeFilter=button.dataset.filter; activeTopic='all'; visiblePosts=6; renderPosts();
+  if (location.pathname === '/blog') {
+    const url = new URL(location.href);
+    if (activeFilter === 'saved') url.searchParams.set('saved', '1');
+    else url.searchParams.delete('saved');
+    history.replaceState(history.state, '', url);
+  }
   if(!reducedMotion.matches) { $('#post-list').classList.remove('list-enter'); void $('#post-list').offsetWidth; $('#post-list').classList.add('list-enter'); }
 }));
 $('#journal-topic-options').addEventListener('click', event => {
@@ -264,10 +277,12 @@ $('#post-list').addEventListener('click', event => {
   const save = event.target.closest('[data-save-post]');
   if (save) {
     const slug = save.dataset.savePost;
+    const index = [...$('#post-list').querySelectorAll('[data-save-post]')].indexOf(save);
     window.fieldNotes.toggleSaved(slug);
     renderJournalDesk();
     renderPosts();
-    $('#post-list').querySelectorAll('[data-save-post]').forEach(button => { if (button.dataset.savePost === slug) button.focus(); });
+    const buttons = [...$('#post-list').querySelectorAll('[data-save-post]')];
+    (buttons.find(button => button.dataset.savePost === slug) || buttons[Math.min(index, buttons.length - 1)] || $('.filter[data-filter="saved"]')).focus({preventScroll:true});
     return;
   }
   const link=event.target.closest('a.post-row');

@@ -12,7 +12,7 @@ type Filters = { category: string; topic: string; query: string; access: AccessF
 type Snapshot = Filters & { scrollY: number }
 const defaults: Filters = { category:'전체',topic:'전체',query:'',access:'all' }
 const archiveKey = 'cedrai-blog-archive'
-export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:string;publicContent:string|null;posts:BlogPost[]}) {
+export default function BlogPage({slug,publicContent,posts:BLOG_POSTS,returnSaved=false}:{slug?:string;publicContent:string|null;posts:BlogPost[];returnSaved?:boolean}) {
   const {isAdmin}=useAuth()
   const [filters,setFilters] = useState<Filters>(defaults)
   const [ready,setReady] = useState(false)
@@ -103,7 +103,7 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
     <a className="skip-link" href="#blog-main">본문으로 건너뛰기</a>
 
     <main id="blog-main">
-      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} /> : <article className="article-view article-view--archive"><a className="article-back" href="/blog">← FIELD NOTES</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
+      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} returnSaved={returnSaved} /> : <article className="article-view article-view--archive"><a className="article-back" href="/blog">← FIELD NOTES</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
         <BlogHero />
         {isAdmin && <div className="blog-admin-bar"><Link className="primary-button" href="/blog/write">＋ 글 작성</Link><span>관리자로 로그인 중입니다.</span></div>}
         <section className="archive-section" id="archive">
