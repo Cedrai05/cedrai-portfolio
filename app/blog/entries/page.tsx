@@ -1,1 +1,5 @@
-export { default, generateMetadata } from '../page'
+import { permanentRedirect } from 'next/navigation'
+
+export default function Page() {
+  permanentRedirect('/blog')
+}

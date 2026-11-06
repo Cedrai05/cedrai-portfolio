@@ -4,7 +4,6 @@ const chapters: Record<string, { number: string; eyebrow: string; title: string;
   '/projects': { number: '02', eyebrow: 'SELECTED WORK', title: 'Fieldwork', description: '공부와 대회에서 발견한 흔적을 모았습니다.' },
   '/projects/records': { number: '02', eyebrow: 'SELECTED WORK', title: 'Fieldwork', description: '프로젝트 전체 기록과 편집을 살펴봅니다.' },
   '/blog': { number: '03', eyebrow: 'THE BLOG / JOURNAL', title: 'Field Notes', description: '보안과 디지털 포렌식에서 찾은 단서를 기록합니다.' },
-  '/blog/entries': { number: '03', eyebrow: 'THE BLOG / JOURNAL', title: 'Field Notes', description: '기록의 전체 목록을 살펴봅니다.' },
   '/blog/write': { number: '03', eyebrow: 'THE SEALED DESK', title: 'The Writing Desk', description: '새 기록을 아카이브에 남깁니다.' },
   '/schedule': { number: '04', eyebrow: 'THE CALENDAR', title: 'The Almanac', description: '날짜마다 새겨 둔 기록과 할 일을 살펴봅니다.' },
   '/schedule/entries': { number: '04', eyebrow: 'THE CALENDAR', title: 'The Almanac', description: '전체 일정과 할 일을 살펴봅니다.' },
