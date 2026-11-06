@@ -536,3 +536,9 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
 }
 .blog-page .archive-reading-actions .saved-shelf-link:hover{background:var(--bg3)}
 .blog-page .archive-reading-actions .saved-shelf-link:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+
+.archive-route-content .blog-page--article .article-meta{flex-wrap:wrap;align-items:center}
+.blog-page--article .article-edit-link{color:var(--acc);font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.blog-page--article .article-edit-link:hover{color:var(--txw)}
+.blog-page--article .article-edit-link:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.blog-editor--archive .blog-editor__load-status{margin:0 0 1rem;color:var(--txw)}

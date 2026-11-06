@@ -95,3 +95,35 @@ export async function saveWriting(input:WritingInput,publish:boolean) {
   if(publish)await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadataFromStored(record))
   return metadataFromStored(record)
 }
+
+export async function updateWriting(input:WritingInput,revision:unknown) {
+  if(typeof revision!=='string'||!/^[a-f0-9]{64}$/.test(revision))throw new BlogInputError('수정할 글을 다시 열어 주세요.')
+  const existing=await readWrittenPost(input.slug)
+  if(!existing||existing.version!==2||existing.archivedAt||!await writtenMetadata(input.slug))throw new BlogInputError('수정할 글을 찾을 수 없습니다.',404)
+  if(existing.fingerprint!==revision)throw new BlogInputError('다른 곳에서 글이 변경되었습니다. 페이지를 새로 열어 최신 내용을 확인해 주세요.',409)
+  const fingerprint=createHash('sha256').update(JSON.stringify(input)).digest('hex')
+  if(fingerprint===existing.fingerprint)return metadataFromStored(existing)
+  const content=renderBlogMarkdown(input)
+  const visibility=input.isSecret?'protected':'public'
+  const metadata:BlogPost={
+    ...existing.metadata,
+    number:existing.metadata.number??await numberForWrittenPost(input.slug),
+    title:input.title,
+    category:input.category,
+    topic:input.topic,
+    sourceCategory:input.topic?`${input.category} / ${input.topic}`:input.category,
+    readTime:`${Math.max(1,Math.ceil(input.markdown.length/700))} MIN READ`,
+    summary:input.summary,
+    tags:input.tags,
+    protected:input.isSecret,
+  }
+  const record:StoredPost={...existing,metadata,visibility,markdown:input.markdown,content,assets:input.assets,updatedAt:new Date().toISOString(),fingerprint}
+  const postKey=`${WRITTEN_PREFIX}posts/${input.slug}.json`
+  await writeBlogJSON(postKey,record,true)
+  try { await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadataFromStored(record),true) }
+  catch(error) {
+    try { await writeBlogJSON(postKey,existing,true) } catch { /* A later retry can restore the catalogue. */ }
+    throw error
+  }
+  return metadataFromStored(record)
+}

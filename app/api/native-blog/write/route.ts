@@ -1,7 +1,7 @@
 import { postHref } from '@/lib/blog-catalog'
 import { NextResponse, type NextRequest } from 'next/server'
 import { blogRole, privateBlogHeaders, sameOriginWrite } from '@/lib/blog-access'
-import { BlogInputError, renderBlogMarkdown, saveWriting, validateWriting } from '@/lib/blog-writing'
+import { BlogInputError, renderBlogMarkdown, saveWriting, updateWriting, validateWriting } from '@/lib/blog-writing'
 export const runtime='nodejs'
 export async function POST(request:NextRequest) {
   const headers=privateBlogHeaders()
@@ -13,6 +13,10 @@ export async function POST(request:NextRequest) {
     const body=JSON.parse(text)
     const input=validateWriting(body)
     if(body.mode==='preview')return NextResponse.json({content:renderBlogMarkdown(input,true)},{headers})
+    if(body.mode==='update') {
+      const metadata=await updateWriting(input,body.revision)
+      return NextResponse.json({post:metadata,href:postHref(metadata),draft:false},{headers})
+    }
     if(body.mode!=='draft'&&body.mode!=='publish')throw new BlogInputError('저장 방식을 확인해 주세요.')
     const metadata=await saveWriting(input,body.mode==='publish')
     return NextResponse.json({post:metadata,href:body.mode==='draft'?`/blog/write?draft=${metadata.slug}`:postHref(metadata),draft:body.mode==='draft'},{headers})
