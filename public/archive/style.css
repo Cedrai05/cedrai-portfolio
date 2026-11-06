@@ -48,7 +48,7 @@ html.map-loading .map-loader{display:grid}
 .map-loader__progress{position:absolute;z-index:4;bottom:clamp(28px,6vh,58px);left:50%;width:min(330px,62vw);display:flex;align-items:center;gap:14px;transform:translateX(-50%);font:600 11px 'Cormorant Garamond',serif;letter-spacing:.13em;white-space:nowrap;opacity:0;animation:map-fade .6s ease .8s both}
 .map-loader__progress i{display:block;flex:1;height:1px;background:#6d503449;position:relative;overflow:hidden}
 .map-loader__progress i:after{content:'';position:absolute;inset:0;background:#5f422c;transform:scaleX(0);transform-origin:left;animation:map-progress 2.65s linear .54s both}
-.map-loader__skip{position:absolute;z-index:5;top:calc(16px + env(safe-area-inset-top,0px));right:clamp(16px,4vw,58px);min-height:40px;border:1px solid #7c6248;background:#f4e8c9d9;color:#59422e;padding:7px 11px;font:400 13px 'SchoolSafetyWizard',sans-serif;opacity:1}
+.map-loader__skip{display:none;position:absolute;z-index:5;top:calc(16px + env(safe-area-inset-top,0px));right:clamp(16px,4vw,58px);min-height:40px;border:1px solid #7c6248;background:#f4e8c9d9;color:#59422e;padding:7px 11px;font:400 13px 'SchoolSafetyWizard',sans-serif;opacity:1}
 .map-loader__skip span{margin-left:7px}.map-loader__skip:hover{color:#1c160f;border-color:#1c160f}
 .map-loader.is-leaving{opacity:0;transform:scale(1.045);filter:blur(5px);transition:opacity .62s ease,transform .62s ease,filter .62s ease;pointer-events:none}
 @keyframes map-draw{from{stroke-dashoffset:100;opacity:0}10%{opacity:1}to{stroke-dashoffset:0;opacity:1}}
@@ -56,7 +56,7 @@ html.map-loading .map-loader{display:grid}
 @keyframes map-fade{from{opacity:0}to{opacity:1}}
 @keyframes map-inscribe{from{opacity:0;transform:translateY(12px);filter:blur(5px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 @keyframes map-progress{to{transform:scaleX(1)}}
-@media(max-width:760px){.map-loader__drawing{width:960px;max-width:none;left:50%;transform:translateX(-50%)}.map-loader__mobile-steps{display:block}.map-loader__inscription{min-width:100%;padding:20px 24px 30px}.map-loader__inscription strong{font-size:clamp(48px,13vw,78px)}.map-loader__progress{bottom:82px}.map-loader__skip{right:50%;bottom:25px;transform:translateX(50%)}}
+@media(max-width:760px){.map-loader__drawing{width:960px;max-width:none;left:50%;transform:translateX(-50%)}.map-loader__mobile-steps{display:block}.map-loader__inscription{min-width:100%;padding:20px 24px 30px}.map-loader__inscription strong{font-size:clamp(48px,13vw,78px)}.map-loader__progress{bottom:82px}}
 
 /* The path home leaves footprints behind the moving light on the map. */
 html.map-returning,html.map-returning body{overflow:hidden}
@@ -72,7 +72,7 @@ html.map-returning .map-loader{display:grid}
 .map-loader.is-returning .map-loader__inscription{position:absolute;top:9%;left:50%;min-width:0;padding:0;transform:translateX(-50%);background:none;animation:none;opacity:1}
 .map-loader.is-returning .map-loader__inscription strong{font-size:clamp(46px,7vw,74px)}
 .map-loader.is-returning .map-loader__progress{display:none}
-.map-loader.is-returning .map-loader__skip{animation:none;opacity:1}
+.map-loader.is-returning .map-loader__skip{display:block;animation:none;opacity:1}
 @keyframes return-footprint{from{opacity:0;filter:blur(4px)}to{opacity:.88;filter:blur(0)}}
 @media(max-width:760px){.map-loader.is-returning .map-loader__inscription{top:13%}}
 

@@ -26,24 +26,17 @@ let finishMapReturn = null;
 if (document.documentElement.classList.contains('map-loading')) {
   $('#entrance').inert = true;
   let dismissed = false;
-  const dismissMap = (focusEntrance = false, immediate = false) => {
+  const dismissMap = () => {
     if (dismissed) return;
     dismissed = true;
-    if (!immediate) mapLoader.classList.add('is-leaving');
-    const finish = () => {
+    mapLoader.classList.add('is-leaving');
+    window.setTimeout(() => {
       mapLoader.hidden = true;
       document.documentElement.classList.remove('map-loading');
       $('#entrance').inert = false;
-      if (focusEntrance) $('#enter-button').focus();
-    };
-    if (immediate) finish();
-    else window.setTimeout(finish, 640);
+    }, 640);
   };
-  const mapTimer = window.setTimeout(() => dismissMap(), 3300);
-  $('#skip-map-loader').addEventListener('click', () => {
-    window.clearTimeout(mapTimer);
-    dismissMap(true, true);
-  });
+  window.setTimeout(dismissMap, 3300);
 } else {
   mapLoader.hidden = true;
 }
