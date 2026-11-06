@@ -377,3 +377,10 @@ body::before { background:radial-gradient(ellipse at 90% 5%, color-mix(in srgb,v
 .archive-route-content #schedule .split-grid>div{min-width:0}
 .archive-route-content #schedule [style*='color: rgb(255, 107, 107)'],.archive-route-content #schedule [style*='color: rgb(126, 200, 255)']{color:var(--acc2)!important}
 @media(max-width:800px){.archive-route-content #schedule .split-grid{grid-template-columns:minmax(0,1fr)!important}}
+
+/* Functional routes share the compact archive navigation. */
+.archive-site-header{max-width:1330px;height:76px;margin-inline:auto;padding-inline:5%;justify-content:space-between;border-bottom:0;background:transparent;position:relative}
+.archive-site-links{display:none}
+.archive-site-menu-button{display:block}
+.archive-mobile-menu{position:fixed;top:72px;right:max(5%,calc((100vw - 1330px)/2 + 66px));z-index:105;display:grid;width:min(430px,calc(100vw - 20px));padding:16px;background:#efe8d3;border:1px solid #aebd9c;box-shadow:0 25px 55px #0008}
+@media(max-width:640px){.archive-site-header{height:68px;padding-inline:5%}.archive-mobile-menu{top:66px;right:10px}}

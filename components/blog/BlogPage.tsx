@@ -99,11 +99,11 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS}:{slug?:st
     }
     return b.date.localeCompare(a.date)||b.slug.localeCompare(a.slug,'en',{numeric:true})
   })
-  return <div className="blog-page">
+  return <div className={`blog-page${slug?' blog-page--article':''}`}>
     <a className="skip-link" href="#blog-main">본문으로 건너뛰기</a>
 
     <main id="blog-main">
-      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} /> : <article className="article-view"><a className="article-back" href="/blog">← BACK TO ARCHIVE</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
+      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} /> : <article className="article-view article-view--archive"><a className="article-back" href="/blog">← FIELD NOTES</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
         <BlogHero />
         {isAdmin && <div className="blog-admin-bar"><Link className="primary-button" href="/blog/write">＋ 글 작성</Link><span>관리자로 로그인 중입니다.</span></div>}
         <section className="archive-section" id="archive">

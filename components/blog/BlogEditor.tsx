@@ -117,10 +117,10 @@ export default function BlogEditor({draftSlug}:{draftSlug?:string}) {
     }catch(error){setStatus((error as Error).message)}finally{setBusy(false)}
   }
   const disabled=busy||uploading||Boolean(published)
-  return <div className="blog-page"><main className="blog-editor">
-    <a className="article-back" href="/blog">← BACK TO ARCHIVE</a><p className="small-label">WRITE / FIELD NOTES</p><h1>글 작성<span>.</span></h1>
+  return <div className="blog-page blog-page--writer"><main className="blog-editor blog-editor--archive">
+    <div className="blog-editor__heading"><a className="article-back" href="/blog">← FIELD NOTES</a><p className="small-label">THE SEALED DESK / CHAPTER 03</p><h1>The Writing Desk</h1><p>새 글 작성</p></div>
     {!ready?<p>로그인 확인 중…</p>:!isAdmin?<div className="protected-form"><p>관리자만 글을 작성할 수 있습니다.</p><button type="button" onClick={()=>window.dispatchEvent(new Event('cedrai:open-login'))}>관리자 로그인</button></div>:<>
-      <div className="blog-editor__fields"><label>제목<input value={title} maxLength={160} disabled={disabled} onChange={e=>setTitle(e.target.value)} required placeholder="글 제목을 입력해 주세요."/></label>
+      <div className="blog-editor__fields"><div className="blog-editor__folio-heading"><span>✦ &nbsp; FIELD NOTES / NEW ENTRY</span><span>CÉDRAI'S ARCHIVE</span></div><label>제목<input value={title} maxLength={160} disabled={disabled} onChange={e=>setTitle(e.target.value)} required placeholder="글 제목을 입력해 주세요."/></label>
       <div className="blog-editor__row"><label>카테고리<select value={category} disabled={disabled} onChange={e=>{setCategory(e.target.value);setTopic('')}}>{BLOG_CATEGORIES.map(c=><option key={c}>{c}</option>)}</select></label><label>주제{BLOG_TOPICS[category]?<select value={topic} disabled={disabled} onChange={e=>setTopic(e.target.value)}><option value="">선택 안 함</option>{BLOG_TOPICS[category].map(t=><option key={t}>{t}</option>)}</select>:<input value={topic} disabled={disabled} maxLength={60} onChange={e=>setTopic(e.target.value)} placeholder="선택 사항"/>}</label></div>
       <label>소개<input value={summary} disabled={disabled} maxLength={300} onChange={e=>setSummary(e.target.value)} placeholder="목록에 표시할 짧은 소개 (선택 사항)"/></label><label>태그<input value={tags} disabled={disabled} onChange={e=>setTags(e.target.value)} placeholder="쉼표로 구분해 주세요."/></label>
       <label className="blog-editor__secret"><input type="checkbox" checked={isSecret} disabled={disabled} onChange={e=>setIsSecret(e.target.checked)}/><span><strong>비밀글</strong><small>{isSecret?'로그인한 사용자만 읽을 수 있습니다.':'체크하지 않으면 로그인 없이 모두가 읽을 수 있습니다.'}</small></span></label>
