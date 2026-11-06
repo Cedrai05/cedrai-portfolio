@@ -20,8 +20,76 @@
     </div>`;
   document.body.append(dialog);
 
+  const desk = document.querySelector('.journal-access');
+  const adminBar = document.getElementById('journal-admin-bar');
+  const signInButton = desk?.querySelector('[data-spell="patronus"]');
+  const writeLink = desk?.querySelector('.archive-write-link');
+  const logoutButton = desk?.querySelector('.archive-logout');
+  const deskMessage = desk?.querySelector('p');
+  const signedOutMessage = deskMessage?.textContent || '';
+  let currentRole = null;
+  let authCheck = 0;
+
+  async function refreshAuth() {
+    const check = ++authCheck;
+    let role = null;
+    try {
+      const response = await fetch('/api/me', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Session check failed');
+      const session = await response.json();
+      role = session.role;
+    } catch {
+      role = null;
+    }
+    if (check !== authCheck) return;
+    currentRole = role;
+    const isAdmin = role === 'admin';
+    const signedIn = isAdmin || role === 'club-member';
+    if (adminBar) adminBar.hidden = !isAdmin;
+    if (signInButton) signInButton.hidden = signedIn;
+    if (writeLink) writeLink.hidden = !isAdmin;
+    if (logoutButton) logoutButton.hidden = !signedIn;
+    if (deskMessage) {
+      deskMessage.textContent = isAdmin
+        ? '관리자로 로그인 중입니다. 새 글을 작성할 수 있습니다.'
+        : signedIn ? '회원으로 로그인 중입니다. 글 작성은 관리자만 할 수 있습니다.' : signedOutMessage;
+    }
+  }
+
+  refreshAuth();
+  window.addEventListener('pageshow', event => { if (event.persisted) refreshAuth(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAuth(); });
+  if (typeof BroadcastChannel !== 'undefined') {
+    const channel = new BroadcastChannel('cedrai-auth');
+    channel.addEventListener('message', refreshAuth);
+  }
+  logoutButton?.addEventListener('click', async () => {
+    logoutButton.disabled = true;
+    let loggedOut = false;
+    try {
+      const response = await fetch('/api/logout', { method: 'POST' });
+      if (!response.ok) throw new Error('Logout failed');
+      loggedOut = true;
+      if (typeof BroadcastChannel !== 'undefined') {
+        const channel = new BroadcastChannel('cedrai-auth');
+        channel.postMessage('logout');
+        channel.close();
+      }
+    } catch {
+      // Keep the current session and let the next check restore the correct controls.
+    } finally {
+      await refreshAuth();
+      if (!loggedOut && deskMessage) deskMessage.textContent = '로그아웃하지 못했습니다. 다시 시도해 주세요.';
+      logoutButton.disabled = false;
+    }
+  });
+
   let opener;
   window.openArchiveLogin = trigger => {
+    if (currentRole === 'admin') {
+      location.assign('/blog/write');
+      return;
+    }
     if (dialog.open) return;
     opener = trigger || document.getElementById('spellbook-toggle');
     dialog.showModal();
