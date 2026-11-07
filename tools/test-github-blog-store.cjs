@@ -9,6 +9,12 @@ const api='http://127.0.0.1:8914'
 const files=new Map()
 let mock,server
 function json(res,status,data){res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(data))}
+function sealed(value,secret){
+  const iv=crypto.randomBytes(12),key=crypto.createHash('sha256').update('cedrai-blog-storage-v1\0').update(secret).digest()
+  const cipher=crypto.createCipheriv('aes-256-gcm',key,iv)
+  const payload=Buffer.concat([cipher.update(value),cipher.final()])
+  return Buffer.from(JSON.stringify({format:'cedrai-blog-aes-gcm-v1',iv:iv.toString('base64'),tag:cipher.getAuthTag().toString('base64'),payload:payload.toString('base64')}))
+}
 async function mockGithub(req,res){
   const url=new URL(req.url,api)
   const blobPrefix='/repos/test/repo/git/blobs/'
@@ -49,10 +55,13 @@ async function request(path,{cookie,body,form}={}){
   return {status:response.status,data,bytes,headers:response.headers}
 }
 async function main(){
+  const testSecret=crypto.randomBytes(32).toString('hex')
+  const seed=(key,data)=>files.set(key,{data,sha:crypto.createHash('sha1').update(data).digest('hex')})
+  seed('data/native-blog/blog-native/v1/posts/tistory-123.json.sealed.json',sealed(Buffer.from(JSON.stringify({version:1,slug:'tistory-123',visibility:'protected',title:'Legacy test',content:'<p>GITHUB_LEGACY_BODY</p>',assets:[]})),testSecret))
   mock=http.createServer((req,res)=>{mockGithub(req,res).catch(error=>json(res,500,{error:error.message}))})
   await new Promise(resolve=>mock.listen(8914,'127.0.0.1',resolve))
   server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','8915'],{
-    env:{...process.env,ADMIN_ID:'storage-test-admin',ADMIN_PASSWORD:'storage-test-password',ADMIN_SESSION_SECRET:crypto.randomBytes(32).toString('hex'),CLUB_ID:'storage-test-member',CLUB_PASSWORD:'storage-test-member-password',GITHUB_TOKEN:'test-token',GITHUB_REPO:'test/repo',GITHUB_BRANCH:'main',GITHUB_API_BASE:api,BLOB_READ_WRITE_TOKEN:'not-a-real-token',BLOB_STORE_ID:'mock-blocked-blob',VERCEL:''},stdio:'ignore'
+    env:{...process.env,ADMIN_ID:'storage-test-admin',ADMIN_PASSWORD:'storage-test-password',ADMIN_SESSION_SECRET:testSecret,CLUB_ID:'storage-test-member',CLUB_PASSWORD:'storage-test-member-password',GITHUB_TOKEN:'test-token',GITHUB_REPO:'test/repo',GITHUB_BRANCH:'main',GITHUB_API_BASE:api,BLOB_READ_WRITE_TOKEN:'not-a-real-token',BLOB_STORE_ID:'mock-blocked-blob',VERCEL:''},stdio:'ignore'
   })
   for(let i=0;i<100;i++){try{if((await request('/api/me')).status===200)break}catch{}await new Promise(resolve=>setTimeout(resolve,100));if(i===99)throw new Error('Test site did not start')}
   const login=await request('/api/login',{body:{id:'storage-test-admin',password:'storage-test-password'}})
@@ -69,7 +78,7 @@ async function main(){
   const saved=await request('/api/native-blog/write',{cookie,body:input})
   assert.equal(saved.status,200,JSON.stringify(saved.data));assert(saved.data.post.number>=131)
   const catalog=await request('/api/native-blog/catalog')
-  assert.equal(catalog.status,200);assert.equal(catalog.data.storageUnavailable,true)
+  assert.equal(catalog.status,200);assert.equal(catalog.data.storageUnavailable,false)
   assert(catalog.data.posts.some(post=>post.slug===slug))
   const article=await request(saved.data.href)
   assert.equal(article.status,200);assert(article.data.includes('PUBLIC_GITHUB_BODY'))
@@ -89,17 +98,18 @@ async function main(){
   const member=await request('/api/login',{body:{id:'storage-test-member',password:'storage-test-member-password'}})
   const memberCookie=member.headers.get('set-cookie').split(';')[0]
   assert((await request('/api/native-blog/posts/'+secretSlug,{cookie:memberCookie})).data.content.includes('SECRET_GITHUB_BODY'))
+  assert.equal((await request('/api/native-blog/posts/tistory-123')).status,401)
+  assert((await request('/api/native-blog/posts/tistory-123',{cookie:memberCookie})).data.content.includes('GITHUB_LEGACY_BODY'))
+  const inventory=await request('/api/native-blog/import-status',{cookie})
+  assert.equal(inventory.status,200);assert(inventory.data.posts.includes('posts/tistory-123.json'))
   const concurrent=await Promise.all([1,2].map(index=>request('/api/native-blog/write',{cookie,body:{...input,slug:'blog-'+crypto.randomUUID(),title:'Concurrent '+index,markdown:'Concurrent post',assets:[]}})))
   assert(concurrent.every(item=>item.status===200),JSON.stringify(concurrent.map(item=>item.data)))
   assert.notEqual(concurrent[0].data.post.number,concurrent[1].data.post.number)
-  assert.equal((await request('/api/native-blog/migrate',{cookie,body:{number:129}})).status,503)
-  const missing=await request('/blog?post=129')
-  assert.equal(missing.status,200);assert(missing.data.includes('기록을 잠시 열 수 없습니다.'))
   for(const [key,file] of files){
     const value=file.data.toString('utf8')
     assert(!value.includes('PUBLIC_GITHUB_BODY')&&!value.includes('SECRET_GITHUB_BODY')&&!value.includes('Secret test'),key)
     assert.equal(JSON.parse(value).format,'cedrai-blog-aes-gcm-v1')
   }
-  console.log('Passed: encrypted GitHub posts and large assets, public and protected reads, edits, concurrent numbering, numeric URLs, blocked Blob fallback, and archive availability.')
+  console.log('Passed: encrypted GitHub legacy and new posts, large assets, public and protected reads, edits, concurrent numbering, numeric URLs, and Blob-independent archive availability.')
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{server?.kill('SIGTERM');if(mock)await new Promise(resolve=>mock.close(resolve))})

@@ -4,7 +4,7 @@ import { getBlogPost } from '@/lib/blog-post'
 import { readNativePost, validSlug } from '@/lib/native-blog'
 import { listWrittenMetadata, readWrittenPost, renderedWrittenContent } from '@/lib/blog-writing'
 export const WRITTEN_CATALOG_TAG='written-blog-catalog'
-const cachedWrittenMetadata=unstable_cache(listWrittenMetadata,['written-blog-catalog-v3',process.env.BLOB_STORE_ID||'local'],{revalidate:300,tags:[WRITTEN_CATALOG_TAG]})
+const cachedWrittenMetadata=unstable_cache(listWrittenMetadata,['written-blog-catalog-v4',process.env.GITHUB_REPO||'local'],{revalidate:300,tags:[WRITTEN_CATALOG_TAG]})
 export async function getBlogCatalog():Promise<BlogPost[]> {
   const written=await cachedWrittenMetadata()
   return [...BLOG_POSTS,...written.posts].sort((a,b)=>b.date.localeCompare(a.date)||b.slug.localeCompare(a.slug))

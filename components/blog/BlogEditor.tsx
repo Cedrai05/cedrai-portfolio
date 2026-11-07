@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect,useRef,useState } from 'react'
-import { upload } from '@vercel/blob/client'
 import { useAuth } from '@/lib/auth-context'
 import { BLOG_CATEGORIES,BLOG_TOPICS,postHref,type BlogPost } from '@/lib/blog-catalog'
 import { findBlogTable, serializeBlogTable, type BlogTable } from '@/lib/blog-table'
@@ -99,13 +98,12 @@ export default function BlogEditor({draftSlug,editSlug}:{draftSlug?:string;editS
     try {
       const configResponse=await fetch('/api/native-blog/upload',{cache:'no-store'});const config=await configResponse.json();if(!configResponse.ok)throw new Error(config.error)
       for(const file of files){
-        const maxFileBytes=Number(config.maxFileBytes)||20*1024*1024
+        const maxFileBytes=Number(config.maxFileBytes)||4*1024*1024
         if(file.size>maxFileBytes)throw new Error(`파일 하나당 ${Math.floor(maxFileBytes/1024/1024)}MB까지 업로드할 수 있습니다.`)
         const ext=file.name.split('.').pop()?.toLowerCase();if(!ext||!/^[a-z0-9]{1,10}$/.test(ext))throw new Error('확장자가 있는 파일을 선택해 주세요.')
         const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer())
         const hash=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join(''),name=`${hash}.${ext}`
-        if(config.storage==='blob')await upload(`blog-native/v1/assets/${name}`,file,{access:'private',handleUploadUrl:'/api/native-blog/upload',multipart:file.size>4*1024*1024})
-        else {const form=new FormData();form.set('file',file);form.set('name',name);const response=await fetch('/api/native-blog/upload',{method:'POST',body:form});if(!response.ok)throw new Error('첨부파일을 업로드하지 못했습니다.')}
+        const form=new FormData();form.set('file',file);form.set('name',name);const response=await fetch('/api/native-blog/upload',{method:'POST',body:form});if(!response.ok)throw new Error('첨부파일을 업로드하지 못했습니다.')
         names.push(name)
         const label=file.name.replace(/[\[\]\\]/g,'_')
         lines.push(`${file.type.startsWith('image/')&&!/\.svg$/i.test(file.name)?'!':''}[${label}](attachment:${name})`)
@@ -136,7 +134,7 @@ export default function BlogEditor({draftSlug,editSlug}:{draftSlug?:string;editS
       <label>소개<input value={summary} disabled={disabled} maxLength={300} onChange={e=>setSummary(e.target.value)} placeholder="목록에 표시할 짧은 소개 (선택 사항)"/></label><label>태그<input value={tags} disabled={disabled} onChange={e=>setTags(e.target.value)} placeholder="쉼표로 구분해 주세요."/></label>
       <label className="blog-editor__secret"><input type="checkbox" checked={isSecret} disabled={disabled} onChange={e=>setIsSecret(e.target.checked)}/><span><strong>비밀글</strong><small>{isSecret?'로그인한 사용자만 읽을 수 있습니다.':'체크하지 않으면 로그인 없이 모두가 읽을 수 있습니다.'}</small></span></label>
       <div className="blog-editor__toolbar"><button type="button" disabled={disabled} onClick={()=>insert('## ')}>제목</button><button type="button" disabled={disabled} onClick={()=>insert('**','**')}>굵게</button><button type="button" disabled={disabled} onClick={()=>insert('```\n','\n```')}>코드</button><button type="button" disabled={disabled} onClick={()=>insert('- ')}>목록</button><button type="button" disabled={disabled} onClick={openTableEditor}>표</button><button type="button" disabled={disabled} onClick={()=>insert('[','](https://)')}>링크</button><label className="blog-editor__file" aria-disabled={disabled}><span aria-hidden="true">＋</span><span>이미지·첨부파일 추가</span><input type="file" aria-label="이미지·첨부파일 추가" multiple disabled={disabled} onChange={e=>{addFiles(Array.from(e.target.files||[]));e.target.value=''}}/></label></div>
-      <label>본문<textarea ref={textarea} value={markdown} disabled={disabled} onChange={e=>{setMarkdown(e.target.value);setPreview(null)}} maxLength={500000} rows={20} placeholder="내용을 작성해 주세요. Markdown을 지원합니다."/></label><p className="blog-editor__hint">Enter는 줄바꿈, 빈 줄은 새 문단, **글자**는 굵게 표시됩니다. 표 버튼에서 셀과 행·열을 편집할 수 있습니다. 기존 표는 커서를 표 안에 놓고 표 버튼을 누르세요. 이미지와 첨부파일은 본문에 자동으로 추가됩니다. 파일 하나당 최대 20MB입니다.</p>
+      <label>본문<textarea ref={textarea} value={markdown} disabled={disabled} onChange={e=>{setMarkdown(e.target.value);setPreview(null)}} maxLength={500000} rows={20} placeholder="내용을 작성해 주세요. Markdown을 지원합니다."/></label><p className="blog-editor__hint">Enter는 줄바꿈, 빈 줄은 새 문단, **글자**는 굵게 표시됩니다. 표 버튼에서 셀과 행·열을 편집할 수 있습니다. 기존 표는 커서를 표 안에 놓고 표 버튼을 누르세요. 이미지와 첨부파일은 본문에 자동으로 추가됩니다. 파일 하나당 최대 4MB입니다.</p>
       <div className="blog-editor__actions"><button type="button" disabled={disabled||!title.trim()||!markdown.trim()} onClick={()=>save('preview')}>미리보기</button>{!editSlug&&<button type="button" disabled={disabled||!title.trim()||!markdown.trim()} onClick={()=>save('draft')}>임시 저장</button>}<button type="button" className="primary-button" disabled={disabled||!title.trim()||!markdown.trim()} onClick={()=>save(editSlug?'update':'publish')}>{busy?'처리 중…':editSlug?'수정 내용 저장':isSecret?'비밀글 업로드':'일반글 업로드'}</button></div>
       <p role="status" aria-live="polite">{status}</p>{published&&<div className="blog-editor__success"><Link href={published}>{editSlug?'수정한 글 보기':'업로드한 글 보기'} →</Link><a href="/blog/write">새 글 작성 →</a></div>}
       </div>
