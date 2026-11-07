@@ -67,7 +67,7 @@ async function main(){
   const slug='blog-'+crypto.randomUUID()
   const input={slug,title:'GitHub storage test',category:'개발',topic:'Tests',summary:'Public test',tags:[],markdown:`# PUBLIC_GITHUB_BODY\n\n**Bold**\n\n![Picture](attachment:${name})`,assets:[name],isSecret:false,mode:'publish'}
   const saved=await request('/api/native-blog/write',{cookie,body:input})
-  assert.equal(saved.status,200,JSON.stringify(saved.data));assert(saved.data.post.number>=130)
+  assert.equal(saved.status,200,JSON.stringify(saved.data));assert(saved.data.post.number>=131)
   const catalog=await request('/api/native-blog/catalog')
   assert.equal(catalog.status,200);assert.equal(catalog.data.storageUnavailable,true)
   assert(catalog.data.posts.some(post=>post.slug===slug))

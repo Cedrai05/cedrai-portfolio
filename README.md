@@ -81,7 +81,7 @@ cedrai-portfolio/
 
 새로 작성하는 글과 첨부파일은 GitHub의 `data/native-blog/`에 **AES-256-GCM으로 암호화해** 저장합니다. 공개 저장소에서 원문을 읽을 수 없으며, 서버가 로그인 여부를 확인한 후 복호화해 전달합니다. 암호화 키는 `ADMIN_SESSION_SECRET`에서 파생하므로 이 값을 변경하기 전에 저장된 글을 새 키로 옮겨야 합니다. GitHub 저장 시 첨부파일은 요청 크기 때문에 파일당 4MB까지 업로드할 수 있습니다. 기존 공개글은 `public/blog-content/`의 정적 파일로 계속 제공합니다. GitHub 설정이 없는 개발 환경에서는 `.private_uploads/native-blog/`를 사용합니다.
 
-2026-11-08 이전에 작성한 글 124~129번의 원본은 기존 Vercel 비공개 Blob에 남겨 두었습니다. Blob이 차단된 동안 해당 글은 읽을 수 없지만 기존 정적 글과 새 GitHub 글은 계속 제공합니다. Blob 접근이 복구되면 관리자 계정으로 `POST /api/native-blog/migrate`에 `{ "number": 124 }`부터 129까지 각각 요청해 암호화된 GitHub 저장소로 옮깁니다. 원본을 확인하고 첨부파일의 해시를 검증한 후 복사하며 Blob 원본은 삭제하지 않습니다. 미처 옮기지 못한 글은 Blob을 읽는 기존 경로를 유지합니다.
+2026-11-08 이전에 작성한 글 124~130번의 원본은 기존 Vercel 비공개 Blob에 남겨 두었습니다. Blob이 차단된 동안 해당 글은 읽을 수 없지만 기존 정적 글과 새 GitHub 글은 계속 제공합니다. Blob 접근이 복구되면 관리자 계정으로 `POST /api/native-blog/migrate`에 `{ "number": 124 }`부터 130까지 각각 요청해 암호화된 GitHub 저장소로 옮깁니다. 원본을 확인하고 첨부파일의 해시를 검증한 후 복사하며 Blob 원본은 삭제하지 않습니다. 미처 옮기지 못한 글은 Blob을 읽는 기존 경로를 유지합니다.
 
 `/admin/blog-import`는 기존 이관 도구이며 새 글 작성은 `/blog/write`를 사용합니다.
 
