@@ -4,15 +4,16 @@ import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { blobStorageEnabled } from '@/lib/blob-storage'
 const localRoot = path.join(process.cwd(),'.private_uploads','native-blog')
+const blobTokenOptions = () => process.env.BLOB_READ_WRITE_TOKEN ? {token:process.env.BLOB_READ_WRITE_TOKEN} : {}
 function localPath(key: string) {
   if (!/^[a-zA-Z0-9_./-]+$/.test(key) || key.split('/').includes('..')) throw new Error('Invalid storage key')
   return path.join(localRoot,key)
 }
 async function getPrivateBlob(key:string) {
-  try { return await get(key,{access:'private',useCache:false}) }
+  try { return await get(key,{access:'private',useCache:false,...blobTokenOptions()}) }
   catch(error) {
     if(!(error instanceof Error)||!error.message.includes('Failed to fetch blob: 403 Forbidden'))throw error
-    try { return await get(key,{access:'private'}) }
+    try { return await get(key,{access:'private',...blobTokenOptions()}) }
     catch(cachedError) { throw new Error('Vercel Blob fresh and cached reads both returned an error',{cause:cachedError}) }
   }
 }
@@ -30,7 +31,7 @@ export async function readBlogJSON<T>(key: string): Promise<T | null> {
 export async function writeBlogJSON(key: string, value: unknown, overwrite=false) {
   const data=JSON.stringify(value)
   if (blobStorageEnabled()) {
-    await put(key,data,{access:'private',addRandomSuffix:false,allowOverwrite:overwrite,contentType:'application/json',cacheControlMaxAge:60})
+    await put(key,data,{access:'private',addRandomSuffix:false,allowOverwrite:overwrite,contentType:'application/json',cacheControlMaxAge:60,...blobTokenOptions()})
     return
   }
   const file=localPath(key)
@@ -44,7 +45,7 @@ export async function listBlogKeys(prefix: string) {
   if (blobStorageEnabled()) {
     const names:string[]=[]
     let cursor:string|undefined
-    do { const result=await list({prefix,cursor}); names.push(...result.blobs.map(blob=>blob.pathname)); cursor=result.hasMore?result.cursor:undefined } while(cursor)
+    do { const result=await list({prefix,cursor,...blobTokenOptions()}); names.push(...result.blobs.map(blob=>blob.pathname)); cursor=result.hasMore?result.cursor:undefined } while(cursor)
     return names
   }
   try { return (await readdir(localPath(prefix))).filter(name=>name.endsWith('.json')).map(name=>prefix+name) }
