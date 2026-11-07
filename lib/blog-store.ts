@@ -8,10 +8,18 @@ function localPath(key: string) {
   if (!/^[a-zA-Z0-9_./-]+$/.test(key) || key.split('/').includes('..')) throw new Error('Invalid storage key')
   return path.join(localRoot,key)
 }
+async function getPrivateBlob(key:string) {
+  try { return await get(key,{access:'private',useCache:false}) }
+  catch(error) {
+    if(!(error instanceof Error)||!error.message.includes('Failed to fetch blob: 403 Forbidden'))throw error
+    try { return await get(key,{access:'private'}) }
+    catch(cachedError) { throw new Error('Vercel Blob fresh and cached reads both returned an error',{cause:cachedError}) }
+  }
+}
 export async function readBlogJSON<T>(key: string): Promise<T | null> {
   if (blobStorageEnabled()) {
     try {
-      const result=await get(key,{access:'private',useCache:false})
+      const result=await getPrivateBlob(key)
       if (!result || result.statusCode!==200) return null
       return await new Response(result.stream).json() as T
     } catch (error) { if (error instanceof BlobNotFoundError) return null; throw error }
@@ -45,7 +53,7 @@ export async function listBlogKeys(prefix: string) {
 export async function readBlogAsset(key: string) {
   if (blobStorageEnabled()) {
     try {
-      const result=await get(key,{access:'private',useCache:false})
+      const result=await getPrivateBlob(key)
       return result?.statusCode===200 ? {body:result.stream,contentType:result.blob.contentType} : null
     } catch(error) { if(error instanceof BlobNotFoundError)return null;throw error }
   }
