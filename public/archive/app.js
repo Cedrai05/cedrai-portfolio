@@ -337,6 +337,7 @@ async function loadContent() {
   try {
     const response=await fetch('/api/archive-home', { cache: 'no-store' }); if(!response.ok) throw Error('content');
     content=await response.json();
+    $('#journal-storage-notice').hidden = !content.storageUnavailable;
     renderJournalDesk(); renderPosts(); renderCalendar(); renderCalendarLedger(); renderNowHistory(); renderProjects();
   } catch {
     $('#post-list').innerHTML='<div class="empty-posts">기록을 불러오지 못했습니다.</div>';

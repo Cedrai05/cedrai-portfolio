@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getBlogCatalog } from '@/lib/blog-repository'
+import { getAvailableBlogCatalog } from '@/lib/blog-repository'
 import { CONTENT } from '@/lib/content'
 import { isGithubConfigured, readFile } from '@/lib/github'
 import type { ScheduleData, NowPost, Project } from '@/lib/data'
@@ -20,8 +20,8 @@ async function currentContent(kind: 'schedule' | 'now' | 'projects') {
 
 export async function GET() {
   try {
-    const [catalog, schedule, now, projects] = await Promise.all([
-      getBlogCatalog(),
+    const [blog, schedule, now, projects] = await Promise.all([
+      getAvailableBlogCatalog(),
       currentContent('schedule'),
       currentContent('now'),
       currentContent('projects'),
@@ -31,7 +31,8 @@ export async function GET() {
       ? [...nowPosts].sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null
       : null
     return NextResponse.json({
-      posts: catalog.map(post => ({
+      storageUnavailable: blog.storageUnavailable,
+      posts: blog.posts.map(post => ({
         slug: post.slug,
         number: post.number,
         title: post.title,

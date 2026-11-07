@@ -99,7 +99,8 @@ export default function BlogEditor({draftSlug,editSlug}:{draftSlug?:string;editS
     try {
       const configResponse=await fetch('/api/native-blog/upload',{cache:'no-store'});const config=await configResponse.json();if(!configResponse.ok)throw new Error(config.error)
       for(const file of files){
-        if(file.size>20*1024*1024)throw new Error('파일 하나당 20MB까지 업로드할 수 있습니다.')
+        const maxFileBytes=Number(config.maxFileBytes)||20*1024*1024
+        if(file.size>maxFileBytes)throw new Error(`파일 하나당 ${Math.floor(maxFileBytes/1024/1024)}MB까지 업로드할 수 있습니다.`)
         const ext=file.name.split('.').pop()?.toLowerCase();if(!ext||!/^[a-z0-9]{1,10}$/.test(ext))throw new Error('확장자가 있는 파일을 선택해 주세요.')
         const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer())
         const hash=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join(''),name=`${hash}.${ext}`

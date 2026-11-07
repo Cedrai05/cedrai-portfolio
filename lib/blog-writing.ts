@@ -4,7 +4,7 @@ import { marked, Renderer } from 'marked'
 import sanitizeHtml from 'sanitize-html'
 import { BLOG_CATEGORIES, BLOG_TOPICS, type BlogPost } from '@/lib/blog-catalog'
 import { validAsset, validWrittenSlug, WRITTEN_PREFIX } from '@/lib/native-blog'
-import { readBlogJSON, writeBlogJSON, listBlogKeys } from '@/lib/blog-store'
+import { readBlogJSON, writeBlogJSON, listBlogKeys, listBlogKeysWithStatus } from '@/lib/blog-store'
 export type StoredPost = { version:2; renderVersion?:2; metadata:BlogPost; content:string; markdown:string; assets:string[]; visibility:'public'|'protected'; createdAt:string; updatedAt:string; fingerprint:string; archivedAt?:string }
 export class BlogInputError extends Error { constructor(message:string, public status=400) { super(message) } }
 export type WritingInput = {slug:string;title:string;category:string;topic:string;summary:string;tags:string[];markdown:string;assets:string[];isSecret:boolean}
@@ -67,18 +67,22 @@ export async function writtenMetadata(slug:string) {
   return {...post,number:post.number??await numberForWrittenPost(slug),summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary}
 }
 export async function listWrittenMetadata() {
-  const keys=await listBlogKeys(`${WRITTEN_PREFIX}catalog/`)
-  const result=await Promise.all(keys.map(key=>readBlogJSON<BlogPost>(key)))
-  return Promise.all(result.filter((post):post is BlogPost=>Boolean(post&&validWrittenSlug(post.slug))).map(async post=>({...post,number:post.number??await numberForWrittenPost(post.slug),summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary})))
+  const {keys,storageUnavailable}=await listBlogKeysWithStatus(`${WRITTEN_PREFIX}catalog/`)
+  const result=await Promise.allSettled(keys.map(async key=>{
+    const post=await readBlogJSON<BlogPost>(key)
+    if(!post||!validWrittenSlug(post.slug))return null
+    return {...post,number:post.number??await numberForWrittenPost(post.slug),summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary}
+  }))
+  return {posts:result.flatMap(item=>item.status==='fulfilled'&&item.value?[item.value]:[]),storageUnavailable:storageUnavailable||result.some(item=>item.status==='rejected'||item.value===null)}
 }
 export async function listDrafts() {
   const keys=await listBlogKeys(`${WRITTEN_PREFIX}drafts/`)
-  const drafts=await Promise.all(keys.map(async key=>{
+  const drafts=await Promise.allSettled(keys.map(async key=>{
     const draft=await readBlogJSON<StoredPost>(key)
     if(!draft||draft.archivedAt||await writtenMetadata(draft.metadata.slug))return null
     return {...metadataFromStored(draft),updatedAt:draft.updatedAt}
   }))
-  return drafts.filter(post=>post!==null).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))
+  return drafts.flatMap(item=>item.status==='fulfilled'&&item.value?[item.value]:[]).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))
 }
 export async function saveWriting(input:WritingInput,publish:boolean) {
   const fingerprint=createHash('sha256').update(JSON.stringify(input)).digest('hex')

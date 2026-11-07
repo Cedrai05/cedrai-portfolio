@@ -3,7 +3,8 @@ import { validWrittenSlug, WRITTEN_PREFIX } from '@/lib/native-blog'
 import { listBlogKeys, readBlogJSON, writeBlogJSON } from '@/lib/blog-store'
 const idsPrefix=`${WRITTEN_PREFIX}ids/`
 const slugPrefix=`${WRITTEN_PREFIX}numbers/`
-const legacyMax=Math.max(...BLOG_POSTS.map(post=>Number(post.slug.replace('tistory-',''))))
+// 124–129 were published in the original Blob store before GitHub became the primary store.
+const legacyMax=Math.max(129,...BLOG_POSTS.map(post=>Number(post.slug.replace('tistory-',''))))
 function validNumber(value:unknown):value is number { return typeof value==='number'&&Number.isSafeInteger(value)&&value>0 }
 export async function slugForPostNumber(value:string) {
   if(!/^[0-9]{1,15}$/.test(value))return null

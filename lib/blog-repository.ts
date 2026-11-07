@@ -1,18 +1,28 @@
-import { slugForPostNumber } from '@/lib/blog-numbering'
+import { unstable_cache } from 'next/cache'
 import { BLOG_POSTS, prepareBlogContent, type BlogPost } from '@/lib/blog-catalog'
 import { getBlogPost } from '@/lib/blog-post'
 import { readNativePost, validSlug } from '@/lib/native-blog'
-import { listWrittenMetadata, readWrittenPost, renderedWrittenContent, writtenMetadata } from '@/lib/blog-writing'
+import { listWrittenMetadata, readWrittenPost, renderedWrittenContent } from '@/lib/blog-writing'
+export const WRITTEN_CATALOG_TAG='written-blog-catalog'
+const cachedWrittenMetadata=unstable_cache(listWrittenMetadata,['written-blog-catalog-v3',process.env.BLOB_STORE_ID||'local'],{revalidate:300,tags:[WRITTEN_CATALOG_TAG]})
 export async function getBlogCatalog():Promise<BlogPost[]> {
-  return [...BLOG_POSTS,...await listWrittenMetadata()].sort((a,b)=>b.date.localeCompare(a.date)||b.slug.localeCompare(a.slug))
+  const written=await cachedWrittenMetadata()
+  return [...BLOG_POSTS,...written.posts].sort((a,b)=>b.date.localeCompare(a.date)||b.slug.localeCompare(a.slug))
 }
 export async function getPostMetadata(value:string) {
-  const slug=validSlug(value)?value:await slugForPostNumber(value)
-  if(!slug)return null
-  return BLOG_POSTS.find(post=>post.slug===slug)||await writtenMetadata(slug)
+  const number=/^[0-9]{1,15}$/.test(value)?Number(value):null
+  const legacy=BLOG_POSTS.find(post=>post.slug===value||(number!==null&&post.number===number))
+  if(legacy)return legacy
+  if(number===null&&!validSlug(value))return null
+  const written=await cachedWrittenMetadata()
+  return written.posts.find(post=>post.slug===value||(number!==null&&post.number===number))||null
 }
-export async function getStoredArticle(value:string) {
-  const metadata=await getPostMetadata(value)
+export async function getAvailableBlogCatalog():Promise<{posts:BlogPost[];storageUnavailable:boolean}> {
+  try { const written=await cachedWrittenMetadata();return {posts:[...BLOG_POSTS,...written.posts].sort((a,b)=>b.date.localeCompare(a.date)||b.slug.localeCompare(a.slug)),storageUnavailable:written.storageUnavailable} }
+  catch { return {posts:BLOG_POSTS,storageUnavailable:true} }
+}
+export async function getStoredArticle(value:string,knownMetadata?:BlogPost) {
+  const metadata=knownMetadata??await getPostMetadata(value)
   if(!metadata)return null
   const slug=metadata.slug
   if(slug.startsWith('blog-')) {

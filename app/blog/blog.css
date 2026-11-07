@@ -506,6 +506,14 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
 }
 
 /* The blog starts below the site header, so a negative offset leaves this link visible. */
+.archive-route-content .blog-page .archive-availability {
+  margin: 0 0 28px;
+  padding: 14px 18px;
+  border: 1px solid var(--bd);
+  background: color-mix(in srgb, var(--bg2) 82%, transparent);
+  color: var(--txw);
+  font: 16px/1.6 'SchoolSafetyWizard', serif;
+}
 .blog-page .skip-link{
   position:fixed;
   top:12px;

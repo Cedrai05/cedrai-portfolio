@@ -4,24 +4,31 @@ import { readToken, SESSION_COOKIE } from '@/lib/session'
 import { BLOG_PREFIX, validAsset, validSlug } from '@/lib/native-blog'
 import { blogRole, sameOriginWrite, privateBlogHeaders } from '@/lib/blog-access'
 import { blobStorageEnabled } from '@/lib/blob-storage'
+import { githubBlogStorageEnabled } from '@/lib/github-blog-store'
+import { writeBlogAsset } from '@/lib/blog-store'
 import { createHash } from 'node:crypto'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 export const runtime = 'nodejs'
 export async function GET(request: NextRequest) {
   if (blogRole(request) !== 'admin') return NextResponse.json({error:'관리자 로그인이 필요합니다.'},{status:403})
-  return NextResponse.json({storage:blobStorageEnabled()?'blob':'local'},{headers:privateBlogHeaders()})
+  const storage=githubBlogStorageEnabled()?'github':blobStorageEnabled()?'blob':'local'
+  return NextResponse.json({storage,maxFileBytes:storage==='github'?4*1024*1024:20*1024*1024},{headers:privateBlogHeaders()})
 }
 export async function POST(request: NextRequest) {
   try {
     if (request.headers.get('content-type')?.startsWith('multipart/form-data')) {
-      if (blogRole(request) !== 'admin' || !sameOriginWrite(request) || blobStorageEnabled() || process.env.VERCEL) return NextResponse.json({error:'업로드를 허용하지 않습니다.'},{status:403})
+      const github=githubBlogStorageEnabled()
+      if (blogRole(request) !== 'admin' || !sameOriginWrite(request) || (!github&&(blobStorageEnabled()||process.env.VERCEL))) return NextResponse.json({error:'업로드를 허용하지 않습니다.'},{status:403})
       const form=await request.formData(), file=form.get('file'), name=String(form.get('name')||'')
-      if (!(file instanceof File) || !validAsset(name) || file.size>20*1024*1024) return NextResponse.json({error:'파일을 확인해 주세요.'},{status:400})
+      if (!(file instanceof File) || !validAsset(name) || file.size>(github?4:20)*1024*1024) return NextResponse.json({error:'파일을 확인해 주세요.'},{status:400})
       const data=Buffer.from(await file.arrayBuffer())
       if(createHash('sha256').update(data).digest('hex')!==name.split('.')[0]) return NextResponse.json({error:'파일 검증에 실패했습니다.'},{status:400})
-      const dir=path.join(process.cwd(),'.private_uploads/native-blog',BLOG_PREFIX,'assets')
-      await mkdir(dir,{recursive:true,mode:0o700}); await writeFile(path.join(dir,name),data,{mode:0o600})
+      if(github)await writeBlogAsset(`${BLOG_PREFIX}assets/${name}`,data)
+      else {
+        const dir=path.join(process.cwd(),'.private_uploads/native-blog',BLOG_PREFIX,'assets')
+        await mkdir(dir,{recursive:true,mode:0o700}); await writeFile(path.join(dir,name),data,{mode:0o600})
+      }
       return NextResponse.json({ok:true},{headers:privateBlogHeaders()})
     }
     const body = await request.json() as HandleUploadBody

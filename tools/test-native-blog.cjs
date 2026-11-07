@@ -13,7 +13,7 @@ async function main(){
  await seed('blog-native/v1/assets/'+name,asset)
  await seed('blog-native/v1/posts/tistory-123.json',JSON.stringify({version:1,slug:'tistory-123',visibility:'protected',title:'Legacy test',content:'<p>SECRET_LEGACY_TEST_BODY</p><img data-native-src="'+name+'">',assets:[name],password:{hash:'legacy-verifier-must-not-leak'}}))
  await seed('blog-native/v1/posts/tistory-63.json',JSON.stringify({version:1,slug:'tistory-63',visibility:'private',title:'Major test',content:'<p>SECRET_MAJOR_TEST_BODY</p>',assets:[name]}))
- server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','8912'],{env:{...process.env,ADMIN_ID:'local-admin',ADMIN_PASSWORD:'local-admin-password',CLUB_ID:'local-member',CLUB_PASSWORD:'local-member-password',ADMIN_SESSION_SECRET:secret,BLOB_READ_WRITE_TOKEN:'',BLOB_STORE_ID:'',VERCEL:''},stdio:'ignore'})
+ server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','8912'],{env:{...process.env,ADMIN_ID:'local-admin',ADMIN_PASSWORD:'local-admin-password',CLUB_ID:'local-member',CLUB_PASSWORD:'local-member-password',ADMIN_SESSION_SECRET:secret,BLOB_READ_WRITE_TOKEN:'',BLOB_STORE_ID:'',GITHUB_TOKEN:'',GITHUB_REPO:'',VERCEL:''},stdio:'ignore'})
  for(let i=0;i<100;i++){try{if((await request('/api/me')).status===200)break}catch{}await new Promise(r=>setTimeout(r,100));if(i===99)throw Error('Local server did not start')}
  const admin=await login('local-admin','local-admin-password'),member=await login('local-member','local-member-password')
  assert.equal((await request('/api/me',{cookie:admin})).data.role,'admin');assert.equal((await request('/api/me',{cookie:member})).data.role,'club-member')

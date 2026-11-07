@@ -12,7 +12,7 @@ type Filters = { category: string; topic: string; query: string; access: AccessF
 type Snapshot = Filters & { scrollY: number }
 const defaults: Filters = { category:'전체',topic:'전체',query:'',access:'all' }
 const archiveKey = 'cedrai-blog-archive'
-export default function BlogPage({slug,publicContent,posts:BLOG_POSTS,returnSaved=false}:{slug?:string;publicContent:string|null;posts:BlogPost[];returnSaved?:boolean}) {
+export default function BlogPage({slug,publicContent,posts:BLOG_POSTS,returnSaved=false,storageUnavailable=false}:{slug?:string;publicContent:string|null;posts:BlogPost[];returnSaved?:boolean;storageUnavailable?:boolean}) {
   const {isAdmin}=useAuth()
   const [filters,setFilters] = useState<Filters>(defaults)
   const [ready,setReady] = useState(false)
@@ -103,10 +103,11 @@ export default function BlogPage({slug,publicContent,posts:BLOG_POSTS,returnSave
     <a className="skip-link" href="#blog-main">본문으로 건너뛰기</a>
 
     <main id="blog-main">
-      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} returnSaved={returnSaved} /> : <article className="article-view article-view--archive"><a className="article-back" href="/blog">← FIELD NOTES</a><h1>기록을 찾을 수 없습니다.</h1><p className="article-summary">주소를 확인하거나 아카이브로 돌아가 주세요.</p></article> : <div id="home-view">
+      {slug ? post ? <BlogArticle post={post} initialContent={publicContent} returnSaved={returnSaved} /> : <article className="article-view article-view--archive"><a className="article-back" href="/blog">← FIELD NOTES</a><h1>{storageUnavailable?'기록을 잠시 열 수 없습니다.':'기록을 찾을 수 없습니다.'}</h1><p className="article-summary">{storageUnavailable?'글 저장소에 연결할 수 없습니다. 복구 후 다시 열어 주세요.':'주소를 확인하거나 아카이브로 돌아가 주세요.'}</p></article> : <div id="home-view">
         <BlogHero />
         {isAdmin && <div className="blog-admin-bar"><Link className="primary-button" href="/blog/write">＋ 글 작성</Link><span>관리자로 로그인 중입니다.</span></div>}
         <section className="archive-section" id="archive">
+          {storageUnavailable&&<p className="archive-availability" role="status">글 저장소에 연결할 수 없어 새로 작성한 기록이 잠시 보이지 않습니다. 기존 기록은 계속 읽을 수 있습니다.</p>}
           <div className="section-kicker"><span className="kicker-pill">ARCHIVE</span><span className="kicker-line" /><span>THE FIELD NOTES</span></div>
           <div className="section-heading"><div><p className="small-label">THE INDEX</p><h2>Open the field notes<span>.</span></h2><p>관심 분야별로 정리한 생각과 실험의 기록입니다.</p></div><span className="entry-total" id="entry-total">{BLOG_POSTS.length} ENTRIES</span></div>
           <div className="archive-toolbar"><div id="category-filters" className="category-filters" role="group" aria-label="카테고리 필터">{['전체',...BLOG_CATEGORIES].map(category=><button key={category} type="button" aria-pressed={filters.category===category} onClick={()=>update({category,topic:'전체'})}>{category}</button>)}</div><div className="archive-search-controls"><label className="search-box"><span>⌕</span><input ref={search} id="search-input" type="search" placeholder="기록 검색..." aria-label="기록 검색" autoComplete="off" value={filters.query} onChange={event=>update({query:event.target.value})}/><kbd>/</kbd></label><BlogAccessFilter value={filters.access} onChange={access=>update({access})} /></div></div>
