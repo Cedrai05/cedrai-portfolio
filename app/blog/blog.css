@@ -551,3 +551,26 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
 .blog-page--article .article-edit-link:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 .blog-editor--archive .blog-editor__load-status{margin:0 0 1rem;color:var(--txw)}
 .archive-route-content .blog-page .article-body .tistory-content strong{font-weight:800;-webkit-text-stroke:.35px currentColor}
+
+/* Original MapleStory fonts: https://maplestory.nexon.com/Media/Font (NEXON Korea). */
+@font-face{
+  font-family:'MapleStory';
+  src:url('/fonts/maplestory/Maplestory OTF Light.otf') format('opentype');
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+}
+@font-face{
+  font-family:'MapleStory';
+  src:url('/fonts/maplestory/Maplestory OTF Bold.otf') format('opentype');
+  font-style:normal;
+  font-weight:700 900;
+  font-display:swap;
+}
+.blog-page .article-body,
+.blog-page .article-body :where(*){
+  font-family:'MapleStory',var(--font-sans)!important;
+}
+.blog-page .article-body :where(pre,pre *,code,code *,kbd,samp){
+  font-family:var(--font-mono)!important;
+}
