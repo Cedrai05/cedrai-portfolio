@@ -10,6 +10,7 @@ export default function FilesPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [link, setLink] = useState('')
+  const [expiresAt, setExpiresAt] = useState('')
   const [copied, setCopied] = useState(false)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -17,6 +18,7 @@ export default function FilesPage() {
     if (!file || uploading) return
     setError('')
     setLink('')
+    setExpiresAt('')
     setCopied(false)
     setUploading(true)
     try {
@@ -24,8 +26,9 @@ export default function FilesPage() {
       body.append('file', file)
       const response = await fetch('/api/files', { method: 'POST', body })
       if (!response.ok) throw new Error((await response.text()).trim() || `업로드 실패 (${response.status})`)
-      const result = await response.json() as { url: string }
+      const result = await response.json() as { url: string; expires_at: string }
       setLink(result.url)
+      setExpiresAt(result.expires_at)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : '업로드에 실패했습니다.')
     } finally {
@@ -43,7 +46,7 @@ export default function FilesPage() {
         {isAdmin ? <form onSubmit={submit}>
           <label htmlFor="share-file">공유할 파일</label>
           <input id="share-file" type="file" accept=".png,.jpg,.jpeg,.pdf" required onChange={event => setFile(event.target.files?.[0] ?? null)} />
-          <p>PNG · JPEG · PDF / 최대 3 MiB</p>
+          <p>PNG · JPEG · PDF / 최대 3 MiB / 공유 기간 24시간</p>
           <button type="submit" disabled={!file || uploading}>{uploading ? '업로드 중…' : '공유 링크 만들기 ↗'}</button>
         </form> : <div className="files-page__login">
           <p>업로드는 관리자 로그인 후 사용할 수 있습니다. 공유 링크를 받은 사람은 로그인 없이 다운로드할 수 있습니다.</p>
@@ -53,6 +56,7 @@ export default function FilesPage() {
         {link && <div className="files-page__result" role="status">
           <strong>공유 링크</strong>
           <a href={link}>{link}</a>
+          {expiresAt && <p>다운로드 만료: {new Date(expiresAt).toLocaleString('ko-KR')}</p>}
           <button type="button" onClick={async () => { await navigator.clipboard.writeText(link); setCopied(true) }}>{copied ? '복사됨 ✓' : '링크 복사'}</button>
         </div>}
       </section>
@@ -64,6 +68,6 @@ export default function FilesPage() {
         <pre><code>{`curl -L -o downloaded.png \\\n  '공유_URL'`}</code></pre>
       </section>
     </div>
-    <p className="files-page__note">공유 주소는 파일을 열 수 있는 열쇠입니다. 주소가 공개되면 누구나 다운로드할 수 있습니다.</p>
+    <p className="files-page__note">공유 주소는 파일을 열 수 있는 열쇠입니다. 주소가 공개되면 만료 전까지 누구나 다운로드할 수 있습니다.</p>
   </main>
 }

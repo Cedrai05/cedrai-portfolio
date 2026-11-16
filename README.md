@@ -89,22 +89,38 @@ cedrai-portfolio/
 
 ## Go 파일 공유 실습
 
-`/files`에서 관리자 로그인 후 PNG, JPEG, PDF 파일을 업로드하면 공유 URL을 받습니다. 같은 Go API를 `curl`에서도 사용할 수 있습니다.
+`/files`에서 관리자 로그인 후 PNG, JPEG, PDF 파일을 업로드하면 24시간 유효한 공유 URL을 받습니다. 같은 Go API를 `curl`에서도 사용할 수 있습니다.
 
 ```bash
 curl -u '관리자ID' -F 'file=@example.png' https://www.cedrai.info/api/files
 curl -L -o downloaded.png '응답_JSON의_url'
 ```
 
-Go Vercel Function은 [`api/files.go`](api/files.go)에 있습니다. 업로드는 최대 3 MiB로 제한하고 파일명 경로, 확장자, MIME 선언과 내용, 관리자 인증을 검증합니다. 공개 다운로드는 `Content-Disposition: attachment`와 `X-Content-Type-Options: nosniff`를 사용합니다.
+Go Vercel Function은 [`api/files.go`](api/files.go)에 있습니다. 업로드는 최대 3 MiB로 제한하고 파일명 경로, 확장자, MIME 선언과 내용, 관리자 인증을 검증합니다. PNG/JPEG는 전체 디코딩과 이미지 크기 제한도 적용합니다. 공개 다운로드는 `Content-Disposition: attachment`와 `X-Content-Type-Options: nosniff`를 사용합니다.
+
+로컬 디스크 실습은 같은 핸들러를 [`cmd/file-share/main.go`](cmd/file-share/main.go)에서 실행합니다. Go 1.22 이상에서 다음처럼 시작하면 `127.0.0.1:8081`의 웹 화면과 API가 `.private_uploads/file-share/`에 암호화된 파일을 저장합니다. 디렉터리는 0700, 파일은 0600으로 생성하며 원본 이름은 저장 경로에 사용하지 않습니다.
+
+```bash
+export ADMIN_ID=admin
+export ADMIN_PASSWORD='실습용_비밀번호'
+export ADMIN_SESSION_SECRET="$(openssl rand -hex 32)"
+export FILE_SHARE_STORAGE=local
+export FILE_SHARE_DATA_DIR="$PWD/.private_uploads/file-share"
+go run ./cmd/file-share
+
+# 다른 터미널에서
+curl -u 'admin' -F 'file=@example.png' http://127.0.0.1:8081/api/files
+```
 
 VPS가 없어 파일은 서버 디스크에 저장하지 않습니다. 암호화된 파일을 이 저장소의 별도 `file-share-data` 브랜치에 GitHub Contents API로 저장합니다. 저장 파일명은 공개 공유 ID의 HMAC이므로 공개 저장소의 커밋을 보더라도 다운로드 URL을 알아낼 수 없습니다. 파일 내용과 원래 이름은 `ADMIN_SESSION_SECRET`에서 파생한 키로 AES-GCM 암호화합니다. **이 비밀키를 바꾸면 기존 공유 파일을 읽을 수 없습니다.**
 
-배포 전 `file-share-data` 브랜치를 GitHub에 한 번 만들고, Vercel Production 환경에 기존 `ADMIN_ID`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO`가 설정되어 있는지 확인합니다. `vercel.json`은 데이터 브랜치의 커밋이 Vercel 배포를 유발하지 않도록 설정합니다. `FILE_SHARE_PUBLIC_BASE_URL`은 기본값 `https://www.cedrai.info`를 사용하며 다른 도메인이라면 변경합니다.
+배포 전 `file-share-data` 브랜치를 GitHub에 한 번 만들고, Vercel Production 환경에 기존 `ADMIN_ID`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO`와 새 `CRON_SECRET`이 설정되어 있는지 확인합니다. `vercel.json`은 데이터 브랜치의 커밋이 Vercel 배포를 유발하지 않도록 설정합니다. `FILE_SHARE_PUBLIC_BASE_URL`은 기본값 `https://www.cedrai.info`를 사용하며 다른 도메인이라면 변경합니다.
 
-로컬 개발은 `vercel dev`로 실행합니다. `next dev`만으로는 루트 `api/`의 Go 함수를 제공하지 않습니다. 테스트는 `go test ./api`, 전체 빌드는 `vercel build --yes --target preview`입니다.
+새 공유 링크는 발급 24시간 뒤 Go 서버가 다운로드를 거부합니다. Vercel Cron이 하루 한 번 `/api/files?cleanup=1`을 호출해 만료된 파일을 데이터 브랜치의 현재 상태에서 제거합니다. Hobby 플랜의 정리 시각은 정확히 보장되지 않으므로, **접근 만료와 정리 시각은 다를 수 있습니다.** GitHub의 이전 커밋에는 암호문이 남으므로 이를 완전한 삭제로 간주하지 않습니다. 이전 버전에서 생성한 링크는 만료 정보가 없어 계속 접근 가능합니다.
 
-공유 URL을 아는 사람은 누구나 다운로드할 수 있습니다. 삭제·만료, 악성코드 검사, 저장 용량 관리가 없는 학습용 첫 버전입니다. GitHub 커밋 저장은 소량의 파일에만 적합합니다.
+포트폴리오와 Go 함수를 함께 로컬에서 확인할 때는 `vercel dev`로 실행합니다. `next dev`만으로는 루트 `api/`의 Go 함수를 제공하지 않습니다. 테스트는 `go test -race ./api ./cmd/file-share`, 전체 빌드는 `vercel build --yes --target preview`입니다. 구현 과정과 Go 개념 정리는 [`docs/go-file-share.md`](docs/go-file-share.md)에 있습니다.
+
+공유 URL을 아는 사람은 만료 전까지 누구나 다운로드할 수 있습니다. PDF 내부 악성코드 검사와 저장 용량 총량 관리가 없는 학습용 서비스입니다. GitHub 커밋 저장은 소량의 파일에만 적합합니다. 구현을 보강할 때는 [Golang 파일 업로드 구현 사례](https://tls456.github.io/posts/Golang-File-Uploader/)의 검증 순서와 만료·삭제 구분을 참고했습니다.
 
 ## 관리자 로그인
 

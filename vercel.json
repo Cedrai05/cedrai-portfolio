@@ -4,5 +4,8 @@
     "deploymentEnabled": {
       "file-share-data": false
     }
-  }
+  },
+  "crons": [
+    { "path": "/api/files?cleanup=1", "schedule": "0 3 * * *" }
+  ]
 }

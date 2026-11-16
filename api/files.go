@@ -14,8 +14,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
+	"log"
 	"mime"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -27,15 +32,17 @@ import (
 )
 
 const maxFileSize int64 = 3 << 20 // Vercel Functions accept at most 4.5 MB per request/response.
+const shareLifetime = 24 * time.Hour
 
 var fileTypes = map[string]string{
 	".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".pdf": "application/pdf",
 }
 
 type fileInfo struct {
-	Name string `json:"name"`
-	MIME string `json:"mime"`
-	Size int64  `json:"size"`
+	Name      string    `json:"name"`
+	MIME      string    `json:"mime"`
+	Size      int64     `json:"size"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 }
 
 // Handler is the Vercel Go Function for both browser and curl uploads/downloads.
@@ -44,7 +51,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		upload(w, r)
 	case http.MethodGet, http.MethodHead:
-		download(w, r)
+		if r.URL.Query().Get("cleanup") == "1" {
+			cleanup(w, r)
+		} else if r.URL.Query().Get("health") == "1" {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_, _ = io.WriteString(w, `{"service":"cedrai-file-share","status":"ok"}`)
+		} else {
+			download(w, r)
+		}
 	default:
 		w.Header().Set("Allow", "GET, HEAD, POST")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -109,6 +123,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "file exceeds 3 MiB", http.StatusRequestEntityTooLarge)
 		return
 	}
+	if (mimeType == "image/png" || mimeType == "image/jpeg") && validateImage(data, mimeType) != nil {
+		http.Error(w, "invalid or oversized image", http.StatusUnsupportedMediaType)
+		return
+	}
 	if next, err := reader.NextPart(); err != io.EOF || next != nil {
 		if next != nil {
 			next.Close()
@@ -123,19 +141,20 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 	id := base64.RawURLEncoding.EncodeToString(idBytes)
 	key := storageKey(id)
-	record, err := encrypt(fileInfo{Name: name, MIME: mimeType, Size: int64(len(data))}, data)
+	expiresAt := time.Now().UTC().Add(shareLifetime)
+	record, err := encrypt(fileInfo{Name: name, MIME: mimeType, Size: int64(len(data)), ExpiresAt: expiresAt}, data)
 	if err != nil {
 		http.Error(w, "server error", http.StatusInternalServerError)
 		return
 	}
-	if err := githubPut(key, record); err != nil {
+	if err := saveRecord(key, record); err != nil {
 		http.Error(w, "storage failed", http.StatusBadGateway)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]string{"url": publicBaseURL() + "/api/files?id=" + id})
+	_ = json.NewEncoder(w).Encode(map[string]string{"url": publicBaseURL() + "/api/files?id=" + id, "expires_at": expiresAt.Format(time.RFC3339)})
 }
 
 func download(w http.ResponseWriter, r *http.Request) {
@@ -149,7 +168,7 @@ func download(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "file storage is not configured", http.StatusServiceUnavailable)
 		return
 	}
-	record, found, err := githubGet(storageKey(id))
+	record, found, err := loadRecord(storageKey(id))
 	if err != nil {
 		http.Error(w, "storage unavailable", http.StatusBadGateway)
 		return
@@ -163,11 +182,75 @@ func download(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "stored file is invalid", http.StatusInternalServerError)
 		return
 	}
+	// Records created before expiration was introduced remain readable.
+	if !info.ExpiresAt.IsZero() && !time.Now().Before(info.ExpiresAt) {
+		http.NotFound(w, r)
+		return
+	}
 	w.Header().Set("Content-Type", info.MIME)
 	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": info.Name}))
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
 	http.ServeContent(w, r, info.Name, time.Time{}, bytes.NewReader(data))
+}
+
+func cleanup(w http.ResponseWriter, r *http.Request) {
+	secret := os.Getenv("CRON_SECRET")
+	const prefix = "Bearer "
+	auth := r.Header.Get("Authorization")
+	if r.Method != http.MethodGet || len(secret) < 32 || !strings.HasPrefix(auth, prefix) || !equalSecret(strings.TrimPrefix(auth, prefix), secret) {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if !storageConfigured() {
+		http.Error(w, "file storage is not configured", http.StatusServiceUnavailable)
+		return
+	}
+	if localStorageEnabled() {
+		cleanupLocal(w)
+		return
+	}
+	entries, err := githubList()
+	if err != nil {
+		http.Error(w, "storage unavailable", http.StatusBadGateway)
+		return
+	}
+	checked, deleted, failures := 0, 0, 0
+	now := time.Now().UTC()
+	for _, entry := range entries {
+		if entry.Type != "file" || !validStoragePath(entry.Path) || len(entry.SHA) != 40 {
+			continue
+		}
+		checked++
+		record, err := githubBlob(entry.SHA)
+		if err != nil {
+			failures++
+			log.Printf("file cleanup: read failed: %v", err)
+			continue
+		}
+		info, _, err := decrypt(record)
+		if err != nil {
+			failures++
+			log.Printf("file cleanup: invalid record: %v", err)
+			continue
+		}
+		if info.ExpiresAt.IsZero() || now.Before(info.ExpiresAt) {
+			continue
+		}
+		if err := githubDelete(entry.Path, entry.SHA); err != nil {
+			failures++
+			log.Printf("file cleanup: delete failed: %v", err)
+			continue
+		}
+		deleted++
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	if failures > 0 {
+		w.WriteHeader(http.StatusBadGateway)
+	}
+	_ = json.NewEncoder(w).Encode(map[string]int{"checked": checked, "deleted": deleted, "failures": failures})
 }
 
 func authorized(r *http.Request) bool {
@@ -203,11 +286,18 @@ func equalSecret(a, b string) bool {
 
 func sameOrigin(origin string, r *http.Request) bool {
 	u, err := url.Parse(origin)
-	return err == nil && u.Host == r.Host && (u.Scheme == "https" || (u.Scheme == "http" && (r.Host == "localhost:3000" || r.Host == "127.0.0.1:3000")))
+	if err != nil || u.Host != r.Host {
+		return false
+	}
+	if u.Scheme == "https" {
+		return true
+	}
+	host, _, err := net.SplitHostPort(r.Host)
+	return u.Scheme == "http" && err == nil && (host == "localhost" || host == "127.0.0.1")
 }
 
 func safeFilename(name string) bool {
-	if name == "" || name == "." || name == ".." || len(name) > 255 || !utf8.ValidString(name) || strings.ContainsAny(name, `/\`) {
+	if name == "" || name == "." || name == ".." || len(name) > 255 || !utf8.ValidString(name) || strings.ContainsAny(name, `/\`) || strings.HasPrefix(name, ".") || strings.TrimSpace(name) != name {
 		return false
 	}
 	for _, c := range name {
@@ -218,8 +308,154 @@ func safeFilename(name string) bool {
 	return true
 }
 
+func validateImage(data []byte, mimeType string) error {
+	var expected string
+	switch mimeType {
+	case "image/png":
+		expected = "png"
+	case "image/jpeg":
+		expected = "jpeg"
+	default:
+		return errors.New("unsupported image")
+	}
+	config, format, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil || format != expected || config.Width < 1 || config.Height < 1 || config.Width > 4096 || config.Height > 4096 || int64(config.Width)*int64(config.Height) > 16_000_000 {
+		return errors.New("invalid image dimensions or format")
+	}
+	// Decode the whole image so a valid signature with a broken body is rejected.
+	if expected == "png" {
+		_, err = png.Decode(bytes.NewReader(data))
+	} else {
+		_, err = jpeg.Decode(bytes.NewReader(data))
+	}
+	return err
+}
+
 func storageConfigured() bool {
-	return os.Getenv("GITHUB_TOKEN") != "" && os.Getenv("GITHUB_REPO") != "" && os.Getenv("ADMIN_SESSION_SECRET") != ""
+	if os.Getenv("ADMIN_SESSION_SECRET") == "" {
+		return false
+	}
+	return localStorageEnabled() || (os.Getenv("GITHUB_TOKEN") != "" && os.Getenv("GITHUB_REPO") != "")
+}
+
+func localStorageEnabled() bool {
+	return os.Getenv("FILE_SHARE_STORAGE") == "local"
+}
+
+func localDataDir() string {
+	if dir := os.Getenv("FILE_SHARE_DATA_DIR"); dir != "" {
+		return dir
+	}
+	return ".private_uploads/file-share"
+}
+
+func localPath(key string) (string, error) {
+	if !validStoragePath(key) {
+		return "", errors.New("invalid storage key")
+	}
+	return filepath.Join(localDataDir(), filepath.Base(key)), nil
+}
+
+func saveRecord(key string, data []byte) error {
+	if !localStorageEnabled() {
+		return githubPut(key, data)
+	}
+	path, err := localPath(key)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(localDataDir(), 0700); err != nil {
+		return err
+	}
+	if err := os.Chmod(localDataDir(), 0700); err != nil {
+		return err
+	}
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	if _, err := file.Write(data); err != nil {
+		file.Close()
+		os.Remove(path)
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		file.Close()
+		os.Remove(path)
+		return err
+	}
+	if err := file.Close(); err != nil {
+		os.Remove(path)
+		return err
+	}
+	return nil
+}
+
+func loadRecord(key string) ([]byte, bool, error) {
+	if !localStorageEnabled() {
+		return githubGet(key)
+	}
+	path, err := localPath(key)
+	if err != nil {
+		return nil, false, err
+	}
+	file, err := os.Open(path)
+	if os.IsNotExist(err) {
+		return nil, false, nil
+	}
+	if err != nil {
+		return nil, false, err
+	}
+	defer file.Close()
+	data, err := io.ReadAll(io.LimitReader(file, maxFileSize+4096))
+	if err != nil || int64(len(data)) >= maxFileSize+4096 {
+		return nil, false, errors.New("invalid local file size")
+	}
+	return data, true, nil
+}
+
+func cleanupLocal(w http.ResponseWriter) {
+	entries, err := os.ReadDir(localDataDir())
+	if os.IsNotExist(err) {
+		entries = nil
+	} else if err != nil {
+		http.Error(w, "storage unavailable", http.StatusBadGateway)
+		return
+	}
+	checked, deleted, failures := 0, 0, 0
+	now := time.Now().UTC()
+	for _, entry := range entries {
+		key := "data/file-share/" + entry.Name()
+		if entry.IsDir() || !validStoragePath(key) {
+			continue
+		}
+		checked++
+		record, found, err := loadRecord(key)
+		if err != nil || !found {
+			failures++
+			continue
+		}
+		info, _, err := decrypt(record)
+		if err != nil {
+			failures++
+			continue
+		}
+		if info.ExpiresAt.IsZero() || now.Before(info.ExpiresAt) {
+			continue
+		}
+		path, _ := localPath(key)
+		if err := os.Remove(path); err != nil {
+			failures++
+			continue
+		}
+		deleted++
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	if failures > 0 {
+		w.WriteHeader(http.StatusBadGateway)
+	}
+	_ = json.NewEncoder(w).Encode(map[string]int{"checked": checked, "deleted": deleted, "failures": failures})
 }
 
 func publicBaseURL() string {
@@ -362,23 +598,91 @@ func githubGet(path string) ([]byte, bool, error) {
 	}
 	// The Contents API's inline content can transform binary data. Read the raw
 	// Git blob by SHA so AES-GCM receives exactly the bytes we uploaded.
-	blob, err := githubRequest(http.MethodGet, githubURL("/git/blobs/"+result.SHA), nil)
+	data, err := githubBlob(result.SHA)
+	return data, true, err
+}
+
+type githubEntry struct {
+	Path string `json:"path"`
+	SHA  string `json:"sha"`
+	Type string `json:"type"`
+}
+
+func githubList() ([]githubEntry, error) {
+	res, err := githubRequest(http.MethodGet, githubURL("/contents/data/file-share?ref="+url.QueryEscape(githubBranch())), nil)
 	if err != nil {
-		return nil, false, err
+		return nil, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode == http.StatusNotFound {
+		return nil, nil
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GitHub list status %d", res.StatusCode)
+	}
+	var entries []githubEntry
+	if err := json.NewDecoder(io.LimitReader(res.Body, 2<<20)).Decode(&entries); err != nil {
+		return nil, err
+	}
+	if len(entries) >= 1000 {
+		return nil, errors.New("GitHub directory listing is too large")
+	}
+	return entries, nil
+}
+
+func validStoragePath(path string) bool {
+	const prefix = "data/file-share/"
+	if !strings.HasPrefix(path, prefix) || !strings.HasSuffix(path, ".bin") || len(path) != len(prefix)+64+4 {
+		return false
+	}
+	_, err := hex.DecodeString(strings.TrimSuffix(strings.TrimPrefix(path, prefix), ".bin"))
+	return err == nil
+}
+
+func githubDelete(path, sha string) error {
+	if !validStoragePath(path) || len(sha) != 40 {
+		return errors.New("invalid GitHub delete target")
+	}
+	body, err := json.Marshal(map[string]string{
+		"message": "file-share: delete expired upload",
+		"sha":     sha,
+		"branch":  githubBranch(),
+	})
+	if err != nil {
+		return err
+	}
+	res, err := githubRequest(http.MethodDelete, githubURL("/contents/"+path), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNotFound {
+		return fmt.Errorf("GitHub delete status %d", res.StatusCode)
+	}
+	return nil
+}
+
+func githubBlob(sha string) ([]byte, error) {
+	if len(sha) != 40 {
+		return nil, errors.New("invalid GitHub blob SHA")
+	}
+	blob, err := githubRequest(http.MethodGet, githubURL("/git/blobs/"+sha), nil)
+	if err != nil {
+		return nil, err
 	}
 	defer blob.Body.Close()
 	if blob.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("GitHub blob status %d", blob.StatusCode)
+		return nil, fmt.Errorf("GitHub blob status %d", blob.StatusCode)
 	}
 	var detail struct {
 		Encoding string `json:"encoding"`
 		Content  string `json:"content"`
 	}
 	if err := json.NewDecoder(io.LimitReader(blob.Body, 6<<20)).Decode(&detail); err != nil || detail.Encoding != "base64" {
-		return nil, false, errors.New("invalid GitHub blob")
+		return nil, errors.New("invalid GitHub blob")
 	}
 	data, err := base64.StdEncoding.DecodeString(detail.Content)
-	return data, true, err
+	return data, err
 }
 
 func githubBranch() string {
