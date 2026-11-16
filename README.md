@@ -87,6 +87,25 @@ cedrai-portfolio/
 
 검증: `npm run build`, `node tools/test-native-blog.cjs`, `node tools/test-github-blog-store.cjs`.
 
+## Go 파일 공유 실습
+
+`/files`에서 관리자 로그인 후 PNG, JPEG, PDF 파일을 업로드하면 공유 URL을 받습니다. 같은 Go API를 `curl`에서도 사용할 수 있습니다.
+
+```bash
+curl -u '관리자ID' -F 'file=@example.png' https://www.cedrai.info/api/files
+curl -L -o downloaded.png '응답_JSON의_url'
+```
+
+Go Vercel Function은 [`api/files.go`](api/files.go)에 있습니다. 업로드는 최대 3 MiB로 제한하고 파일명 경로, 확장자, MIME 선언과 내용, 관리자 인증을 검증합니다. 공개 다운로드는 `Content-Disposition: attachment`와 `X-Content-Type-Options: nosniff`를 사용합니다.
+
+VPS가 없어 파일은 서버 디스크에 저장하지 않습니다. 암호화된 파일을 이 저장소의 별도 `file-share-data` 브랜치에 GitHub Contents API로 저장합니다. 저장 파일명은 공개 공유 ID의 HMAC이므로 공개 저장소의 커밋을 보더라도 다운로드 URL을 알아낼 수 없습니다. 파일 내용과 원래 이름은 `ADMIN_SESSION_SECRET`에서 파생한 키로 AES-GCM 암호화합니다. **이 비밀키를 바꾸면 기존 공유 파일을 읽을 수 없습니다.**
+
+배포 전 `file-share-data` 브랜치를 GitHub에 한 번 만들고, Vercel Production 환경에 기존 `ADMIN_ID`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `GITHUB_TOKEN`, `GITHUB_REPO`가 설정되어 있는지 확인합니다. `vercel.json`은 데이터 브랜치의 커밋이 Vercel 배포를 유발하지 않도록 설정합니다. `FILE_SHARE_PUBLIC_BASE_URL`은 기본값 `https://www.cedrai.info`를 사용하며 다른 도메인이라면 변경합니다.
+
+로컬 개발은 `vercel dev`로 실행합니다. `next dev`만으로는 루트 `api/`의 Go 함수를 제공하지 않습니다. 테스트는 `go test ./api`, 전체 빌드는 `vercel build --yes --target preview`입니다.
+
+공유 URL을 아는 사람은 누구나 다운로드할 수 있습니다. 삭제·만료, 악성코드 검사, 저장 용량 관리가 없는 학습용 첫 버전입니다. GitHub 커밋 저장은 소량의 파일에만 적합합니다.
+
 ## 관리자 로그인
 
 `.env.example`을 `.env.local`로 복사하고 값을 채웁니다:
