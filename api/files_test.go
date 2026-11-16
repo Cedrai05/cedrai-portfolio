@@ -81,11 +81,18 @@ func TestUploadDownloadAndAuth(t *testing.T) {
 			}
 			w.WriteHeader(http.StatusCreated)
 		case http.MethodGet:
-			if r.URL.Path != storedPath || stored == nil {
+			if stored == nil {
 				http.NotFound(w, r)
 				return
 			}
-			_ = json.NewEncoder(w).Encode(map[string]string{"content": base64.StdEncoding.EncodeToString(stored)})
+			if strings.Contains(r.URL.Path, "/git/blobs/") {
+				_ = json.NewEncoder(w).Encode(map[string]string{"encoding": "base64", "content": base64.StdEncoding.EncodeToString(stored)})
+			} else if r.URL.Path == storedPath {
+				// Deliberately omit inline content: binary must come from the Git blob API.
+				_ = json.NewEncoder(w).Encode(map[string]string{"sha": strings.Repeat("a", 40)})
+			} else {
+				http.NotFound(w, r)
+			}
 		}
 	}))
 	defer github.Close()

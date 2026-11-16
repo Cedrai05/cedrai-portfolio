@@ -352,19 +352,16 @@ func githubGet(path string) ([]byte, bool, error) {
 		return nil, false, fmt.Errorf("GitHub read status %d", res.StatusCode)
 	}
 	var result struct {
-		Content string `json:"content"`
-		SHA     string `json:"sha"`
+		SHA string `json:"sha"`
 	}
 	if err := json.NewDecoder(io.LimitReader(res.Body, 1<<20)).Decode(&result); err != nil {
 		return nil, false, err
 	}
-	if result.Content != "" {
-		data, err := base64.StdEncoding.DecodeString(result.Content)
-		return data, true, err
-	}
 	if len(result.SHA) != 40 {
 		return nil, false, errors.New("missing GitHub blob SHA")
 	}
+	// The Contents API's inline content can transform binary data. Read the raw
+	// Git blob by SHA so AES-GCM receives exactly the bytes we uploaded.
 	blob, err := githubRequest(http.MethodGet, githubURL("/git/blobs/"+result.SHA), nil)
 	if err != nil {
 		return nil, false, err
