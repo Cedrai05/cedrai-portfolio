@@ -66,6 +66,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func upload(w http.ResponseWriter, r *http.Request) {
+	if !authorized(r) {
+		w.Header().Set("WWW-Authenticate", `Basic realm="Cédrai file upload"`)
+		http.Error(w, "administrator login required", http.StatusUnauthorized)
+		return
+	}
 	if origin := r.Header.Get("Origin"); origin != "" && !sameOrigin(origin, r) {
 		http.Error(w, "invalid origin", http.StatusForbidden)
 		return
@@ -246,6 +251,32 @@ func cleanup(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadGateway)
 	}
 	_ = json.NewEncoder(w).Encode(map[string]int{"checked": checked, "deleted": deleted, "failures": failures})
+}
+
+func authorized(r *http.Request) bool {
+	adminID, adminPassword, secret := os.Getenv("ADMIN_ID"), os.Getenv("ADMIN_PASSWORD"), os.Getenv("ADMIN_SESSION_SECRET")
+	if adminID == "" || adminPassword == "" || secret == "" {
+		return false
+	}
+	if id, password, ok := r.BasicAuth(); ok && equalSecret(id, adminID) && equalSecret(password, adminPassword) {
+		return true
+	}
+	cookie, err := r.Cookie("cedrai_session")
+	if err != nil {
+		return false
+	}
+	parts := strings.Split(cookie.Value, ".")
+	if len(parts) != 2 {
+		return false
+	}
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(parts[0]))
+	want := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+	if !equalSecret(parts[1], want) {
+		return false
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(parts[0])
+	return err == nil && equalSecret(string(decoded), adminID)
 }
 
 func equalSecret(a, b string) bool {

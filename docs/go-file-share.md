@@ -15,7 +15,7 @@
 ```text
 웹 화면 또는 curl
     ↓ POST /api/files
-요청 출처 확인 → 요청 크기 제한 → 파일명·확장자·MIME 검사
+관리자 인증 → 요청 크기 제한 → 파일명·확장자·MIME 검사
     ↓
 PNG/JPEG 전체 디코딩 및 크기 검사 → 난수 공유 ID 생성
     ↓
@@ -32,7 +32,7 @@ GET /api/files?id=<ID> → 만료 확인 → 복호화 → 첨부파일 다운�
 
 클라이언트가 보낸 확장자와 `Content-Type`은 신뢰하지 않는다. 서버가 실제 파일의 처음 512바이트에서 MIME 타입을 판별해 확장자와 비교한다. PNG와 JPEG는 이미지 전체를 디코딩하고 가로·세로 각각 4096픽셀, 총 1,600만 픽셀 이하로 제한한다. PDF는 시그니처 수준만 확인하므로 내부 악성코드 검사까지 수행하는 것은 아니다.
 
-외부 실습을 위해 업로드는 로그인 없이 공개했다. 다운로드는 링크를 가진 사람에게 공개된다. 응답에는 `Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`를 넣었다.
+업로드는 기존 포트폴리오 관리자 세션이나 HTTP Basic 인증이 필요하다. 다운로드는 링크를 가진 사람에게 공개된다. 응답에는 `Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`를 넣었다.
 
 ## 만료와 실제 삭제
 
@@ -44,7 +44,7 @@ GET /api/files?id=<ID> → 만료 확인 → 복호화 → 첨부파일 다운�
 go test -race ./api ./cmd/file-share
 go vet ./api ./cmd/file-share
 
-curl -F 'file=@example.png' https://www.cedrai.info/api/files
+curl -u '관리자ID' -F 'file=@example.png' https://www.cedrai.info/api/files
 curl -L -o downloaded.png '응답_JSON의_url'
 shasum -a 256 example.png downloaded.png
 ```
