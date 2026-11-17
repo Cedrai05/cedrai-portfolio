@@ -87,7 +87,9 @@ cedrai-portfolio/
 
 `/admin/blog-import`는 기존 이관 도구이며 새 글 작성은 `/blog/write`를 사용합니다.
 
-검증: `npm run build`, `node tools/test-native-blog.cjs`, `node tools/test-github-blog-store.cjs`.
+검증: `npm run build`, `node tools/test-native-blog.cjs`, `node tools/test-github-blog-store.cjs`, `npm run test:dependency-security`, `npm audit`.
+
+`@vercel/oidc`가 사용하는 `@vercel/cli-config`를 `overrides`로 0.4.0에 지정합니다. 이전 0.3.1은 취약한 Zod 4.1.11을 내부 번들에도 포함하므로 외부 Zod 의존성만 바꾸는 것으로는 충분하지 않습니다. 0.4.0은 내부 Zod도 수정 버전으로 교체합니다(GHSA-mrhx-c7xc-m3w5). Vercel SDK가 수정된 설정 패키지를 직접 사용하게 되면 이 override를 제거할 수 있습니다. `test:dependency-security`는 내부 번들과 실제 하위 의존성의 입력 크기 제한, 패턴 확장 제한과 Vercel 설정 파싱 호환성을 검사합니다.
 
 ## Go 파일 공유 실습
 
