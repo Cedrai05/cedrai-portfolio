@@ -8,8 +8,9 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ kind: string }> }
 
 function requireAdmin(request: NextRequest) {
-  if (!process.env.ADMIN_SESSION_SECRET) return null
-  return readToken(request.cookies.get(SESSION_COOKIE)?.value)
+  if (!process.env.ADMIN_SESSION_SECRET || !process.env.ADMIN_ID) return null
+  const id = readToken(request.cookies.get(SESSION_COOKIE)?.value)
+  return id === process.env.ADMIN_ID ? id : null
 }
 
 /** 인증 · 종류 · GitHub 설정을 한 번에 확인합니다. */
