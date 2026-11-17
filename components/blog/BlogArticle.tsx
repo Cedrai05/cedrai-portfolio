@@ -9,6 +9,8 @@ export default function BlogArticle({post,initialContent,returnSaved=false}:{pos
   const allowed=!post.protected||isAdmin||isMember
   const [article,setArticle]=useState<Article|null>(initialContent?{content:initialContent,assets:[]}:null)
   const [status,setStatus]=useState('')
+  const [deleting,setDeleting]=useState(false)
+  const [deleteError,setDeleteError]=useState('')
   const [retry,setRetry]=useState(0)
   const [saved,setSaved]=useState(false)
   const [resumeAt,setResumeAt]=useState(0)
@@ -45,6 +47,20 @@ export default function BlogArticle({post,initialContent,returnSaved=false}:{pos
     if(setFieldNoteSaved(post.slug,next))setSaved(next)
   }
   const returnHref=returnSaved?'/blog?saved=1':'/blog'
+  const deletePost=async()=>{
+    if(!isAdmin||deleting||!window.confirm(`“${post.title}” 글을 삭제하시겠습니까?\n삭제하면 블로그에서 더 이상 볼 수 없습니다.`))return
+    setDeleting(true);setDeleteError('')
+    try {
+      const response=await fetch(`/api/native-blog/posts/${encodeURIComponent(post.slug)}`,{method:'DELETE'})
+      const data=await response.json()
+      if(!response.ok)throw new Error(data.error||'글을 삭제하지 못했습니다.')
+      setFieldNoteSaved(post.slug,false)
+      window.location.assign(returnHref)
+    } catch(error) {
+      setDeleteError(error instanceof Error?error.message:'글을 삭제하지 못했습니다.')
+      setDeleting(false)
+    }
+  }
   useEffect(()=>{
     if(!allowed){setArticle(null);setStatus('');return}
     if(!ready||initialContent)return
@@ -83,7 +99,8 @@ export default function BlogArticle({post,initialContent,returnSaved=false}:{pos
   const visible=allowed?article:null
   return <article id="article-view" className="article-view article-view--archive">
     <header className="article-view__heading"><a className="article-back" href={returnHref}>← FIELD NOTES</a><div className="article-category">FIELD NOTES / {post.category.toUpperCase()}</div><h1>{post.title}</h1>
-    <div className="article-meta"><span>{dateText(post.date)}</span><span>{post.protected?'MEMBERS ONLY':post.readTime}</span>{isAdmin&&post.slug.startsWith('blog-')&&<a className="article-edit-link" href={`/blog/write?edit=${encodeURIComponent(post.slug)}`}>✎ 글 수정 ↗</a>}</div></header>
+    <div className="article-meta"><span>{dateText(post.date)}</span><span>{post.protected?'MEMBERS ONLY':post.readTime}</span>{isAdmin&&post.slug.startsWith('blog-')&&<a className="article-edit-link" href={`/blog/write?edit=${encodeURIComponent(post.slug)}`}>✎ 글 수정 ↗</a>}{isAdmin&&<button type="button" className="article-delete-button" onClick={deletePost} disabled={deleting}>{deleting?'삭제 중…':'글 삭제'}</button>}</div></header>
+    {isAdmin&&deleteError&&<p className="article-summary" role="alert">{deleteError}</p>}
     {visible&&!post.protected&&<div className="archive-reading-actions"><button type="button" onClick={toggleSaved} aria-pressed={saved}>{saved?'✦ 내 서재에 보관됨':'✧ 내 서재에 담기'}</button>{saved&&<a className="saved-shelf-link" href="/blog?saved=1">내 서재 보기 ↗</a>}{resumeAt>=5&&resumeAt<95&&<button type="button" onClick={()=>{const element=body.current;if(!element)return;const start=element.offsetTop-innerHeight*.55;const end=element.offsetTop+element.offsetHeight-innerHeight*.45;scrollTo({top:start+(end-start)*resumeAt/100,behavior:'smooth'});setResumeAt(0)}}>RESUME AT {resumeAt}% ↗</button>}</div>}
     {visible?<div ref={body} className="article-body" dangerouslySetInnerHTML={{__html:visible.content}}/>:post.protected&&!ready?<p className="article-summary">로그인 확인 중…</p>:!allowed?<div className="protected-form"><h2>로그인이 필요한 비밀글입니다.</h2><p>로그인한 사용자만 읽을 수 있습니다.</p><button type="button" onClick={()=>window.dispatchEvent(new Event('cedrai:open-login'))}>로그인</button></div>:null}
     {allowed&&status&&<p className="article-summary" role="status">{status}{!status.includes('불러오는 중')&&<button type="button" className="blog-retry" onClick={()=>{setArticle(null);setRetry(value=>value+1)}}>다시 열기</button>}</p>}

@@ -1,4 +1,5 @@
 import { numberForWrittenPost } from '@/lib/blog-numbering'
+import { isBlogPostDeleted } from '@/lib/blog-deletion'
 import { createHash } from 'node:crypto'
 import { marked, Renderer } from 'marked'
 import sanitizeHtml from 'sanitize-html'
@@ -57,11 +58,11 @@ export function metadataFromStored(post:StoredPost):BlogPost {
   return {slug:m.slug,number:m.number,title:m.title,category:m.category,topic:m.topic||'',sourceCategory:m.sourceCategory||'',date:m.date,readTime:m.readTime,summary:post.visibility==='protected'?'로그인한 사용자만 읽을 수 있습니다.':m.summary,tags:m.tags,protected:post.visibility==='protected'}
 }
 export async function readWrittenPost(slug:string,draft=false) {
-  if(!validWrittenSlug(slug))return null
+  if(!validWrittenSlug(slug)||await isBlogPostDeleted(slug))return null
   return readBlogJSON<StoredPost>(`${WRITTEN_PREFIX}${draft?'drafts':'posts'}/${slug}.json`)
 }
 export async function writtenMetadata(slug:string) {
-  if(!validWrittenSlug(slug))return null
+  if(!validWrittenSlug(slug)||await isBlogPostDeleted(slug))return null
   const post=await readBlogJSON<BlogPost>(`${WRITTEN_PREFIX}catalog/${slug}.json`)
   if(!post)return null
   return {...post,number:post.number??await numberForWrittenPost(slug),summary:post.protected?'로그인한 사용자만 읽을 수 있습니다.':post.summary}
@@ -78,13 +79,14 @@ export async function listWrittenMetadata() {
 export async function listDrafts() {
   const keys=await listBlogKeys(`${WRITTEN_PREFIX}drafts/`)
   const drafts=await Promise.allSettled(keys.map(async key=>{
-    const draft=await readBlogJSON<StoredPost>(key)
+    const draft=await readWrittenPost(key.slice(`${WRITTEN_PREFIX}drafts/`.length,-'.json'.length),true)
     if(!draft||draft.archivedAt||await writtenMetadata(draft.metadata.slug))return null
     return {...metadataFromStored(draft),updatedAt:draft.updatedAt}
   }))
   return drafts.flatMap(item=>item.status==='fulfilled'&&item.value?[item.value]:[]).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))
 }
 export async function saveWriting(input:WritingInput,publish:boolean) {
+  if(await isBlogPostDeleted(input.slug))throw new BlogInputError('삭제된 글입니다. 새 글로 작성해 주세요.',409)
   const fingerprint=createHash('sha256').update(JSON.stringify(input)).digest('hex')
   const existing=await readWrittenPost(input.slug)
   if(existing) {

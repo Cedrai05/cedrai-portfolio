@@ -44,12 +44,12 @@ async function mockGithub(req,res){
   }
   return json(res,405,{message:'Method Not Allowed'})
 }
-async function request(path,{cookie,body,form}={}){
+async function request(path,{cookie,body,form,method}={}){
   const headers={}
   if(cookie)headers.Cookie=cookie
-  if(body!==undefined||form)headers.Origin=site
+  if(body!==undefined||form||method==='DELETE')headers.Origin=site
   if(body!==undefined)headers['Content-Type']='application/json'
-  const response=await fetch(site+path,{method:body!==undefined||form?'POST':'GET',headers,body:body!==undefined?JSON.stringify(body):form,redirect:'manual'})
+  const response=await fetch(site+path,{method:method||(body!==undefined||form?'POST':'GET'),headers,body:body!==undefined?JSON.stringify(body):form,redirect:'manual'})
   const bytes=Buffer.from(await response.arrayBuffer())
   let data;try{data=JSON.parse(bytes.toString('utf8'))}catch{data=bytes.toString('utf8')}
   return {status:response.status,data,bytes,headers:response.headers}
@@ -105,11 +105,22 @@ async function main(){
   const concurrent=await Promise.all([1,2].map(index=>request('/api/native-blog/write',{cookie,body:{...input,slug:'blog-'+crypto.randomUUID(),title:'Concurrent '+index,markdown:'Concurrent post',assets:[]}})))
   assert(concurrent.every(item=>item.status===200),JSON.stringify(concurrent.map(item=>item.data)))
   assert.notEqual(concurrent[0].data.post.number,concurrent[1].data.post.number)
+  for(const target of [slug,secretSlug,'tistory-123']){
+    const route='/api/native-blog/posts/'+target
+    assert.equal((await request(route,{method:'DELETE',cookie:memberCookie})).status,403)
+    assert.equal((await request(route,{method:'DELETE',cookie})).status,200)
+    assert(!(await request('/api/native-blog/catalog')).data.posts.some(post=>post.slug===target))
+    assert.equal((await request(route,{cookie})).status,404)
+    assert(files.has(`data/native-blog/blog-native/v2/deleted/${target}.json.sealed.json`))
+  }
+  assert.equal((await request('/api/native-blog/posts/'+saved.data.post.number)).status,404)
+  assert.equal((await request(`/api/native-blog/assets?slug=${slug}&name=${name}`)).status,404)
+  assert.equal((await request('/api/native-blog/write',{cookie,body:input})).status,409)
   for(const [key,file] of files){
     const value=file.data.toString('utf8')
     assert(!value.includes('PUBLIC_GITHUB_BODY')&&!value.includes('SECRET_GITHUB_BODY')&&!value.includes('Secret test'),key)
     assert.equal(JSON.parse(value).format,'cedrai-blog-aes-gcm-v1')
   }
-  console.log('Passed: encrypted GitHub legacy and new posts, large assets, public and protected reads, edits, concurrent numbering, numeric URLs, and Blob-independent archive availability.')
+  console.log('Passed: encrypted GitHub legacy and new posts, large assets, public and protected reads, edits, admin-only deletion, encrypted deletion records, concurrent numbering, numeric URLs, and Blob-independent archive availability.')
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{server?.kill('SIGTERM');if(mock)await new Promise(resolve=>mock.close(resolve))})

@@ -5,15 +5,15 @@ const secret=crypto.randomBytes(32).toString('hex'),created=[],restore=[]
 let server
 const numberedSlugs=new Set()
 async function seed(key,data){const p=path.join(root,key);await fs.mkdir(path.dirname(p),{recursive:true});try{restore.push([p,await fs.readFile(p)])}catch{created.push(p)}await fs.writeFile(p,data)}
-async function request(route,{cookie,body,form,origin,token}={}){const headers={};if(cookie)headers.Cookie=cookie;if(body!==undefined)headers['Content-Type']='application/json';if(origin)headers.Origin=origin;else if(body!==undefined||form)headers.Origin=base;if(token)headers.Authorization='Bearer '+token;const r=await fetch(base+route,{method:body!==undefined||form?'POST':'GET',headers,body:body!==undefined?JSON.stringify(body):form,redirect:'manual'});const text=await r.text();let data;try{data=JSON.parse(text)}catch{data=text}return {status:r.status,data,headers:r.headers,text}}
+async function request(route,{cookie,body,form,origin,token,method}={}){const headers={};if(cookie)headers.Cookie=cookie;if(body!==undefined)headers['Content-Type']='application/json';if(origin)headers.Origin=origin;else if(body!==undefined||form||method==='DELETE')headers.Origin=base;if(token)headers.Authorization='Bearer '+token;const r=await fetch(base+route,{method:method||(body!==undefined||form?'POST':'GET'),headers,body:body!==undefined?JSON.stringify(body):form,redirect:'manual'});const text=await r.text();let data;try{data=JSON.parse(text)}catch{data=text}return {status:r.status,data,headers:r.headers,text}}
 async function login(id,password){const r=await request('/api/login',{body:{id,password}});assert.equal(r.status,200);return r.headers.get('set-cookie').split(';')[0]}
-const uuid=()=>{const slug=`blog-${crypto.randomUUID()}`;numberedSlugs.add(slug);for(const dir of ['posts','catalog','drafts','numbers'])created.push(path.join(root,'blog-native/v2',dir,slug+'.json'));return slug}
+const uuid=()=>{const slug=`blog-${crypto.randomUUID()}`;numberedSlugs.add(slug);for(const dir of ['posts','catalog','drafts','numbers','deleted'])created.push(path.join(root,'blog-native/v2',dir,slug+'.json'));return slug}
 async function main(){
  const asset=crypto.randomBytes(24),name=crypto.createHash('sha256').update(asset).digest('hex')+'.png'
  await seed('blog-native/v1/assets/'+name,asset)
  await seed('blog-native/v1/posts/tistory-123.json',JSON.stringify({version:1,slug:'tistory-123',visibility:'protected',title:'Legacy test',content:'<p>SECRET_LEGACY_TEST_BODY</p><img data-native-src="'+name+'">',assets:[name],password:{hash:'legacy-verifier-must-not-leak'}}))
  await seed('blog-native/v1/posts/tistory-63.json',JSON.stringify({version:1,slug:'tistory-63',visibility:'private',title:'Major test',content:'<p>SECRET_MAJOR_TEST_BODY</p>',assets:[name]}))
- server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','8912'],{env:{...process.env,ADMIN_ID:'local-admin',ADMIN_PASSWORD:'local-admin-password',CLUB_ID:'local-member',CLUB_PASSWORD:'local-member-password',ADMIN_SESSION_SECRET:secret,BLOB_READ_WRITE_TOKEN:'',BLOB_STORE_ID:'',GITHUB_TOKEN:'',GITHUB_REPO:'',VERCEL:''},stdio:'ignore'})
+ server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','8912'],{env:{...process.env,ADMIN_ID:'local-admin',ADMIN_PASSWORD:'local-admin-password',CLUB_ID:'local-member',CLUB_PASSWORD:'local-member-password',ADMIN_SESSION_SECRET:secret,BLOB_READ_WRITE_TOKEN:'',BLOB_STORE_ID:'',GITHUB_TOKEN:'',GITHUB_REPO:'local-test-'+secret,VERCEL:''},stdio:'ignore'})
  for(let i=0;i<100;i++){try{if((await request('/api/me')).status===200)break}catch{}await new Promise(r=>setTimeout(r,100));if(i===99)throw Error('Local server did not start')}
  const admin=await login('local-admin','local-admin-password'),member=await login('local-member','local-member-password')
  assert.equal((await request('/api/me',{cookie:admin})).data.role,'admin');assert.equal((await request('/api/me',{cookie:member})).data.role,'club-member')
@@ -106,6 +106,40 @@ async function main(){
  assert.equal((await request('/api/native-blog/upload',{cookie:member,form})).status,403)
  assert.equal((await request('/api/native-blog/upload',{cookie:admin,form})).status,200)
  assert.equal((await request('/api/native-blog/posts/tistory-123',{cookie:admin+'.extra'})).status,401)
+ // Deletion covers both storage generations, both visibility modes, and numeric URLs.
+ for(const target of [pub.slug,sec.slug,'tistory-123','tistory-63','tistory-113']){
+   const route='/api/native-blog/posts/'+target
+   assert.equal((await request(route,{method:'DELETE'})).status,403)
+   assert.equal((await request(route,{method:'DELETE',cookie:member})).status,403)
+   assert.equal((await request(route,{method:'DELETE',cookie:admin+'.extra'})).status,403)
+   assert.equal((await request(route,{method:'DELETE',cookie:admin,origin:'https://evil.test'})).status,403)
+   const metadata=(await request('/api/native-blog/catalog')).data.posts.find(post=>post.slug===target)
+   assert(metadata)
+   created.push(path.join(root,'blog-native/v2/deleted',target+'.json'))
+   assert.equal((await request('/api/native-blog/posts/'+metadata.number,{method:'DELETE',cookie:admin})).status,200)
+   assert(!(await request('/api/native-blog/catalog')).data.posts.some(post=>post.slug===target))
+   for(const value of [target,String(metadata.number)]){
+     for(const cookie of [undefined,member,admin])assert.equal((await request('/api/native-blog/posts/'+value,{cookie})).status,404)
+     assert.equal((await request('/api/blog-post?id='+value,{cookie:admin})).status,404)
+   }
+   assert.equal((await request('/api/native-blog/assets?slug='+target+'&name='+name,{cookie:admin})).status,404)
+   assert.equal((await request(route+'/source',{cookie:admin})).status,404)
+   assert.equal((await request(route,{method:'DELETE',cookie:admin})).status,404)
+   assert(!(await request('/blog?post='+metadata.number)).text.includes('article-delete-button'))
+ }
+ assert.equal((await request('/api/native-blog/write',{cookie:admin,body:pub})).status,409)
+ for(const route of ['/api/archive-home','/api/blog-feed']){
+   const result=await request(route)
+   assert.equal(result.status,200)
+   assert(!result.data.posts.some(post=>[pub.slug,sec.slug,'tistory-123','tistory-63','tistory-113'].includes(post.slug)))
+ }
+ assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...pub,mode:'update',revision:source.data.revision}})).status,404)
+ assert.equal((await request('/api/native-blog/drafts/'+draft.slug,{cookie:admin})).status,404)
+ assert.equal((await request('/api/native-blog/posts/'+draft.slug,{method:'DELETE',cookie:admin})).status,200)
+ assert.equal((await request('/api/native-blog/drafts/'+draft.slug,{cookie:admin})).status,404)
+ assert.equal((await request('/api/native-blog/posts/not-a-slug',{method:'DELETE',cookie:admin})).status,404)
+ assert.equal((await request('/api/native-blog/posts/tistory-999999',{method:'DELETE',cookie:admin})).status,404)
+ console.log('Passed: admin-only deletion, CSRF/session rejection, legacy and written public/secret deletion, immediate catalog removal, blocked body/assets/source access, deleted URL and numbering protection.')
  console.log('Passed: numeric URLs, legacy redirects, canonical links, collision-free concurrent numbering, admin/member/anonymous access, legacy and new secret bodies/assets, old password/ticket denial, draft privacy, public publish and edit, Markdown soft breaks and bold, old rendered post refresh, stale edit rejection, visibility changes, immediate catalog updates, duplicate protection, Markdown sanitization, CSRF, upload permissions, unknown/suffixed sessions.')
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{server?.kill('SIGTERM');const idDir=path.join(root,'blog-native/v2/ids');for(const file of await fs.readdir(idDir).catch(()=>[])){const target=path.join(idDir,file);const claim=JSON.parse(await fs.readFile(target,'utf8'));if(numberedSlugs.has(claim.slug))await fs.rm(target,{force:true})}for(const file of [...new Set(created)])await fs.rm(file,{force:true});for(const [file,data] of restore)await fs.writeFile(file,data)})
