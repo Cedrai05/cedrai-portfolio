@@ -2,8 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"image"
@@ -60,7 +58,7 @@ func uploadRequest(t *testing.T, name string, content []byte) *http.Request {
 	return req
 }
 
-func TestUploadDownloadAndAuth(t *testing.T) {
+func TestUploadDownloadWithoutAuth(t *testing.T) {
 	testEnvironment(t)
 	var stored []byte
 	var storedPath string
@@ -137,7 +135,7 @@ func TestUploadDownloadAndAuth(t *testing.T) {
 
 	noAuth := httptest.NewRecorder()
 	Handler(noAuth, uploadRequest(t, "proof.png", data))
-	if noAuth.Code != http.StatusUnauthorized {
+	if noAuth.Code != http.StatusCreated {
 		t.Fatalf("unauthenticated upload status %d", noAuth.Code)
 	}
 	badType := uploadRequest(t, "proof.png", []byte("not a PNG"))
@@ -149,17 +147,9 @@ func TestUploadDownloadAndAuth(t *testing.T) {
 	}
 }
 
-func TestBrowserCookieAndCrossOrigin(t *testing.T) {
+func TestCrossOriginUploadRejected(t *testing.T) {
 	testEnvironment(t)
-	payload := base64.RawURLEncoding.EncodeToString([]byte("admin"))
-	mac := hmac.New(sha256.New, []byte("0123456789abcdef0123456789abcdef"))
-	mac.Write([]byte(payload))
-	cookie := payload + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 	request := uploadRequest(t, "proof.png", imageBytes(t))
-	request.AddCookie(&http.Cookie{Name: "cedrai_session", Value: cookie})
-	if !authorized(request) {
-		t.Fatal("existing admin login cookie should authorize upload")
-	}
 	request.Header.Set("Origin", "https://attacker.example")
 	response := httptest.NewRecorder()
 	Handler(response, request)
