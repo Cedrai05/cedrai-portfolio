@@ -26,17 +26,20 @@ const escape=(text:string)=>text.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt
 export function renderBlogMarkdown(input:WritingInput,preview=false) {
   const assets=new Set(input.assets)
   const renderer=new Renderer()
+  let missingImage=false,missingFile=false
   renderer.image=({href,text,title})=>{
     const name=href.startsWith('attachment:')?href.slice(11):null
-    if(name&&!assets.has(name))throw new BlogInputError('본문에서 사용한 첨부 이미지를 업로드해 주세요.')
+    if(name&&!assets.has(name)){missingImage=true;return ''}
     return `<img ${name?`data-native-src="${name}"`:`src="${escape(href)}"`} alt="${escape(text)}"${title?` title="${escape(title)}"`:''}>`
   }
   renderer.link=({href,tokens,title})=>{
     const name=href.startsWith('attachment:')?href.slice(11):null
-    if(name&&!assets.has(name))throw new BlogInputError('본문에서 사용한 첨부파일을 업로드해 주세요.')
+    if(name&&!assets.has(name)){missingFile=true;return ''}
     return `<a ${name?`data-native-href="${name}" download`: `href="${escape(href)}"`}${title?` title="${escape(title)}"`:''}>${renderer.parser.parseInline(tokens)}</a>`
   }
   const raw=marked.parse(input.markdown,{renderer,gfm:true,breaks:true,async:false}) as string
+  if(missingImage)throw new BlogInputError('본문에서 사용한 첨부 이미지를 업로드해 주세요.')
+  if(missingFile)throw new BlogInputError('본문에서 사용한 첨부파일을 업로드해 주세요.')
   const clean=sanitizeHtml(raw,{
     allowedTags:[...sanitizeHtml.defaults.allowedTags,'img','details','summary','del','mark'],
     allowedAttributes:{a:['href','title','rel','download','data-native-href','referrerpolicy'],img:['src','alt','title','loading','decoding','referrerpolicy','data-native-src'],code:['class'],th:['colspan','rowspan'],td:['colspan','rowspan'],ol:['start']},
@@ -95,7 +98,7 @@ export async function saveWriting(input:WritingInput,publish:boolean) {
     if(!await writtenMetadata(input.slug))await writeBlogJSON(`${WRITTEN_PREFIX}catalog/${input.slug}.json`,metadata)
     return metadata
   }
-  const content=renderBlogMarkdown(input)
+  const content=publish?renderBlogMarkdown(input):''
   const number=publish?await numberForWrittenPost(input.slug):undefined
   const now=new Date().toISOString()
   const visibility=input.isSecret?'protected':'public'

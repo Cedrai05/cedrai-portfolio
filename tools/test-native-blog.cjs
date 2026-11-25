@@ -41,7 +41,8 @@ async function main(){
  const baseInput={title:'Local publishing test',category:'개발',topic:'Tests',summary:'Public summary',tags:['tests'],markdown:'# Test\n\nPUBLIC_TEST_BODY\n**BOLD_TEST_LINE**\nSOFT_BREAK_TEST\n\n![picture](attachment:'+name+')\n\n<script>alert(1)</script>\n\n<a href="javascript:alert(1)">bad link</a>\n\n<img src="x" onerror="alert(1)">',assets:[name],isSecret:false,mode:'publish'}
  const pub={...baseInput,slug:uuid()}
  const sec={...baseInput,slug:uuid(),title:'Local members-only test',summary:'SECRET_SUMMARY',markdown:'SECRET_NEW_TEST_BODY\n\n![picture](attachment:'+name+')',isSecret:true}
- const draft={...baseInput,slug:uuid(),mode:'draft',markdown:'DRAFT_TEST_BODY',assets:[]}
+ const missingName='0'.repeat(64)+'.png'
+ const draft={...baseInput,slug:uuid(),mode:'draft',markdown:`DRAFT_TEST_BODY\n\n![later](attachment:${missingName})`,assets:[]}
  for(const input of [pub,sec,draft])for(const dir of ['posts','catalog','drafts'])created.push(path.join(root,'blog-native/v2',dir,input.slug+'.json'))
  assert.equal((await request('/api/native-blog/write',{body:pub})).status,403)
  assert.equal((await request('/api/native-blog/write',{cookie:member,body:pub})).status,403)
@@ -50,6 +51,8 @@ async function main(){
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...pub,title:''}})).status,400)
  const preview=await request('/api/native-blog/write',{cookie:admin,body:{...pub,mode:'preview'}})
  assert.equal(preview.status,200);assert.match(preview.data.content,/<strong>BOLD_TEST_LINE<\/strong><br\s*\/>SOFT_BREAK_TEST/);assert(!preview.data.content.includes('<script'));assert(!preview.data.content.includes('onerror'));assert(!preview.data.content.includes('javascript:'))
+ const missingPreview=await request('/api/native-blog/write',{cookie:admin,body:{...draft,mode:'preview'}})
+ assert.equal(missingPreview.status,400);assert.equal(missingPreview.data.error,'본문에서 사용한 첨부 이미지를 업로드해 주세요.')
  const published=await request('/api/native-blog/write',{cookie:admin,body:pub});assert.equal(published.status,200);assert.match(published.data.href,/^\/blog\?post=[0-9]+$/);assert(Number.isSafeInteger(published.data.post.number)&&published.data.post.number>123)
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:pub})).status,200)
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...pub,title:'Changed'}})).status,409)
@@ -64,7 +67,8 @@ async function main(){
  assert.equal((await request(secretPublished.data.href)).text.includes('SECRET_NEW_TEST_BODY'),false)
  assert.equal((await request('/api/native-blog/assets?slug='+sec.slug+'&name='+name)).status,401)
  assert.equal((await request('/api/native-blog/write',{cookie:admin,body:draft})).status,200)
- assert.equal((await request('/api/native-blog/drafts/'+draft.slug,{cookie:admin})).status,200)
+ const savedDraft=await request('/api/native-blog/drafts/'+draft.slug,{cookie:admin})
+ assert.equal(savedDraft.status,200);assert.equal(savedDraft.data.markdown,draft.markdown)
  assert.equal((await request('/api/native-blog/drafts/'+draft.slug,{cookie:member})).status,403)
  assert.equal((await request('/api/native-blog/posts/'+draft.slug)).status,404)
  const catalog=(await request('/api/native-blog/catalog')).data.posts
@@ -99,7 +103,10 @@ async function main(){
  assert.equal((await request('/api/native-blog/catalog')).data.posts.find(post=>post.slug===pub.slug).summary,'Edited public summary')
  const concurrent=await Promise.all([1,2].map(index=>request('/api/native-blog/write',{cookie:admin,body:{...baseInput,slug:uuid(),title:'Concurrent '+index}})))
  assert(concurrent.every(result=>result.status===200));assert.notEqual(concurrent[0].data.post.number,concurrent[1].data.post.number)
- assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...draft,mode:'publish'}})).status,200)
+ const incompletePublish=await request('/api/native-blog/write',{cookie:admin,body:{...draft,mode:'publish'}})
+ assert.equal(incompletePublish.status,400);assert.equal(incompletePublish.data.error,'본문에서 사용한 첨부 이미지를 업로드해 주세요.')
+ assert.equal((await request('/api/native-blog/drafts/'+draft.slug,{cookie:admin})).data.markdown,draft.markdown)
+ assert.equal((await request('/api/native-blog/write',{cookie:admin,body:{...draft,mode:'publish',markdown:'DRAFT_TEST_BODY'}})).status,200)
  assert.equal((await request('/api/native-blog/posts/'+draft.slug)).status,200)
  const form=new FormData(),uploaded=Buffer.from('local upload test'),uploadedName=crypto.createHash('sha256').update(uploaded).digest('hex')+'.txt'
  form.set('file',new File([uploaded],'sample.txt'));form.set('name',uploadedName);created.push(path.join(root,'blog-native/v1/assets',uploadedName))
