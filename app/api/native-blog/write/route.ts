@@ -1,7 +1,7 @@
 import { postHref } from '@/lib/blog-catalog'
 import { NextResponse, type NextRequest } from 'next/server'
 import { blogRole, privateBlogHeaders, sameOriginWrite } from '@/lib/blog-access'
-import { BlogInputError, renderBlogMarkdown, saveWriting, updateWriting, validateWriting } from '@/lib/blog-writing'
+import { BlogInputError, includeUploadedAssets, renderBlogMarkdown, saveWriting, updateWriting, validateWriting } from '@/lib/blog-writing'
 import { revalidateTag } from 'next/cache'
 import { WRITTEN_CATALOG_TAG } from '@/lib/blog-repository'
 export const runtime='nodejs'
@@ -14,7 +14,7 @@ export async function POST(request:NextRequest) {
     if(text.length>700000)throw new BlogInputError('본문은 50만 자 이내로 작성해 주세요.')
     const body=JSON.parse(text)
     const input=validateWriting(body)
-    if(body.mode==='preview')return NextResponse.json({content:renderBlogMarkdown(input,true)},{headers})
+    if(body.mode==='preview')return NextResponse.json({content:renderBlogMarkdown(await includeUploadedAssets(input),true)},{headers})
     if(body.mode==='update') {
       const metadata=await updateWriting(input,body.revision)
       revalidateTag(WRITTEN_CATALOG_TAG,{expire:0})

@@ -39,7 +39,7 @@ async function main(){
  assert.equal((await request('/api/native-blog/posts/63')).status,401)
  assert.equal((await request('/api/native-blog/posts/63',{cookie:member})).status,200)
  const baseInput={title:'Local publishing test',category:'개발',topic:'Tests',summary:'Public summary',tags:['tests'],markdown:'# Test\n\nPUBLIC_TEST_BODY\n**BOLD_TEST_LINE**\nSOFT_BREAK_TEST\n\n![picture](attachment:'+name+')\n\n<script>alert(1)</script>\n\n<a href="javascript:alert(1)">bad link</a>\n\n<img src="x" onerror="alert(1)">',assets:[name],isSecret:false,mode:'publish'}
- const pub={...baseInput,slug:uuid()}
+ const pub={...baseInput,slug:uuid(),assets:[]}
  const sec={...baseInput,slug:uuid(),title:'Local members-only test',summary:'SECRET_SUMMARY',markdown:'SECRET_NEW_TEST_BODY\n\n![picture](attachment:'+name+')',isSecret:true}
  const missingName='0'.repeat(64)+'.png'
  const draft={...baseInput,slug:uuid(),mode:'draft',markdown:`DRAFT_TEST_BODY\n\n![later](attachment:${missingName})`,assets:[]}

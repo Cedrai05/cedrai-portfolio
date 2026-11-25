@@ -5,7 +5,7 @@ import { marked, Renderer } from 'marked'
 import sanitizeHtml from 'sanitize-html'
 import { BLOG_CATEGORIES, BLOG_TOPICS, type BlogPost } from '@/lib/blog-catalog'
 import { validAsset, validWrittenSlug, WRITTEN_PREFIX } from '@/lib/native-blog'
-import { readBlogJSON, writeBlogJSON, listBlogKeys, listBlogKeysWithStatus } from '@/lib/blog-store'
+import { readBlogAsset, readBlogJSON, writeBlogJSON, listBlogKeys, listBlogKeysWithStatus } from '@/lib/blog-store'
 export type StoredPost = { version:2; renderVersion?:2; metadata:BlogPost; content:string; markdown:string; assets:string[]; visibility:'public'|'protected'; createdAt:string; updatedAt:string; fingerprint:string; archivedAt?:string }
 export class BlogInputError extends Error { constructor(message:string, public status=400) { super(message) } }
 export type WritingInput = {slug:string;title:string;category:string;topic:string;summary:string;tags:string[];markdown:string;assets:string[];isSecret:boolean}
@@ -21,6 +21,20 @@ export function validateWriting(value:unknown):WritingInput {
   if(!Array.isArray(input.tags)||input.tags.length>20||input.tags.some(tag=>typeof tag!=='string'||tag.length>40))throw new BlogInputError('태그는 40자 이내로 20개까지 입력해 주세요.')
   if(!Array.isArray(input.assets)||input.assets.length>100||input.assets.some(name=>typeof name!=='string'||!validAsset(name)))throw new BlogInputError('첨부파일을 확인해 주세요.')
   return {slug:input.slug,title,category,topic,summary,markdown,isSecret:input.isSecret,tags:[...new Set(input.tags.map(tag=>(tag as string).trim()).filter(Boolean))],assets:[...new Set(input.assets as string[])]}
+}
+export async function includeUploadedAssets(input:WritingInput):Promise<WritingInput> {
+  const referenced=new Map<string,'image'|'link'>()
+  marked.walkTokens(marked.lexer(input.markdown,{gfm:true,breaks:true}),token=>{
+    if((token.type==='image'||token.type==='link')&&token.href.startsWith('attachment:'))referenced.set(token.href.slice(11),token.type)
+  })
+  const missing=[...referenced.keys()].filter(name=>!input.assets.includes(name))
+  if(!missing.length)return input
+  if(input.assets.length+missing.length>100)throw new BlogInputError('첨부파일은 100개까지 추가할 수 있습니다.')
+  await Promise.all(missing.map(async name=>{
+    const message=referenced.get(name)==='image'?'본문에서 사용한 첨부 이미지를 업로드해 주세요.':'본문에서 사용한 첨부파일을 업로드해 주세요.'
+    if(!validAsset(name)||!await readBlogAsset(`blog-native/v1/assets/${name}`))throw new BlogInputError(message)
+  }))
+  return {...input,assets:[...input.assets,...missing]}
 }
 const escape=(text:string)=>text.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]!))
 export function renderBlogMarkdown(input:WritingInput,preview=false) {
@@ -90,6 +104,7 @@ export async function listDrafts() {
 }
 export async function saveWriting(input:WritingInput,publish:boolean) {
   if(await isBlogPostDeleted(input.slug))throw new BlogInputError('삭제된 글입니다. 새 글로 작성해 주세요.',409)
+  if(publish)input=await includeUploadedAssets(input)
   const fingerprint=createHash('sha256').update(JSON.stringify(input)).digest('hex')
   const existing=await readWrittenPost(input.slug)
   if(existing) {
@@ -111,6 +126,7 @@ export async function saveWriting(input:WritingInput,publish:boolean) {
 
 export async function updateWriting(input:WritingInput,revision:unknown) {
   if(typeof revision!=='string'||!/^[a-f0-9]{64}$/.test(revision))throw new BlogInputError('수정할 글을 다시 열어 주세요.')
+  input=await includeUploadedAssets(input)
   const existing=await readWrittenPost(input.slug)
   if(!existing||existing.version!==2||existing.archivedAt||!await writtenMetadata(input.slug))throw new BlogInputError('수정할 글을 찾을 수 없습니다.',404)
   if(existing.fingerprint!==revision)throw new BlogInputError('다른 곳에서 글이 변경되었습니다. 페이지를 새로 열어 최신 내용을 확인해 주세요.',409)
