@@ -14,9 +14,11 @@ let content = { posts: [], topicGroups: {}, events: [], todos: [], nowPosts: [],
 let activeFilter = new URLSearchParams(location.search).get('saved') === '1' ? 'saved' : 'all';
 let activeTopic = 'all';
 let visiblePosts = 6;
+let contentLoaded = false;
 let calendarDate = new Date();
 const dateFormat = new Intl.DateTimeFormat('en-US', { year:'numeric', month:'long', day:'numeric' });
 const categoryLabels = { 'CTF/Wargame':'CTF / WARGAME', '블로그/기술문서':'TECH NOTES', '논문/컨퍼런스':'PAPERS / CONFERENCES' };
+const filterSlugs = { all:'all', 'CTF/Wargame':'ctf', tech:'tech', '논문/컨퍼런스':'papers', '개발':'dev', 'Bug Bounty':'bug-bounty', '공모전/자격증':'other', saved:'saved' };
 const displayTitle = post => post.title;
 const displayCategory = category => categoryLabels[category] || category;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -57,7 +59,7 @@ function showPanel(name, push = true) {
     if (button.closest('nav')) button.setAttribute('aria-current', selected ? 'page' : 'false');
   });
   window.closeSpellbook?.();
-  if (push) history.pushState({page}, '', pagePaths[page]);
+  if (push) history.pushState({page}, '', page === 'journal' ? journalUrl() : pagePaths[page]);
   window.scrollTo({top:0,behavior:'instant'});
 }
 function walkHome(push = true) {
@@ -185,9 +187,16 @@ $('#spell-form').addEventListener('submit', event => {
 });
 window.addEventListener('popstate', () => {
   const page = pageFromLocation();
+  if (page === 'journal') {
+    syncJournalFiltersFromLocation();
+    if (!$('.panel[data-page="journal"]').hidden) return;
+  }
   if (page === 'home') { walkHome(false); return; }
   const [spell, caption] = panelSpells[page];
   window.magicCurtain(spell, caption, () => showPanel(page, false), false, page);
+});
+window.addEventListener('hashchange', () => {
+  if (location.pathname === '/blog') syncJournalFiltersFromLocation();
 });
 const initialPage = pageFromLocation();
 if (location.pathname === '/' && location.hash && pages.has(location.hash.slice(1))) {
@@ -248,29 +257,52 @@ function renderJournalDesk() {
     $('#journal-resume-link').textContent = `CONTINUE AT ${progress}% ↗`;
   }
 }
-$('#post-search').addEventListener('input', () => { visiblePosts=6; renderPosts(); });
-if (activeFilter === 'saved') {
-  $('.filter[data-filter="all"]').classList.remove('active');
-  $('.filter[data-filter="all"]').setAttribute('aria-pressed', 'false');
-  $('.filter[data-filter="saved"]').classList.add('active');
-  $('.filter[data-filter="saved"]').setAttribute('aria-pressed', 'true');
+function journalHash() {
+  if (activeTopic === 'all' && (activeFilter === 'all' || activeFilter === 'saved')) return '';
+  return `#${filterSlugs[activeFilter]}${activeTopic === 'all' ? '' : `/${encodeURIComponent(activeTopic)}`}`;
 }
+function journalUrl() {
+  const url = new URL('/blog', location.origin);
+  if (activeFilter === 'saved') url.searchParams.set('saved', '1');
+  url.hash = journalHash();
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+function syncJournalFiltersFromLocation() {
+  const saved = new URLSearchParams(location.search).get('saved') === '1';
+  const match = /^#([^/#]+)(?:\/([^/#]+))?$/.exec(location.hash);
+  const filter = match && Object.keys(filterSlugs).find(key => filterSlugs[key] === match[1]);
+  activeFilter = filter || (saved ? 'saved' : 'all');
+  activeTopic = 'all';
+  if (filter && match[2]) {
+    try { activeTopic = decodeURIComponent(match[2]); } catch { activeTopic = 'all'; }
+  }
+  visiblePosts = 6;
+  $$('.filter').forEach(button => {
+    const selected = button.dataset.filter === activeFilter;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  if (contentLoaded) renderPosts();
+}
+function pushJournalFilters() {
+  if (location.pathname !== '/blog') return;
+  const url = journalUrl();
+  if (`${location.pathname}${location.search}${location.hash}` !== url) history.pushState({page:'journal'}, '', url);
+}
+$('#post-search').addEventListener('input', () => { visiblePosts=6; renderPosts(); });
+syncJournalFiltersFromLocation();
 $$('.filter').forEach(button => button.addEventListener('click', () => {
   $$('.filter').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-pressed','false'); });
   button.classList.add('active'); button.setAttribute('aria-pressed','true');
   activeFilter=button.dataset.filter; activeTopic='all'; visiblePosts=6; renderPosts();
-  if (location.pathname === '/blog') {
-    const url = new URL(location.href);
-    if (activeFilter === 'saved') url.searchParams.set('saved', '1');
-    else url.searchParams.delete('saved');
-    history.replaceState(history.state, '', url);
-  }
+  pushJournalFilters();
   if(!reducedMotion.matches) { $('#post-list').classList.remove('list-enter'); void $('#post-list').offsetWidth; $('#post-list').classList.add('list-enter'); }
 }));
 $('#journal-topic-options').addEventListener('click', event => {
   const button = event.target.closest('[data-topic]');
   if (!button) return;
   activeTopic=button.dataset.topic; visiblePosts=6; renderPosts();
+  pushJournalFilters();
 });
 $('#more-posts').addEventListener('click', () => { visiblePosts+=6; renderPosts(); });
 $('#post-list').addEventListener('click', event => {
@@ -337,6 +369,7 @@ async function loadContent() {
   try {
     const response=await fetch('/api/archive-home', { cache: 'no-store' }); if(!response.ok) throw Error('content');
     content=await response.json();
+    contentLoaded = true;
     $('#journal-storage-notice').hidden = !content.storageUnavailable;
     renderJournalDesk(); renderPosts(); renderCalendar(); renderCalendarLedger(); renderNowHistory(); renderProjects();
   } catch {
