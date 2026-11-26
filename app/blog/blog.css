@@ -578,3 +578,15 @@ html[data-house='hufflepuff'] .archive-route-content .blog-page--article{--folio
 .blog-page .article-body :where(pre,pre *,code,code *,kbd,samp){
   font-family:var(--font-mono)!important;
 }
+
+/* Keep inline Markdown code legible on the manuscript surface. */
+.archive-route-content .blog-page .article-body .tistory-content code:not(pre code){
+  color:#f7f1e0!important;
+  -webkit-text-fill-color:#f7f1e0!important;
+  background-color:#244531!important;
+  border-color:#244531;
+  font-size:.9em;
+  font-weight:600;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+}
