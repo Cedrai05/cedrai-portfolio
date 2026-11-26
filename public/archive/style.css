@@ -183,12 +183,11 @@ body.lumos-active::after{content:'';position:fixed;inset:0;z-index:40;pointer-ev
 @media(max-width:760px){.menu-toggle{flex-direction:row;justify-content:center}.menu-toggle span{width:auto;height:auto;background:none}}
 @media(min-width:761px){.entrance-copy{margin-top:140px}}
 
-/* The Korean title face includes Latin glyphs. Keep mixed-language notes in one visual rhythm. */
-.post-text strong{overflow-wrap:anywhere}
-.post-text strong[lang="en"]{font-size:25px;font-weight:700;letter-spacing:-.025em;line-height:1.3}
+/* Give every archive title the same type treatment, including mixed-language titles. */
+.post-text strong{overflow-wrap:anywhere;font-size:25px;font-weight:700;letter-spacing:-.025em;line-height:1.3}
 .article-intro h1[lang="en"]{font-size:clamp(36px,5.8vw,68px);font-weight:700;letter-spacing:-.02em}
 .article-pagination a strong[lang="en"]{font-size:17px;font-weight:700}
-@media(max-width:540px){.post-text strong[lang="en"]{font-size:23px}}
+@media(max-width:540px){.post-text strong{font-size:23px}}
 .archive-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.archive-actions a,.archive-manage-link{display:inline-flex;align-items:center;min-height:42px;padding:10px 16px;border:1px solid var(--line);color:var(--silver);font-size:13px;letter-spacing:.07em}.archive-actions a:hover,.archive-manage-link:hover{background:var(--panel2);border-color:var(--house-accent)}.archive-actions--work{margin-top:24px}.archive-manage-link{margin:16px 22px 22px}.now-card .archive-manage-link{margin:18px 0 0}
 /* Portrait seal and the full profile dossier. */
 .home-sigil__ring{isolation:isolate;overflow:hidden}.home-sigil__portrait{position:absolute;z-index:0;inset:17%;width:66%;height:66%;object-fit:cover;object-position:center 12%;border:1px solid color-mix(in srgb,var(--house-accent) 65%,transparent);border-radius:50%;filter:grayscale(1) sepia(.18) contrast(1.06);box-shadow:0 0 0 7px color-mix(in srgb,var(--house-accent) 12%,transparent),0 0 30px #0008}.home-sigil__ring>span,.home-sigil__ring small{z-index:1}.home-sigil__ring small{bottom:10px;background:color-mix(in srgb,var(--house-deep) 80%,transparent);padding:2px 8px;border-radius:20px}
